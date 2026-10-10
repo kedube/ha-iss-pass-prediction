@@ -306,6 +306,18 @@ pip install skyfield
 python scripts/validate_against_skyfield.py --days 10   # downloads de421.bsp (~17 MB) on first run
 ```
 
+### Releasing
+
+Releases are numbered `MAJOR.MM` with no `v` (1.00, 1.01, … 1.99, then 2.00), and the
+number comes from `version` in `manifest.json`. When every check passes on `main`, CI
+publishes that version as a release, unless it has been released already; until the
+number goes up, pushes release nothing.
+
+```bash
+python scripts/version.py bump     # manifest.json to the next version, e.g. 1.00 -> 1.01
+python scripts/version.py status   # whether pushing to main will release it
+```
+
 ## Credits and licence
 
 Orbit propagation uses [`sgp4`](https://pypi.org/project/sgp4/) by Brandon Rhodes, the

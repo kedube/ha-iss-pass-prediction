@@ -48,3 +48,31 @@ jobs:
       - run: node --test "tests/js/*.test.mjs"
       - name: Check the frontend modules parse
         run: for f in custom_components/iss_pass_prediction/frontend/*.js; do node --check "$f"; done
+
+  # Once every check has passed on main, publish the version in manifest.json
+  # as a release (tag and title "1.01", no "v"), unless that version is already
+  # released. Raise it with: python scripts/version.py bump
+  release:
+    needs: [hassfest, hacs, tests]
+    if: github.ref == 'refs/heads/main' && github.repository == 'kedube/ha-iss-pass-prediction'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # One release decision at a time, so two quick pushes cannot both publish.
+    concurrency:
+      group: release
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          { gh release list --limit 1000 --json tagName --jq '.[].tagName'
+            git ls-remote --tags --refs origin | sed 's|.*refs/tags/||'
+          } | python3 scripts/version.py plan >> "$GITHUB_OUTPUT"
+      - if: steps.plan.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.plan.outputs.version }}
+        run: gh release create "$VERSION" --target "$GITHUB_SHA" --title "$VERSION" --generate-notes
