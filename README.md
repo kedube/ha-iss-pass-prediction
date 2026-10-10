@@ -325,5 +325,8 @@ official Vallado SGP4 implementation. The globe is drawn with
 [MapLibre GL JS](https://maplibre.org) 6.11.2 (BSD-3-Clause, bundled under
 `custom_components/iss_pass_prediction/frontend/vendor/`). The city lights are NASA Black
 Marble via GIBS (public domain), bundled under
-`custom_components/iss_pass_prediction/frontend/img/`. Licensed under the GNU GPL v3; see
-`LICENSE`.
+`custom_components/iss_pass_prediction/frontend/img/`. The icon and logo
+(`custom_components/iss_pass_prediction/brand/`, drawn by `scripts/make_brand.py`) use
+[Natural Earth](https://www.naturalearthdata.com) coastlines (public domain) and the
+[Space Grotesk](https://github.com/floriankarsten/space-grotesk) typeface (SIL Open Font
+License 1.1). Licensed under the GNU GPL v3; see `LICENSE`.

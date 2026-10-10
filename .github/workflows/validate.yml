@@ -23,8 +23,6 @@ jobs:
       - uses: hacs/action@main
         with:
           category: integration
-          # Brand images are not submitted to home-assistant/brands yet.
-          ignore: brands
 
   tests:
     runs-on: ubuntu-latest
