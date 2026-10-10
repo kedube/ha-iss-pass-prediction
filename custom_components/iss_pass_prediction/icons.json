@@ -1,0 +1,22 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "visible_now": { "default": "mdi:space-station" },
+      "visible_pass_soon": { "default": "mdi:bell-ring-outline" },
+      "above_horizon": { "default": "mdi:arrow-up-bold-circle-outline" }
+    },
+    "device_tracker": {
+      "position": { "default": "mdi:space-station" }
+    },
+    "sensor": {
+      "next_visible_pass": { "default": "mdi:telescope" },
+      "next_visible_pass_peak_elevation": { "default": "mdi:angle-acute" },
+      "next_visible_pass_magnitude": { "default": "mdi:brightness-6" },
+      "next_visible_pass_duration": { "default": "mdi:timer-outline" },
+      "next_pass": { "default": "mdi:orbit" },
+      "elevation": { "default": "mdi:angle-acute" },
+      "elements_epoch": { "default": "mdi:database-clock-outline" },
+      "n2yo_difference": { "default": "mdi:compare-horizontal" }
+    }
+  }
+}

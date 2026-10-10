@@ -1,0 +1,5 @@
+pytest-homeassistant-custom-component
+home-assistant-frontend
+sgp4>=2.20
+# Checks the pre-compressed MapLibre copies (tests/test_frontend.py).
+Brotli

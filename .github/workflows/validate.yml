@@ -1,0 +1,49 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  hassfest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: home-assistant/actions/hassfest@master
+
+  hacs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hacs/action@main
+        with:
+          category: integration
+          # Brand images are not submitted to home-assistant/brands yet.
+          ignore: brands
+
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: pip install -r requirements_test.txt ruff
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: pytest
+      # The manifest allows sgp4 2.20; run the whole suite on that floor too.
+      - run: pip install "sgp4==2.20"
+      - run: pytest
+      # Quoted, so Node expands the glob itself (a directory argument fails on Node 22).
+      - run: node --test "tests/js/*.test.mjs"
+      - name: Check the frontend modules parse
+        run: for f in custom_components/iss_pass_prediction/frontend/*.js; do node --check "$f"; done

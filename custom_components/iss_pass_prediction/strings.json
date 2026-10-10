@@ -1,0 +1,119 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Where are you watching from?",
+        "description": "Passes are predicted for this location. It defaults to your Home Assistant home location and never leaves your Home Assistant instance (unless you add an N2YO API key in the options).",
+        "data": {
+          "name": "Name",
+          "location": "Location",
+          "elevation": "Elevation above sea level"
+        },
+        "data_description": {
+          "name": "Used as the device name, for example \"ISS\" or \"ISS at the cabin\".",
+          "elevation": "Height of the location in metres. A rough value is fine."
+        }
+      },
+      "reconfigure": {
+        "title": "Move this location",
+        "description": "Correct where passes are predicted for. The location keeps its entities, and the dashboard cards that show it keep working.",
+        "data": {
+          "location": "Location",
+          "elevation": "Elevation above sea level"
+        },
+        "data_description": {
+          "elevation": "Height of the location in metres. A rough value is fine."
+        }
+      }
+    },
+    "error": {
+      "invalid_location": "Enter a latitude between -90° and 90° and a valid longitude."
+    },
+    "abort": {
+      "already_configured": "This location is already set up.",
+      "reconfigure_successful": "The location has been updated."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Which passes should be reported?",
+        "data": {
+          "min_elevation": "Horizon mask",
+          "min_peak_elevation": "Minimum peak elevation",
+          "max_sun_elevation": "Darkness threshold (Sun elevation)",
+          "min_visible_duration": "Minimum visible time",
+          "forecast_days": "Forecast window",
+          "alert_lead_minutes": "Advance notice",
+          "show_in_sidebar": "Show ISS Tracker in the sidebar",
+          "n2yo_api_key": "N2YO API key (optional)"
+        },
+        "data_description": {
+          "min_elevation": "The station only counts as visible above this elevation. 10° clears most trees and rooftops.",
+          "min_peak_elevation": "Skip low passes that never climb higher than this.",
+          "max_sun_elevation": "The Sun must be at least this far below the horizon. -6° is the end of civil twilight; use -3° for brighter twilight passes.",
+          "min_visible_duration": "Skip passes visible for less than this.",
+          "forecast_days": "How far ahead to predict. Timing more than a week ahead can shift by minutes as new orbit data arrives; predictions are refined automatically.",
+          "alert_lead_minutes": "The \"Visible pass soon\" sensor turns on this long before the station appears.",
+          "show_in_sidebar": "Adds an ISS Tracker page to the sidebar with a 3D globe, the station's course and a countdown to the next visible pass. The globe is also available as a dashboard card either way.",
+          "n2yo_api_key": "Optional. Adds N2YO as a backup source of orbit data and compares N2YO's predictions with this integration's once a day."
+        }
+      }
+    },
+    "error": {
+      "invalid_n2yo_key": "N2YO rejected this API key.",
+      "n2yo_unreachable": "Could not reach N2YO to check the API key. Try again later.",
+      "peak_below_mask": "The minimum peak elevation cannot be lower than the horizon mask."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "visible_now": {
+        "name": "Visible now"
+      },
+      "visible_pass_soon": {
+        "name": "Visible pass soon"
+      },
+      "above_horizon": {
+        "name": "Above horizon"
+      }
+    },
+    "device_tracker": {
+      "position": {
+        "name": "Position"
+      }
+    },
+    "sensor": {
+      "next_visible_pass": {
+        "name": "Next visible pass"
+      },
+      "next_visible_pass_peak_elevation": {
+        "name": "Next visible pass peak elevation"
+      },
+      "next_visible_pass_magnitude": {
+        "name": "Next visible pass brightness"
+      },
+      "next_visible_pass_duration": {
+        "name": "Next visible pass duration"
+      },
+      "next_pass": {
+        "name": "Next pass"
+      },
+      "elevation": {
+        "name": "Elevation"
+      },
+      "elements_epoch": {
+        "name": "Orbital elements epoch"
+      },
+      "n2yo_difference": {
+        "name": "N2YO prediction difference"
+      }
+    }
+  },
+  "issues": {
+    "elements_stale": {
+      "title": "ISS predictions are paused",
+      "description": "The cached orbital elements for the International Space Station are {age} days old, and no fresher ones could be downloaded ({error}). Predictions older than this would be misleading, so the ISS Pass Prediction entities are unavailable until a download succeeds. Check that Home Assistant can reach celestrak.org or wheretheiss.at; adding an N2YO API key in the options gives a further source. This message goes away by itself once fresh elements arrive."
+    }
+  }
+}
