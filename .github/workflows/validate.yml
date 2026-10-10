@@ -36,7 +36,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-      - run: pip install -r requirements_test.txt ruff
+      # Pinned, so a new ruff release cannot fail CI on code that has not changed.
+      - run: pip install -r requirements_test.txt ruff==0.17.0
       - run: ruff check .
       - run: ruff format --check .
       - run: pytest
