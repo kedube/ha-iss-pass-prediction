@@ -1,5 +1,8 @@
 {
   "config": {
+    "initiate_flow": {
+      "user": "Add location"
+    },
     "step": {
       "user": {
         "title": "Where are you watching from?",
@@ -10,7 +13,7 @@
           "elevation": "Elevation above sea level"
         },
         "data_description": {
-          "name": "Used as the device name, for example \"ISS\" or \"ISS at the cabin\".",
+          "name": "Used as the device name, for example \"Home\" or \"Cabin\".",
           "elevation": "Height of the location in metres. A rough value is fine."
         }
       },
@@ -46,6 +49,7 @@
           "forecast_days": "Forecast window",
           "alert_lead_minutes": "Advance notice",
           "show_in_sidebar": "Show ISS Tracker in the sidebar",
+          "units": "Units",
           "n2yo_api_key": "N2YO API key (optional)"
         },
         "data_description": {
@@ -56,6 +60,7 @@
           "forecast_days": "How far ahead to predict. Timing more than a week ahead can shift by minutes as new orbit data arrives; predictions are refined automatically.",
           "alert_lead_minutes": "The \"Visible pass soon\" sensor turns on this long before the station appears.",
           "show_in_sidebar": "Adds an ISS Tracker page to the sidebar with a 3D globe, the station's course and a countdown to the next visible pass. The globe is also available as a dashboard card either way.",
+          "units": "For distances and speeds on the globe (altitude, speed, distance from you). \"Automatic\" follows Home Assistant's unit system.",
           "n2yo_api_key": "Optional. Adds N2YO as a backup source of orbit data and compares N2YO's predictions with this integration's once a day."
         }
       }
@@ -66,21 +71,30 @@
       "peak_below_mask": "The minimum peak elevation cannot be lower than the horizon mask."
     }
   },
+  "selector": {
+    "units": {
+      "options": {
+        "auto": "Automatic (Home Assistant's unit system)",
+        "metric": "Metric (km, km/h)",
+        "imperial": "Imperial (mi, mph)"
+      }
+    }
+  },
   "entity": {
     "binary_sensor": {
       "visible_now": {
-        "name": "Visible now"
+        "name": "ISS visible now"
       },
       "visible_pass_soon": {
         "name": "Visible pass soon"
       },
       "above_horizon": {
-        "name": "Above horizon"
+        "name": "ISS above horizon"
       }
     },
     "device_tracker": {
       "position": {
-        "name": "Position"
+        "name": "ISS position"
       }
     },
     "sensor": {
@@ -100,7 +114,7 @@
         "name": "Next pass"
       },
       "elevation": {
-        "name": "Elevation"
+        "name": "ISS elevation"
       },
       "elements_epoch": {
         "name": "Orbital elements epoch"

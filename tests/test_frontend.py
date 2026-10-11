@@ -363,7 +363,7 @@ async def test_existing_dashboard_keeps_its_address(
     await _advance(hass, freezer, v.start.time - lead + timedelta(seconds=1))
     assert hass.states.get("binary_sensor.home_visible_pass_soon").state == "on"
     await _advance(hass, freezer, v.start.time + timedelta(seconds=1))
-    assert hass.states.get("binary_sensor.home_visible_now").state == "on"
+    assert hass.states.get("binary_sensor.home_iss_visible_now").state == "on"
 
     # Reloading and unloading leave the dashboard alone, without errors.
     assert await hass.config_entries.async_reload(entry.entry_id)
@@ -399,6 +399,7 @@ async def test_track_websocket(
         "max_sun_elevation": -6.0,
         "min_visible_duration": 60.0,
         "forecast_days": 10,
+        "units": "auto",
     }
     assert result["elements"]["source"] == "celestrak"
     assert result["elements"]["age_days"] == pytest.approx(1 / 24, abs=0.01)

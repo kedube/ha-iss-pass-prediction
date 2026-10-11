@@ -1,0 +1,133 @@
+{
+  "config": {
+    "initiate_flow": {
+      "user": "Locatie toevoegen"
+    },
+    "step": {
+      "user": {
+        "title": "Waarvandaan kijk je?",
+        "description": "Overkomsten worden voorspeld voor deze locatie. Standaard is dit de thuislocatie van Home Assistant, en de locatie verlaat je Home Assistant-instantie nooit (tenzij je in de opties een N2YO API-sleutel toevoegt).",
+        "data": {
+          "name": "Naam",
+          "location": "Locatie",
+          "elevation": "Hoogte boven zeeniveau"
+        },
+        "data_description": {
+          "name": "Wordt gebruikt als apparaatnaam, bijvoorbeeld \"Thuis\" of \"Vakantiehuis\".",
+          "elevation": "Hoogte van de locatie in meters. Een ruwe schatting is prima."
+        }
+      },
+      "reconfigure": {
+        "title": "Deze locatie verplaatsen",
+        "description": "Corrigeer voor welke plek overkomsten worden voorspeld. De locatie behoudt haar entiteiten, en de dashboardkaarten die haar tonen blijven werken.",
+        "data": {
+          "location": "Locatie",
+          "elevation": "Hoogte boven zeeniveau"
+        },
+        "data_description": {
+          "elevation": "Hoogte van de locatie in meters. Een ruwe schatting is prima."
+        }
+      }
+    },
+    "error": {
+      "invalid_location": "Voer een breedtegraad tussen -90° en 90° en een geldige lengtegraad in."
+    },
+    "abort": {
+      "already_configured": "Deze locatie is al ingesteld.",
+      "reconfigure_successful": "De locatie is bijgewerkt."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Welke overkomsten moeten worden gemeld?",
+        "data": {
+          "min_elevation": "Horizonmasker",
+          "min_peak_elevation": "Minimale elevatie op het hoogste punt",
+          "max_sun_elevation": "Duisternisdrempel (zonnehoogte)",
+          "min_visible_duration": "Minimale zichtbare tijd",
+          "forecast_days": "Voorspellingsperiode",
+          "alert_lead_minutes": "Vooraankondiging",
+          "show_in_sidebar": "ISS Tracker in de zijbalk tonen",
+          "units": "Eenheden",
+          "n2yo_api_key": "N2YO API-sleutel (optioneel)"
+        },
+        "data_description": {
+          "min_elevation": "Het station telt pas als zichtbaar boven deze elevatie. Met 10° kom je boven de meeste bomen en daken uit.",
+          "min_peak_elevation": "Sla lage overkomsten over die nooit hoger komen dan dit.",
+          "max_sun_elevation": "De zon moet minstens zo ver onder de horizon staan. -6° is het einde van de burgerlijke schemering; gebruik -3° voor overkomsten in lichtere schemering.",
+          "min_visible_duration": "Sla overkomsten over die korter zichtbaar zijn dan dit.",
+          "forecast_days": "Hoe ver vooruit er wordt voorspeld. Tijden meer dan een week vooruit kunnen enkele minuten verschuiven wanneer nieuwe baangegevens binnenkomen; voorspellingen worden automatisch verfijnd.",
+          "alert_lead_minutes": "De sensor \"Zichtbare overkomst binnenkort\" gaat zo lang voordat het station verschijnt aan.",
+          "show_in_sidebar": "Voegt een ISS Tracker-pagina toe aan de zijbalk met een 3D-globe, de koers van het station en een aftelling tot de volgende zichtbare overkomst. De globe is daarnaast altijd beschikbaar als dashboardkaart.",
+          "units": "Voor afstanden en snelheden op de globe (hoogte, snelheid, afstand tot jou). \"Automatisch\" volgt het eenhedenstelsel van Home Assistant.",
+          "n2yo_api_key": "Optioneel. Voegt N2YO toe als reservebron voor baangegevens en vergelijkt eenmaal per dag de voorspellingen van N2YO met die van deze integratie."
+        }
+      }
+    },
+    "error": {
+      "invalid_n2yo_key": "N2YO heeft deze API-sleutel geweigerd.",
+      "n2yo_unreachable": "Kon N2YO niet bereiken om de API-sleutel te controleren. Probeer het later opnieuw.",
+      "peak_below_mask": "De minimale elevatie op het hoogste punt mag niet lager zijn dan het horizonmasker."
+    }
+  },
+  "selector": {
+    "units": {
+      "options": {
+        "auto": "Automatisch (eenhedenstelsel van Home Assistant)",
+        "metric": "Metrisch (km, km/h)",
+        "imperial": "Imperiaal (mi, mph)"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "visible_now": {
+        "name": "ISS nu zichtbaar"
+      },
+      "visible_pass_soon": {
+        "name": "Zichtbare overkomst binnenkort"
+      },
+      "above_horizon": {
+        "name": "ISS boven de horizon"
+      }
+    },
+    "device_tracker": {
+      "position": {
+        "name": "ISS-positie"
+      }
+    },
+    "sensor": {
+      "next_visible_pass": {
+        "name": "Volgende zichtbare overkomst"
+      },
+      "next_visible_pass_peak_elevation": {
+        "name": "Maximale elevatie volgende zichtbare overkomst"
+      },
+      "next_visible_pass_magnitude": {
+        "name": "Helderheid volgende zichtbare overkomst"
+      },
+      "next_visible_pass_duration": {
+        "name": "Duur volgende zichtbare overkomst"
+      },
+      "next_pass": {
+        "name": "Volgende overkomst"
+      },
+      "elevation": {
+        "name": "ISS-elevatie"
+      },
+      "elements_epoch": {
+        "name": "Epoche van de baanelementen"
+      },
+      "n2yo_difference": {
+        "name": "Verschil met N2YO-voorspelling"
+      }
+    }
+  },
+  "issues": {
+    "elements_stale": {
+      "title": "ISS-voorspellingen zijn gepauzeerd",
+      "description": "De opgeslagen baanelementen van het Internationaal Ruimtestation zijn {age} dagen oud, en er konden geen recentere worden gedownload ({error}). Voorspellingen op basis van oudere gegevens zouden misleidend zijn, dus de ISS Tracker-entiteiten zijn niet beschikbaar totdat een download slaagt. Controleer of Home Assistant celestrak.org of wheretheiss.at kan bereiken; met een N2YO API-sleutel in de opties heb je een extra bron. Deze melding verdwijnt vanzelf zodra er recente baanelementen binnenkomen."
+    }
+  }
+}

@@ -1908,13 +1908,21 @@ export class IssGlobeView extends BaseElement {
     return f.format(value);
   }
 
+  /** The location's Units option, or Home Assistant's unit system when it is "auto". */
   _imperial() {
+    const units = this._payload?.settings?.units;
+    if (units === "metric" || units === "imperial") return units === "imperial";
     return this._hass?.config?.unit_system?.length === "mi";
   }
 
   _distance(km) {
     const v = this._imperial() ? km * 0.621371 : km;
     return `${this._num(Math.round(v))} ${this._imperial() ? "mi" : "km"}`;
+  }
+
+  _speed(kmh) {
+    const v = this._imperial() ? kmh * 0.621371 : kmh;
+    return `${this._num(Math.round(v))} ${this._imperial() ? "mph" : "km/h"}`;
   }
 
   _tick() {
@@ -2036,7 +2044,7 @@ export class IssGlobeView extends BaseElement {
     const approx = this._payload.paused && !this._preview ? " (approximate)" : "";
     const html = `
       <span>Altitude <b>${this._distance(pos.alt)}</b></span>
-      <span>Speed <b>${this._imperial() ? `${this._num(Math.round(speed * 0.621371))} mph` : `${this._num(Math.round(speed))} km/h`}</b></span>
+      <span>Speed <b>${this._speed(speed)}</b></span>
       <span class="opt"><b>${lat}, ${lon}</b>${approx}</span>
       <span class="${pos.sunlit ? "lit" : "dark"}">${pos.sunlit ? "In sunlight" : "In Earth's shadow"}</span>
       <span class="opt"><b>${this._distance(ground)}</b> from ${esc(home.title)}${look && look.elevation > 0 ? ` · ${Math.round(look.elevation)}° above your horizon` : ""}</span>`;

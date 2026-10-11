@@ -1,0 +1,133 @@
+{
+  "config": {
+    "initiate_flow": {
+      "user": "Standort hinzufügen"
+    },
+    "step": {
+      "user": {
+        "title": "Von wo aus beobachtest du?",
+        "description": "Überflüge werden für diesen Standort vorhergesagt. Standardmäßig ist das der Heimstandort von Home Assistant, und er verlässt deine Home-Assistant-Instanz nie (außer du trägst in den Optionen einen N2YO-API-Schlüssel ein).",
+        "data": {
+          "name": "Name",
+          "location": "Standort",
+          "elevation": "Höhe über dem Meeresspiegel"
+        },
+        "data_description": {
+          "name": "Wird als Gerätename verwendet, zum Beispiel „Zuhause“ oder „Ferienhaus“.",
+          "elevation": "Höhe des Standorts in Metern. Ein grober Wert genügt."
+        }
+      },
+      "reconfigure": {
+        "title": "Standort verschieben",
+        "description": "Korrigiere, für welchen Ort Überflüge vorhergesagt werden. Der Standort behält seine Entitäten, und die Dashboard-Karten, die ihn anzeigen, funktionieren weiter.",
+        "data": {
+          "location": "Standort",
+          "elevation": "Höhe über dem Meeresspiegel"
+        },
+        "data_description": {
+          "elevation": "Höhe des Standorts in Metern. Ein grober Wert genügt."
+        }
+      }
+    },
+    "error": {
+      "invalid_location": "Gib einen Breitengrad zwischen -90° und 90° und einen gültigen Längengrad ein."
+    },
+    "abort": {
+      "already_configured": "Dieser Standort ist bereits eingerichtet.",
+      "reconfigure_successful": "Der Standort wurde aktualisiert."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Welche Überflüge sollen gemeldet werden?",
+        "data": {
+          "min_elevation": "Horizontmaske",
+          "min_peak_elevation": "Mindesthöhenwinkel am höchsten Punkt",
+          "max_sun_elevation": "Dunkelheitsschwelle (Sonnenhöhe)",
+          "min_visible_duration": "Minimale Sichtbarkeitsdauer",
+          "forecast_days": "Vorhersagezeitraum",
+          "alert_lead_minutes": "Vorwarnzeit",
+          "show_in_sidebar": "ISS Tracker in der Seitenleiste anzeigen",
+          "units": "Einheiten",
+          "n2yo_api_key": "N2YO-API-Schlüssel (optional)"
+        },
+        "data_description": {
+          "min_elevation": "Die Station gilt erst oberhalb dieses Höhenwinkels als sichtbar. 10° liegt über den meisten Bäumen und Dächern.",
+          "min_peak_elevation": "Niedrige Überflüge, die nie höher steigen, werden übersprungen.",
+          "max_sun_elevation": "Die Sonne muss mindestens so weit unter dem Horizont stehen. -6° ist das Ende der bürgerlichen Dämmerung; mit -3° werden auch Überflüge in hellerer Dämmerung gemeldet.",
+          "min_visible_duration": "Überflüge, die kürzer sichtbar sind, werden übersprungen.",
+          "forecast_days": "Wie weit im Voraus vorhergesagt wird. Zeiten, die mehr als eine Woche entfernt sind, können sich um Minuten verschieben, wenn neue Bahndaten eintreffen; die Vorhersagen werden automatisch verfeinert.",
+          "alert_lead_minutes": "Der Sensor „Sichtbarer Überflug in Kürze“ schaltet sich so lange vor dem Erscheinen der Station ein.",
+          "show_in_sidebar": "Fügt der Seitenleiste eine ISS-Tracker-Seite mit 3D-Globus, dem Kurs der Station und einem Countdown bis zum nächsten sichtbaren Überflug hinzu. Der Globus ist in jedem Fall auch als Dashboard-Karte verfügbar.",
+          "units": "Für Entfernungen und Geschwindigkeiten auf dem Globus (Höhe, Geschwindigkeit, Entfernung zu dir). „Automatisch“ folgt dem Einheitensystem von Home Assistant.",
+          "n2yo_api_key": "Optional. Fügt N2YO als Ersatzquelle für Bahndaten hinzu und vergleicht einmal täglich die Vorhersagen von N2YO mit denen dieser Integration."
+        }
+      }
+    },
+    "error": {
+      "invalid_n2yo_key": "N2YO hat diesen API-Schlüssel abgelehnt.",
+      "n2yo_unreachable": "N2YO war nicht erreichbar, um den API-Schlüssel zu prüfen. Versuche es später erneut.",
+      "peak_below_mask": "Der Mindesthöhenwinkel am höchsten Punkt darf nicht kleiner als die Horizontmaske sein."
+    }
+  },
+  "selector": {
+    "units": {
+      "options": {
+        "auto": "Automatisch (Einheitensystem von Home Assistant)",
+        "metric": "Metrisch (km, km/h)",
+        "imperial": "Imperial (mi, mph)"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "visible_now": {
+        "name": "ISS jetzt sichtbar"
+      },
+      "visible_pass_soon": {
+        "name": "Sichtbarer Überflug in Kürze"
+      },
+      "above_horizon": {
+        "name": "ISS über dem Horizont"
+      }
+    },
+    "device_tracker": {
+      "position": {
+        "name": "ISS-Position"
+      }
+    },
+    "sensor": {
+      "next_visible_pass": {
+        "name": "Nächster sichtbarer Überflug"
+      },
+      "next_visible_pass_peak_elevation": {
+        "name": "Maximaler Höhenwinkel des nächsten sichtbaren Überflugs"
+      },
+      "next_visible_pass_magnitude": {
+        "name": "Helligkeit des nächsten sichtbaren Überflugs"
+      },
+      "next_visible_pass_duration": {
+        "name": "Dauer des nächsten sichtbaren Überflugs"
+      },
+      "next_pass": {
+        "name": "Nächster Überflug"
+      },
+      "elevation": {
+        "name": "ISS-Höhenwinkel"
+      },
+      "elements_epoch": {
+        "name": "Epoche der Bahnelemente"
+      },
+      "n2yo_difference": {
+        "name": "Abweichung von der N2YO-Vorhersage"
+      }
+    }
+  },
+  "issues": {
+    "elements_stale": {
+      "title": "ISS-Vorhersagen sind pausiert",
+      "description": "Die zwischengespeicherten Bahnelemente der Internationalen Raumstation sind {age} Tage alt, und es konnten keine aktuelleren heruntergeladen werden ({error}). Vorhersagen auf Grundlage älterer Daten wären irreführend, daher sind die ISS-Tracker-Entitäten nicht verfügbar, bis ein Download gelingt. Prüfe, ob Home Assistant celestrak.org oder wheretheiss.at erreichen kann; ein N2YO-API-Schlüssel in den Optionen liefert eine weitere Quelle. Diese Meldung verschwindet von selbst, sobald aktuelle Bahnelemente eintreffen."
+    }
+  }
+}

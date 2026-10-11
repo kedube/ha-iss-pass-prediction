@@ -1,0 +1,133 @@
+{
+  "config": {
+    "initiate_flow": {
+      "user": "Adicionar local"
+    },
+    "step": {
+      "user": {
+        "title": "De onde você está observando?",
+        "description": "As passagens são previstas para este local. Por padrão, é o local da sua casa no Home Assistant, e ele nunca sai da sua instância do Home Assistant (a menos que você adicione uma chave de API do N2YO nas opções).",
+        "data": {
+          "name": "Nome",
+          "location": "Local",
+          "elevation": "Altitude acima do nível do mar"
+        },
+        "data_description": {
+          "name": "Usado como nome do dispositivo, por exemplo \"Casa\" ou \"Sítio\".",
+          "elevation": "Altura do local em metros. Um valor aproximado é suficiente."
+        }
+      },
+      "reconfigure": {
+        "title": "Mover este local",
+        "description": "Corrija o lugar para o qual as passagens são previstas. O local mantém suas entidades, e os cartões do painel que o exibem continuam funcionando.",
+        "data": {
+          "location": "Local",
+          "elevation": "Altitude acima do nível do mar"
+        },
+        "data_description": {
+          "elevation": "Altura do local em metros. Um valor aproximado é suficiente."
+        }
+      }
+    },
+    "error": {
+      "invalid_location": "Informe uma latitude entre -90° e 90° e uma longitude válida."
+    },
+    "abort": {
+      "already_configured": "Este local já está configurado.",
+      "reconfigure_successful": "O local foi atualizado."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Quais passagens devem ser informadas?",
+        "data": {
+          "min_elevation": "Máscara de horizonte",
+          "min_peak_elevation": "Elevação mínima no ponto mais alto",
+          "max_sun_elevation": "Limite de escuridão (elevação do Sol)",
+          "min_visible_duration": "Tempo mínimo visível",
+          "forecast_days": "Janela de previsão",
+          "alert_lead_minutes": "Aviso antecipado",
+          "show_in_sidebar": "Mostrar o ISS Tracker na barra lateral",
+          "units": "Unidades",
+          "n2yo_api_key": "Chave de API do N2YO (opcional)"
+        },
+        "data_description": {
+          "min_elevation": "A estação só conta como visível acima desta elevação. 10° fica acima da maioria das árvores e telhados.",
+          "min_peak_elevation": "Ignora passagens baixas que nunca sobem mais do que isso.",
+          "max_sun_elevation": "O Sol precisa estar pelo menos isso abaixo do horizonte. -6° é o fim do crepúsculo civil; use -3° para passagens em crepúsculo mais claro.",
+          "min_visible_duration": "Ignora passagens visíveis por menos tempo do que isso.",
+          "forecast_days": "Com quanta antecedência prever. Horários a mais de uma semana podem mudar alguns minutos quando chegam novos dados orbitais; as previsões são refinadas automaticamente.",
+          "alert_lead_minutes": "O sensor \"Passagem visível em breve\" liga com essa antecedência antes de a estação aparecer.",
+          "show_in_sidebar": "Adiciona à barra lateral uma página do ISS Tracker com um globo 3D, a trajetória da estação e uma contagem regressiva até a próxima passagem visível. O globo também fica disponível como cartão do painel de qualquer forma.",
+          "units": "Para distâncias e velocidades no globo (altitude, velocidade, distância até você). \"Automático\" segue o sistema de unidades do Home Assistant.",
+          "n2yo_api_key": "Opcional. Adiciona o N2YO como fonte reserva de dados orbitais e compara uma vez por dia as previsões do N2YO com as desta integração."
+        }
+      }
+    },
+    "error": {
+      "invalid_n2yo_key": "O N2YO rejeitou esta chave de API.",
+      "n2yo_unreachable": "Não foi possível acessar o N2YO para verificar a chave de API. Tente novamente mais tarde.",
+      "peak_below_mask": "A elevação mínima no ponto mais alto não pode ser menor que a máscara de horizonte."
+    }
+  },
+  "selector": {
+    "units": {
+      "options": {
+        "auto": "Automático (sistema de unidades do Home Assistant)",
+        "metric": "Métrico (km, km/h)",
+        "imperial": "Imperial (mi, mph)"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "visible_now": {
+        "name": "ISS visível agora"
+      },
+      "visible_pass_soon": {
+        "name": "Passagem visível em breve"
+      },
+      "above_horizon": {
+        "name": "ISS acima do horizonte"
+      }
+    },
+    "device_tracker": {
+      "position": {
+        "name": "Posição da ISS"
+      }
+    },
+    "sensor": {
+      "next_visible_pass": {
+        "name": "Próxima passagem visível"
+      },
+      "next_visible_pass_peak_elevation": {
+        "name": "Elevação máxima da próxima passagem visível"
+      },
+      "next_visible_pass_magnitude": {
+        "name": "Brilho da próxima passagem visível"
+      },
+      "next_visible_pass_duration": {
+        "name": "Duração da próxima passagem visível"
+      },
+      "next_pass": {
+        "name": "Próxima passagem"
+      },
+      "elevation": {
+        "name": "Elevação da ISS"
+      },
+      "elements_epoch": {
+        "name": "Época dos elementos orbitais"
+      },
+      "n2yo_difference": {
+        "name": "Diferença em relação à previsão do N2YO"
+      }
+    }
+  },
+  "issues": {
+    "elements_stale": {
+      "title": "As previsões da ISS estão pausadas",
+      "description": "Os elementos orbitais da Estação Espacial Internacional em cache têm {age} dias, e não foi possível baixar outros mais recentes ({error}). Previsões baseadas em dados mais antigos seriam enganosas, por isso as entidades do ISS Tracker ficam indisponíveis até que um download seja bem-sucedido. Verifique se o Home Assistant consegue acessar celestrak.org ou wheretheiss.at; adicionar uma chave de API do N2YO nas opções oferece mais uma fonte. Esta mensagem desaparece sozinha assim que chegarem elementos atualizados."
+    }
+  }
+}

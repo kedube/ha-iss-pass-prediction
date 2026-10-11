@@ -27,8 +27,8 @@ from custom_components.iss_tracker.const import DOMAIN
 from custom_components.iss_tracker.elements import CELESTRAK_URL
 
 BLUEPRINT = Path(__file__).parents[1] / "blueprints/automation/iss_tracker/notify_visible_pass.yaml"
-PASS_SENSOR = "sensor.iss_next_visible_pass"
-SOON_SENSOR = "binary_sensor.iss_visible_pass_soon"
+PASS_SENSOR = "sensor.home_next_visible_pass"
+SOON_SENSOR = "binary_sensor.home_visible_pass_soon"
 ATTRIBUTES = {
     "start_direction": "WNW",
     "start_elevation": 10.0,
@@ -278,7 +278,7 @@ async def test_blueprint_reads_real_attributes(
     aioclient_mock.get(CELESTRAK_URL, content=omm_xml)
     entry = MockConfigEntry(
         domain=DOMAIN,
-        title="ISS",
+        title="Home",
         data={CONF_LATITUDE: 39.74, CONF_LONGITUDE: -104.99, CONF_ELEVATION: 1609.0},
     )
     entry.add_to_hass(hass)

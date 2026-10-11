@@ -65,7 +65,7 @@ def start(reference: dict[str, Any]) -> datetime:
 
 @pytest.fixture
 def entry(hass: HomeAssistant) -> MockConfigEntry:
-    entry = MockConfigEntry(domain=DOMAIN, title="ISS", data=DENVER, unique_id="39.740_-104.990")
+    entry = MockConfigEntry(domain=DOMAIN, title="Home", data=DENVER, unique_id="39.740_-104.990")
     entry.add_to_hass(hass)
     return entry
 
@@ -73,7 +73,7 @@ def entry(hass: HomeAssistant) -> MockConfigEntry:
 def _n2yo_entry(hass: HomeAssistant, **kwargs: Any) -> MockConfigEntry:
     entry = MockConfigEntry(
         domain=DOMAIN,
-        title="ISS",
+        title="Home",
         data=DENVER,
         options={CONF_N2YO_API_KEY: "secret-key"},
         unique_id="39.740_-104.990",
@@ -164,7 +164,7 @@ async def test_setup_and_states(
     assert expected
     first = expected[0].visible
 
-    state = hass.states.get("sensor.iss_next_visible_pass")
+    state = hass.states.get("sensor.home_next_visible_pass")
     assert state is not None
     assert dt_util.parse_datetime(state.state) == first.start.time.replace(microsecond=0)
     assert state.attributes["start_direction"] == first.start.compass
@@ -172,24 +172,24 @@ async def test_setup_and_states(
     assert state.attributes["confidence"] in {"high", "medium", "low"}
     assert len(state.attributes["upcoming"]) == len(expected)
 
-    assert float(hass.states.get("sensor.iss_next_visible_pass_peak_elevation").state) == round(
+    assert float(hass.states.get("sensor.home_next_visible_pass_peak_elevation").state) == round(
         first.peak.elevation, 1
     )
-    assert float(hass.states.get("sensor.iss_next_visible_pass_duration").state) == pytest.approx(
+    assert float(hass.states.get("sensor.home_next_visible_pass_duration").state) == pytest.approx(
         round(first.duration_s) / 60, abs=0.01
     )
-    assert hass.states.get("sensor.iss_next_pass").state not in (None, "unknown")
+    assert hass.states.get("sensor.home_next_pass").state not in (None, "unknown")
 
-    epoch = hass.states.get("sensor.iss_orbital_elements_epoch")
+    epoch = hass.states.get("sensor.home_orbital_elements_epoch")
     assert epoch.attributes["source"] == "celestrak"
     assert epoch.attributes["stale"] is False
     assert epoch.attributes["age_days"] == 0.0
 
-    tracker = hass.states.get("device_tracker.iss_position")
+    tracker = hass.states.get("device_tracker.home_iss_position")
     assert -52 < tracker.attributes["latitude"] < 52
     assert 380 < tracker.attributes["altitude_km"] < 460
 
-    elevation = hass.states.get("sensor.iss_elevation")
+    elevation = hass.states.get("sensor.home_iss_elevation")
     assert -90 <= float(elevation.state) <= 90
 
     # The live attributes change on every update and stay out of the recorder;
@@ -200,8 +200,8 @@ async def test_setup_and_states(
     assert {"altitude_km", "speed_km_s", "sunlit"} <= unrecorded
     assert not {"latitude", "longitude"} & unrecorded
 
-    for key in ("visible_now", "visible_pass_soon", "above_horizon"):
-        assert hass.states.get(f"binary_sensor.iss_{key}").state == "off"
+    for key in ("iss_visible_now", "visible_pass_soon", "iss_above_horizon"):
+        assert hass.states.get(f"binary_sensor.home_{key}").state == "off"
 
     # Only one download: the elements are cached for the next refresh.
     assert aioclient_mock.call_count == 1
@@ -224,7 +224,7 @@ async def test_unchanged_position_is_not_rewritten(
     changes = async_capture_events(hass, EVENT_STATE_CHANGED)
     await entry.runtime_data.async_refresh()
     await hass.async_block_till_done()
-    assert not [e for e in changes if e.data["entity_id"] == "device_tracker.iss_position"]
+    assert not [e for e in changes if e.data["entity_id"] == "device_tracker.home_iss_position"]
 
 
 async def test_binary_sensors_follow_the_pass(
@@ -247,8 +247,8 @@ async def test_binary_sensors_follow_the_pass(
 
     def states() -> tuple[str, str, str]:
         return tuple(
-            hass.states.get(f"binary_sensor.iss_{k}").state
-            for k in ("visible_pass_soon", "visible_now", "above_horizon")
+            hass.states.get(f"binary_sensor.home_{k}").state
+            for k in ("visible_pass_soon", "iss_visible_now", "iss_above_horizon")
         )
 
     await _advance(hass, freezer, v.start.time - lead - second)
@@ -257,14 +257,14 @@ async def test_binary_sensors_follow_the_pass(
     assert states() == ("on", "off", "off")
     await _advance(hass, freezer, v.start.time + second)
     assert states() == ("on", "on", "on")
-    assert float(hass.states.get("sensor.iss_elevation").state) >= 10
+    assert float(hass.states.get("sensor.home_iss_elevation").state) >= 10
     await _advance(hass, freezer, v.end.time + second)
     assert states()[:2] == ("off", "off")
     await _advance(hass, freezer, p.set.time + second)
     assert states() == ("off", "off", "off")
 
     # The sensor has moved on to the following visible pass.
-    state = hass.states.get("sensor.iss_next_visible_pass")
+    state = hass.states.get("sensor.home_next_visible_pass")
     assert dt_util.parse_datetime(state.state) == expected[1].visible.start.time.replace(
         microsecond=0
     )
@@ -283,9 +283,9 @@ async def test_falls_back_to_second_source(
     await _setup(hass, entry)
 
     assert entry.state is ConfigEntryState.LOADED
-    epoch = hass.states.get("sensor.iss_orbital_elements_epoch")
+    epoch = hass.states.get("sensor.home_orbital_elements_epoch")
     assert epoch.attributes["source"] == "wheretheiss.at"
-    assert hass.states.get("sensor.iss_next_visible_pass").state != "unavailable"
+    assert hass.states.get("sensor.home_next_visible_pass").state != "unavailable"
 
 
 def _only_n2yo_is_fresh(aioclient_mock: AiohttpClientMocker, start: datetime) -> None:
@@ -312,7 +312,7 @@ async def test_stale_mirror_does_not_hide_a_fresher_source(
     await hass.async_block_till_done(wait_background_tasks=True)
 
     assert entry.state is ConfigEntryState.LOADED
-    epoch = hass.states.get("sensor.iss_orbital_elements_epoch")
+    epoch = hass.states.get("sensor.home_orbital_elements_epoch")
     assert epoch.attributes["source"] == "n2yo"
     assert epoch.attributes["last_download_error"] is None
 
@@ -469,7 +469,7 @@ async def test_lagging_mirror_does_not_replace_newer_elements(
     assert entry.state is ConfigEntryState.LOADED
     assert _calls(aioclient_mock, "wheretheiss") == 1
 
-    epoch = hass.states.get("sensor.iss_orbital_elements_epoch")
+    epoch = hass.states.get("sensor.home_orbital_elements_epoch")
     assert epoch.attributes["source"] == "celestrak"
     assert dt_util.parse_datetime(epoch.state) == cached.epoch.replace(microsecond=0)
     assert hass_storage[STORAGE_KEY]["data"]["source"] == "celestrak"
@@ -491,10 +491,10 @@ async def test_cached_elements_survive_restart_offline(
     await _setup(hass, entry)
 
     assert entry.state is ConfigEntryState.LOADED
-    epoch = hass.states.get("sensor.iss_orbital_elements_epoch")
+    epoch = hass.states.get("sensor.home_orbital_elements_epoch")
     assert epoch.attributes["source"] == "celestrak"
     assert epoch.attributes["last_download_error"]
-    assert hass.states.get("sensor.iss_next_visible_pass").state not in ("unknown", "unavailable")
+    assert hass.states.get("sensor.home_next_visible_pass").state not in ("unknown", "unavailable")
 
 
 async def test_stale_elements_pause_predictions(
@@ -556,9 +556,9 @@ async def test_paused_predictions_explain_themselves(
 ) -> None:
     later = await _paused_while_loaded(hass, entry, aioclient_mock, freezer, omm_xml, start)
 
-    assert hass.states.get("sensor.iss_next_visible_pass").state == "unavailable"
+    assert hass.states.get("sensor.home_next_visible_pass").state == "unavailable"
     # The diagnostic sensor stays, to say why.
-    epoch = hass.states.get("sensor.iss_orbital_elements_epoch")
+    epoch = hass.states.get("sensor.home_orbital_elements_epoch")
     assert epoch.state != "unavailable"
     assert epoch.attributes["stale"] is True
     assert epoch.attributes["age_days"] == pytest.approx(15.0, abs=0.1)
@@ -578,7 +578,7 @@ async def test_paused_predictions_explain_themselves(
     await hass.async_block_till_done()
     assert entry.state is ConfigEntryState.SETUP_RETRY
     assert _stale_issue(hass).dismissed_version is not None
-    epoch = hass.states.get("sensor.iss_orbital_elements_epoch")
+    epoch = hass.states.get("sensor.home_orbital_elements_epoch")
     assert epoch.state == "unavailable"
     assert epoch.attributes["restored"] is True
 
@@ -602,8 +602,8 @@ async def test_paused_predictions_explain_themselves(
         if entry.state is ConfigEntryState.LOADED:
             break
     assert entry.state is ConfigEntryState.LOADED
-    assert hass.states.get("sensor.iss_next_visible_pass").state != "unavailable"
-    assert hass.states.get("sensor.iss_orbital_elements_epoch").attributes["stale"] is False
+    assert hass.states.get("sensor.home_next_visible_pass").state != "unavailable"
+    assert hass.states.get("sensor.home_orbital_elements_epoch").attributes["stale"] is False
     assert _stale_issue(hass) is None
 
 
@@ -628,7 +628,7 @@ async def test_clock_set_back_refreshes(
 
     assert entry.state is ConfigEntryState.LOADED
     assert aioclient_mock.call_count == 1
-    assert hass.states.get("sensor.iss_orbital_elements_epoch").attributes["source"] == "celestrak"
+    assert hass.states.get("sensor.home_orbital_elements_epoch").attributes["source"] == "celestrak"
 
 
 async def test_small_clock_correction_does_not_refresh(
@@ -895,7 +895,7 @@ async def test_n2yo_cross_check(
     # The cross-check runs in the background.
     await hass.async_block_till_done(wait_background_tasks=True)
 
-    state = hass.states.get("sensor.iss_n2yo_prediction_difference")
+    state = hass.states.get("sensor.home_n2yo_prediction_difference")
     assert state is not None
     assert state.attributes["compared_passes"] == len(fake)
     assert 0 < float(state.state) < 2.5
@@ -940,17 +940,17 @@ async def test_setup_does_not_wait_for_n2yo(
     if finished_first:
         await hass.async_block_till_done()
         assert entry.state is ConfigEntryState.LOADED
-        assert hass.states.get("sensor.iss_next_visible_pass").state not in (
+        assert hass.states.get("sensor.home_next_visible_pass").state not in (
             "unknown",
             "unavailable",
         )
-        state = hass.states.get("sensor.iss_n2yo_prediction_difference")
+        state = hass.states.get("sensor.home_n2yo_prediction_difference")
         assert "checked_at" not in state.attributes
     answer.set()
     await setup
     assert finished_first, "setup waited for N2YO"
     await hass.async_block_till_done(wait_background_tasks=True)
-    state = hass.states.get("sensor.iss_n2yo_prediction_difference")
+    state = hass.states.get("sensor.home_n2yo_prediction_difference")
     assert state.attributes["compared_passes"] == 0
 
 
@@ -995,9 +995,9 @@ async def test_n2yo_errors_keep_key_and_location_private(
     await hass.async_block_till_done(wait_background_tasks=True)
     assert entry.state is ConfigEntryState.LOADED
 
-    epoch = hass.states.get("sensor.iss_orbital_elements_epoch")
+    epoch = hass.states.get("sensor.home_orbital_elements_epoch")
     assert "n2yo: " in epoch.attributes["last_download_error"]
-    check = hass.states.get("sensor.iss_n2yo_prediction_difference")
+    check = hass.states.get("sensor.home_n2yo_prediction_difference")
     assert check.attributes["error"].startswith("n2yo: ")
     diag = await async_get_config_entry_diagnostics(hass, entry)
     for secret in SECRETS:
@@ -1049,7 +1049,7 @@ async def test_n2yo_sensor_removed_with_the_key(
     await hass.async_block_till_done(wait_background_tasks=True)
     assert entry.state is ConfigEntryState.LOADED
     assert er.async_get(hass).async_get_entity_id("sensor", DOMAIN, unique_id) is None
-    assert hass.states.get("sensor.iss_n2yo_prediction_difference") is None
+    assert hass.states.get("sensor.home_n2yo_prediction_difference") is None
 
 
 async def test_unload(

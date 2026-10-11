@@ -119,7 +119,11 @@ it a new domain (`iss_tracker`), so it can't take over the old entries. Delete t
 **ISS Pass Prediction** entries under **Settings → Devices & services**, delete the
 `custom_components/iss_pass_prediction` folder if it is still there, and restart; then
 install ISS Tracker and add your locations again. Give each location the same name as
-before and its entity IDs stay the same, so automations keep working. Re-import the
+before (the old default was **ISS**, now it is **Home**) and its entity IDs stay the
+same, so automations keep working. The exceptions are the four entities that describe
+the station rather than your location, whose names now start with ISS: **ISS elevation**,
+**ISS position**, **ISS above horizon** and **ISS visible now**. Check automations that
+use them, or change their entity IDs back under **Settings → Entities**. Re-import the
 [blueprint](#notifications), and pick the location in any globe card that names one.
 
 ### Updating
@@ -142,8 +146,9 @@ Manual installs don't get update notifications. Repeat these steps to update.
 
 **Settings → Devices & services → Add integration → ISS Tracker.** The location
 defaults to your Home Assistant home; you can add more locations (a cabin, a dark-sky
-site) as separate entries. To correct a location's coordinates or elevation later, choose
-**Reconfigure** on its entry: its entities, automations and dashboard cards keep working.
+site) with **Add location** on the integration's page. To correct a location's
+coordinates or elevation later, choose **Reconfigure** on its entry: its entities,
+automations and dashboard cards keep working.
 
 ### Options
 
@@ -156,31 +161,35 @@ site) as separate entries. To correct a location's coordinates or elevation late
 | Forecast window | 10 days | 1–30 days. See **Accuracy**. |
 | Advance notice | 15 min | When **Visible pass soon** turns on. |
 | Show ISS Tracker in the sidebar | on | Adds the **ISS Tracker** page to the sidebar. Turn off to remove it; the globe card stays available. The page stays open while a location reloads after an options change. If another dashboard already uses the address `/iss-tracker`, the page is not added (a warning is logged). |
+| Units | Automatic | Distances and speeds on the globe (altitude, speed, distance from you): **Automatic** follows Home Assistant's unit system, or choose **Metric** (km, km/h) or **Imperial** (mi, mph). Entity attributes stay metric (`range_km`, `altitude_km`, `speed_km_s`). |
 | N2YO API key | none | Optional: adds N2YO as a backup orbit source, for every location (they share the orbit data), and checks this integration's predictions against N2YO's once a day. |
 
 ## Entities
 
-Shown here for a location named **ISS**:
+Shown here for a location named **Home**, with Home Assistant set to English. The
+integration is also translated into German, Dutch, French, Spanish, Italian, Polish,
+Brazilian Portuguese and Swedish; in those languages new entities get their names, and
+entity IDs, in that language.
 
 | Entity | What it tells you |
 |---|---|
-| `sensor.iss_next_visible_pass` | Start time of the next visible pass (or the one under way). Attributes give start/peak/end time, direction and elevation, `duration_seconds`, `magnitude`, `disappears_into_shadow`, `confidence`, and `upcoming`, a list of the next qualifying passes in the window (up to 20). |
-| `sensor.iss_next_visible_pass_peak_elevation` | How high it climbs (90° is straight overhead). |
-| `sensor.iss_next_visible_pass_brightness` | Estimated magnitude (lower = brighter). |
-| `sensor.iss_next_visible_pass_duration` | How long it is visible. |
-| `sensor.iss_next_pass` | Next pass above the horizon mask, visible or not (useful for radio). |
-| `sensor.iss_elevation` | The station's elevation in your sky right now, with azimuth, direction, range and whether it is sunlit. |
-| `binary_sensor.iss_visible_pass_soon` | On from the advance-notice time until the visible pass ends. With an advance notice longer than the gap between two passes (about 90 minutes), it stays on from one pass to the next; the [blueprint](#notifications) still announces each one. |
-| `binary_sensor.iss_visible_now` | On while a visible pass is under way. |
-| `binary_sensor.iss_above_horizon` | On while the station is above your horizon mask, lit or not. |
-| `device_tracker.iss_position` | Ground point beneath the station, for map cards. |
-| `sensor.iss_orbital_elements_epoch` | Diagnostic: age and source of the orbit data, with `age_days`, `stale` and `last_download_error`. When predictions pause, it stays available to say why until Home Assistant restarts or the location reloads (an options change reloads it); then the repair issue and the location's entry under **Devices & services** say why. |
-| `sensor.iss_n2yo_prediction_difference` | Diagnostic (only with an N2YO key): largest angle between N2YO's prediction and this one. Near the peak, 1° is roughly 1 s of timing. |
+| `sensor.home_next_visible_pass` | Start time of the next visible pass (or the one under way). Attributes give start/peak/end time, direction and elevation, `duration_seconds`, `magnitude`, `disappears_into_shadow`, `confidence`, and `upcoming`, a list of the next qualifying passes in the window (up to 20). |
+| `sensor.home_next_visible_pass_peak_elevation` | How high it climbs (90° is straight overhead). |
+| `sensor.home_next_visible_pass_brightness` | Estimated magnitude (lower = brighter). |
+| `sensor.home_next_visible_pass_duration` | How long it is visible. |
+| `sensor.home_next_pass` | Next pass above the horizon mask, visible or not (useful for radio). |
+| `sensor.home_iss_elevation` | The station's elevation in your sky right now, with azimuth, direction, range and whether it is sunlit. |
+| `binary_sensor.home_visible_pass_soon` | On from the advance-notice time until the visible pass ends. With an advance notice longer than the gap between two passes (about 90 minutes), it stays on from one pass to the next; the [blueprint](#notifications) still announces each one. |
+| `binary_sensor.home_iss_visible_now` | On while a visible pass is under way. |
+| `binary_sensor.home_iss_above_horizon` | On while the station is above your horizon mask, lit or not. |
+| `device_tracker.home_iss_position` | Ground point beneath the station, for map cards. |
+| `sensor.home_orbital_elements_epoch` | Diagnostic: age and source of the orbit data, with `age_days`, `stale` and `last_download_error`. When predictions pause, it stays available to say why until Home Assistant restarts or the location reloads (an options change reloads it); then the repair issue and the location's entry under **Devices & services** say why. |
+| `sensor.home_n2yo_prediction_difference` | Diagnostic (only with an N2YO key): largest angle between N2YO's prediction and this one. Near the peak, 1° is roughly 1 s of timing. |
 
 The live position updates every 60 seconds, and every 10 seconds while the station is
 above your horizon. Its fast-changing attributes (direction, range, altitude, speed) are
 not recorded. To keep your database smaller still, you can exclude
-`device_tracker.iss_position` and `sensor.iss_elevation` from the
+`device_tracker.home_iss_position` and `sensor.home_iss_elevation` from the
 [recorder](https://www.home-assistant.io/integrations/recorder/).
 
 If no fresh orbit data can be downloaded for 14 days (a long internet outage, say),
@@ -269,7 +278,7 @@ Or build your own; the timestamp sensor works directly with a time trigger:
 triggers:
   - trigger: time
     at:
-      entity_id: sensor.iss_next_visible_pass
+      entity_id: sensor.home_next_visible_pass
       offset: "-00:10:00"
 ```
 
@@ -280,7 +289,7 @@ Besides the [globe card](#card), the sensors work with Home Assistant's own card
 ```yaml
 type: markdown
 content: >
-  {% set p = 'sensor.iss_next_visible_pass' %}
+  {% set p = 'sensor.home_next_visible_pass' %}
   {% if states(p) not in ['unknown', 'unavailable'] %}
   | When | Look | Peak | Brightness | Confidence |
   |---|---|---|---|---|
@@ -292,7 +301,7 @@ content: >
 ```yaml
 type: map
 entities:
-  - device_tracker.iss_position
+  - device_tracker.home_iss_position
 hours_to_show: 2
 ```
 

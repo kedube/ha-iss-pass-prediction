@@ -1,0 +1,133 @@
+{
+  "config": {
+    "initiate_flow": {
+      "user": "Lägg till plats"
+    },
+    "step": {
+      "user": {
+        "title": "Var tittar du från?",
+        "description": "Passager förutsägs för den här platsen. Som standard är det Home Assistants hemplats, och den lämnar aldrig din Home Assistant-instans (om du inte lägger till en N2YO API-nyckel i alternativen).",
+        "data": {
+          "name": "Namn",
+          "location": "Plats",
+          "elevation": "Höjd över havet"
+        },
+        "data_description": {
+          "name": "Används som enhetsnamn, till exempel ”Hemma” eller ”Stugan”.",
+          "elevation": "Platsens höjd i meter. Ett ungefärligt värde räcker."
+        }
+      },
+      "reconfigure": {
+        "title": "Flytta den här platsen",
+        "description": "Korrigera vilken plats passager förutsägs för. Platsen behåller sina entiteter, och instrumentpanelskorten som visar den fortsätter att fungera.",
+        "data": {
+          "location": "Plats",
+          "elevation": "Höjd över havet"
+        },
+        "data_description": {
+          "elevation": "Platsens höjd i meter. Ett ungefärligt värde räcker."
+        }
+      }
+    },
+    "error": {
+      "invalid_location": "Ange en latitud mellan -90° och 90° och en giltig longitud."
+    },
+    "abort": {
+      "already_configured": "Den här platsen är redan konfigurerad.",
+      "reconfigure_successful": "Platsen har uppdaterats."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Vilka passager ska rapporteras?",
+        "data": {
+          "min_elevation": "Horisontmask",
+          "min_peak_elevation": "Minsta elevation vid högsta punkten",
+          "max_sun_elevation": "Mörkertröskel (solens höjd)",
+          "min_visible_duration": "Minsta synliga tid",
+          "forecast_days": "Prognosfönster",
+          "alert_lead_minutes": "Förvarning",
+          "show_in_sidebar": "Visa ISS Tracker i sidofältet",
+          "units": "Enheter",
+          "n2yo_api_key": "N2YO API-nyckel (valfritt)"
+        },
+        "data_description": {
+          "min_elevation": "Stationen räknas som synlig först ovanför den här elevationen. 10° når över de flesta träd och tak.",
+          "min_peak_elevation": "Hoppa över låga passager som aldrig stiger högre än så här.",
+          "max_sun_elevation": "Solen måste stå minst så här långt under horisonten. -6° är slutet på den borgerliga skymningen; använd -3° för passager i ljusare skymning.",
+          "min_visible_duration": "Hoppa över passager som är synliga kortare tid än så här.",
+          "forecast_days": "Hur långt fram förutsägelser görs. Tider mer än en vecka fram kan förskjutas med några minuter när nya bandata kommer in; förutsägelserna förfinas automatiskt.",
+          "alert_lead_minutes": "Sensorn ”Synlig passage snart” slås på så här lång tid innan stationen syns.",
+          "show_in_sidebar": "Lägger till en ISS Tracker-sida i sidofältet med en 3D-glob, stationens bana och en nedräkning till nästa synliga passage. Globen finns också som instrumentpanelskort oavsett.",
+          "units": "För avstånd och hastigheter på globen (höjd, hastighet, avstånd till dig). ”Automatiskt” följer Home Assistants enhetssystem.",
+          "n2yo_api_key": "Valfritt. Lägger till N2YO som reservkälla för bandata och jämför N2YO:s förutsägelser med den här integrationens en gång om dagen."
+        }
+      }
+    },
+    "error": {
+      "invalid_n2yo_key": "N2YO avvisade den här API-nyckeln.",
+      "n2yo_unreachable": "Kunde inte nå N2YO för att kontrollera API-nyckeln. Försök igen senare.",
+      "peak_below_mask": "Minsta elevation vid högsta punkten kan inte vara lägre än horisontmasken."
+    }
+  },
+  "selector": {
+    "units": {
+      "options": {
+        "auto": "Automatiskt (Home Assistants enhetssystem)",
+        "metric": "Metriskt (km, km/h)",
+        "imperial": "Imperiskt (mi, mph)"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "visible_now": {
+        "name": "ISS synlig nu"
+      },
+      "visible_pass_soon": {
+        "name": "Synlig passage snart"
+      },
+      "above_horizon": {
+        "name": "ISS över horisonten"
+      }
+    },
+    "device_tracker": {
+      "position": {
+        "name": "ISS-position"
+      }
+    },
+    "sensor": {
+      "next_visible_pass": {
+        "name": "Nästa synliga passage"
+      },
+      "next_visible_pass_peak_elevation": {
+        "name": "Högsta elevation för nästa synliga passage"
+      },
+      "next_visible_pass_magnitude": {
+        "name": "Ljusstyrka för nästa synliga passage"
+      },
+      "next_visible_pass_duration": {
+        "name": "Varaktighet för nästa synliga passage"
+      },
+      "next_pass": {
+        "name": "Nästa passage"
+      },
+      "elevation": {
+        "name": "ISS-elevation"
+      },
+      "elements_epoch": {
+        "name": "Epok för banelementen"
+      },
+      "n2yo_difference": {
+        "name": "Skillnad mot N2YO:s förutsägelse"
+      }
+    }
+  },
+  "issues": {
+    "elements_stale": {
+      "title": "ISS-förutsägelserna är pausade",
+      "description": "De cachade banelementen för den internationella rymdstationen är {age} dagar gamla, och inga nyare kunde laddas ned ({error}). Förutsägelser baserade på äldre data skulle vara missvisande, så ISS Tracker-entiteterna är otillgängliga tills en nedladdning lyckas. Kontrollera att Home Assistant kan nå celestrak.org eller wheretheiss.at; en N2YO API-nyckel i alternativen ger ytterligare en källa. Meddelandet försvinner av sig självt när nya banelement kommer in."
+    }
+  }
+}

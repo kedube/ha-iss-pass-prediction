@@ -14,7 +14,7 @@ from homeassistant.const import (
     CONF_NAME,
 )
 from homeassistant.core import HomeAssistant
-from homeassistant.data_entry_flow import FlowResultType
+from homeassistant.data_entry_flow import FlowResultType, InvalidData
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
@@ -28,6 +28,7 @@ from custom_components.iss_tracker.const import (
     CONF_MIN_VISIBLE_DURATION,
     CONF_N2YO_API_KEY,
     CONF_SHOW_PANEL,
+    CONF_UNITS,
     DOMAIN,
 )
 
@@ -215,7 +216,27 @@ async def test_options_flow(hass: HomeAssistant) -> None:
 
     result = await hass.config_entries.options.async_configure(result["flow_id"], OPTIONS)
     assert result["type"] is FlowResultType.CREATE_ENTRY
-    assert entry.options == {**OPTIONS, CONF_N2YO_API_KEY: "", CONF_SHOW_PANEL: True}
+    assert entry.options == {
+        **OPTIONS,
+        CONF_N2YO_API_KEY: "",
+        CONF_SHOW_PANEL: True,
+        CONF_UNITS: "auto",
+    }
+
+
+async def test_options_units(hass: HomeAssistant) -> None:
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_LATITUDE: 1, CONF_LONGITUDE: 2})
+    entry.add_to_hass(hass)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    with pytest.raises(InvalidData):
+        await hass.config_entries.options.async_configure(
+            result["flow_id"], {**OPTIONS, CONF_UNITS: "nautical"}
+        )
+    result = await hass.config_entries.options.async_configure(
+        result["flow_id"], {**OPTIONS, CONF_UNITS: "metric"}
+    )
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    assert entry.options[CONF_UNITS] == "metric"
 
 
 async def test_options_peak_below_mask(hass: HomeAssistant) -> None:

@@ -1,0 +1,133 @@
+{
+  "config": {
+    "initiate_flow": {
+      "user": "Aggiungi posizione"
+    },
+    "step": {
+      "user": {
+        "title": "Da dove osservi?",
+        "description": "I passaggi vengono previsti per questa posizione. Per impostazione predefinita è la posizione di casa di Home Assistant, e non lascia mai la tua istanza di Home Assistant (a meno che tu non aggiunga una chiave API N2YO nelle opzioni).",
+        "data": {
+          "name": "Nome",
+          "location": "Posizione",
+          "elevation": "Altitudine sul livello del mare"
+        },
+        "data_description": {
+          "name": "Usato come nome del dispositivo, ad esempio \"Casa\" o \"Baita\".",
+          "elevation": "Altezza della posizione in metri. Va bene un valore approssimativo."
+        }
+      },
+      "reconfigure": {
+        "title": "Sposta questa posizione",
+        "description": "Correggi il luogo per cui vengono previsti i passaggi. La posizione mantiene le sue entità, e le schede della plancia che la mostrano continuano a funzionare.",
+        "data": {
+          "location": "Posizione",
+          "elevation": "Altitudine sul livello del mare"
+        },
+        "data_description": {
+          "elevation": "Altezza della posizione in metri. Va bene un valore approssimativo."
+        }
+      }
+    },
+    "error": {
+      "invalid_location": "Inserisci una latitudine tra -90° e 90° e una longitudine valida."
+    },
+    "abort": {
+      "already_configured": "Questa posizione è già configurata.",
+      "reconfigure_successful": "La posizione è stata aggiornata."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Quali passaggi devono essere segnalati?",
+        "data": {
+          "min_elevation": "Maschera dell'orizzonte",
+          "min_peak_elevation": "Elevazione minima al culmine",
+          "max_sun_elevation": "Soglia di oscurità (elevazione del Sole)",
+          "min_visible_duration": "Tempo minimo di visibilità",
+          "forecast_days": "Finestra di previsione",
+          "alert_lead_minutes": "Preavviso",
+          "show_in_sidebar": "Mostra ISS Tracker nella barra laterale",
+          "units": "Unità",
+          "n2yo_api_key": "Chiave API N2YO (facoltativa)"
+        },
+        "data_description": {
+          "min_elevation": "La stazione conta come visibile solo sopra questa elevazione. 10° supera la maggior parte di alberi e tetti.",
+          "min_peak_elevation": "Salta i passaggi bassi che non salgono mai oltre questo valore.",
+          "max_sun_elevation": "Il Sole deve trovarsi almeno così in basso sotto l'orizzonte. -6° è la fine del crepuscolo civile; usa -3° per i passaggi nel crepuscolo più chiaro.",
+          "min_visible_duration": "Salta i passaggi visibili per meno di questo tempo.",
+          "forecast_days": "Fino a quanto in avanti prevedere. Gli orari oltre una settimana possono spostarsi di alcuni minuti all'arrivo di nuovi dati orbitali; le previsioni vengono affinate automaticamente.",
+          "alert_lead_minutes": "Il sensore \"Passaggio visibile imminente\" si attiva con questo anticipo prima che la stazione appaia.",
+          "show_in_sidebar": "Aggiunge alla barra laterale una pagina ISS Tracker con un globo 3D, la rotta della stazione e un conto alla rovescia fino al prossimo passaggio visibile. Il globo è comunque disponibile anche come scheda della plancia.",
+          "units": "Per distanze e velocità sul globo (altitudine, velocità, distanza da te). \"Automatico\" segue il sistema di unità di Home Assistant.",
+          "n2yo_api_key": "Facoltativa. Aggiunge N2YO come fonte di riserva per i dati orbitali e confronta una volta al giorno le previsioni di N2YO con quelle di questa integrazione."
+        }
+      }
+    },
+    "error": {
+      "invalid_n2yo_key": "N2YO ha rifiutato questa chiave API.",
+      "n2yo_unreachable": "Impossibile raggiungere N2YO per verificare la chiave API. Riprova più tardi.",
+      "peak_below_mask": "L'elevazione minima al culmine non può essere inferiore alla maschera dell'orizzonte."
+    }
+  },
+  "selector": {
+    "units": {
+      "options": {
+        "auto": "Automatico (sistema di unità di Home Assistant)",
+        "metric": "Metrico (km, km/h)",
+        "imperial": "Imperiale (mi, mph)"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "visible_now": {
+        "name": "ISS visibile ora"
+      },
+      "visible_pass_soon": {
+        "name": "Passaggio visibile imminente"
+      },
+      "above_horizon": {
+        "name": "ISS sopra l'orizzonte"
+      }
+    },
+    "device_tracker": {
+      "position": {
+        "name": "Posizione della ISS"
+      }
+    },
+    "sensor": {
+      "next_visible_pass": {
+        "name": "Prossimo passaggio visibile"
+      },
+      "next_visible_pass_peak_elevation": {
+        "name": "Elevazione massima del prossimo passaggio visibile"
+      },
+      "next_visible_pass_magnitude": {
+        "name": "Luminosità del prossimo passaggio visibile"
+      },
+      "next_visible_pass_duration": {
+        "name": "Durata del prossimo passaggio visibile"
+      },
+      "next_pass": {
+        "name": "Prossimo passaggio"
+      },
+      "elevation": {
+        "name": "Elevazione della ISS"
+      },
+      "elements_epoch": {
+        "name": "Epoca degli elementi orbitali"
+      },
+      "n2yo_difference": {
+        "name": "Differenza dalla previsione N2YO"
+      }
+    }
+  },
+  "issues": {
+    "elements_stale": {
+      "title": "Le previsioni della ISS sono in pausa",
+      "description": "Gli elementi orbitali della Stazione Spaziale Internazionale memorizzati nella cache hanno {age} giorni, e non è stato possibile scaricarne di più recenti ({error}). Previsioni basate su dati più vecchi sarebbero fuorvianti, quindi le entità di ISS Tracker non sono disponibili finché un download non va a buon fine. Verifica che Home Assistant riesca a raggiungere celestrak.org o wheretheiss.at; aggiungere una chiave API N2YO nelle opzioni fornisce un'ulteriore fonte. Questo messaggio scompare da solo quando arrivano elementi aggiornati."
+    }
+  }
+}

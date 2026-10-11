@@ -28,7 +28,9 @@ import voluptuous as vol
 
 from .const import (
     CONF_SHOW_PANEL,
+    CONF_UNITS,
     DEFAULT_SHOW_PANEL,
+    DEFAULT_UNITS,
     DOMAIN,
     ELEMENTS_MAX_AGE,
     FRONTEND_URL,
@@ -340,6 +342,7 @@ def build_track_payload(coordinator: IssTrackerCoordinator) -> dict[str, Any]:
             "max_sun_elevation": settings.max_sun_elevation,
             "min_visible_duration": settings.min_visible_duration,
             "forecast_days": settings.forecast_days,
+            "units": entry.options.get(CONF_UNITS, DEFAULT_UNITS),
         },
         "elements": {
             "epoch": epoch.isoformat(),

@@ -29,6 +29,9 @@ from homeassistant.helpers.selector import (
     NumberSelector,
     NumberSelectorConfig,
     NumberSelectorMode,
+    SelectSelector,
+    SelectSelectorConfig,
+    SelectSelectorMode,
     TextSelector,
     TextSelectorConfig,
     TextSelectorType,
@@ -45,6 +48,7 @@ from .const import (
     CONF_MIN_VISIBLE_DURATION,
     CONF_N2YO_API_KEY,
     CONF_SHOW_PANEL,
+    CONF_UNITS,
     DEFAULT_ALERT_LEAD_MINUTES,
     DEFAULT_FORECAST_DAYS,
     DEFAULT_MAX_SUN_ELEVATION,
@@ -52,12 +56,14 @@ from .const import (
     DEFAULT_MIN_PEAK_ELEVATION,
     DEFAULT_MIN_VISIBLE_DURATION,
     DEFAULT_SHOW_PANEL,
+    DEFAULT_UNITS,
     DOMAIN,
+    UNITS,
     USER_AGENT,
 )
 from .elements import ElementsError, SourceRejectedError, fetch_n2yo
 
-DEFAULT_NAME = "ISS"
+DEFAULT_NAME = "Home"
 
 
 def _number(minimum: float, maximum: float, step: float, unit: str | None = None) -> NumberSelector:
@@ -249,6 +255,16 @@ class IssTrackerOptionsFlow(OptionsFlow):
                     CONF_SHOW_PANEL,
                     default=current.get(CONF_SHOW_PANEL, DEFAULT_SHOW_PANEL),
                 ): BooleanSelector(),
+                vol.Required(
+                    CONF_UNITS,
+                    default=current.get(CONF_UNITS, DEFAULT_UNITS),
+                ): SelectSelector(
+                    SelectSelectorConfig(
+                        options=list(UNITS),
+                        translation_key=CONF_UNITS,
+                        mode=SelectSelectorMode.DROPDOWN,
+                    )
+                ),
                 vol.Optional(
                     CONF_N2YO_API_KEY,
                     description={"suggested_value": current.get(CONF_N2YO_API_KEY, "")},

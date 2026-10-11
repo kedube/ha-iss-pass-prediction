@@ -174,6 +174,22 @@ test("clock and number formats follow Home Assistant's settings", () => {
   assert.equal(new Intl.NumberFormat(locales, { ...extra, minimumFractionDigits: 1 }).format(1234.5), "1.234,5");
 });
 
+test("distances and speeds follow the Units option, else Home Assistant's unit system", () => {
+  const view = new IssGlobeView();
+  const show = (units, length) => {
+    view._hass = { config: { unit_system: { length } }, locale: { language: "en", number_format: "language" } };
+    view._payload = { settings: { units } };
+    return [view._distance(400), view._speed(27600)];
+  };
+  const metric = ["400 km", "27,600 km/h"];
+  const imperial = ["249 mi", "17,150 mph"];
+  assert.deepEqual(show("auto", "km"), metric);
+  assert.deepEqual(show("auto", "mi"), imperial);
+  assert.deepEqual(show(undefined, "mi"), imperial);
+  assert.deepEqual(show("metric", "mi"), metric);
+  assert.deepEqual(show("imperial", "km"), imperial);
+});
+
 // ---- the view -------------------------------------------------------------------
 
 test("a preview that ends by itself leaves no animation-frame loop behind", () => {

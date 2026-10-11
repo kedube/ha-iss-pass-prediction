@@ -1,0 +1,133 @@
+{
+  "config": {
+    "initiate_flow": {
+      "user": "Ajouter un lieu"
+    },
+    "step": {
+      "user": {
+        "title": "D'où observez-vous ?",
+        "description": "Les passages sont prédits pour ce lieu. Par défaut, il s'agit de l'emplacement de votre domicile dans Home Assistant, et il ne quitte jamais votre instance Home Assistant (sauf si vous ajoutez une clé API N2YO dans les options).",
+        "data": {
+          "name": "Nom",
+          "location": "Emplacement",
+          "elevation": "Altitude"
+        },
+        "data_description": {
+          "name": "Utilisé comme nom de l'appareil, par exemple « Maison » ou « Chalet ».",
+          "elevation": "Altitude du lieu en mètres. Une valeur approximative suffit."
+        }
+      },
+      "reconfigure": {
+        "title": "Déplacer ce lieu",
+        "description": "Corrigez l'endroit pour lequel les passages sont prédits. Le lieu conserve ses entités, et les cartes de tableau de bord qui l'affichent continuent de fonctionner.",
+        "data": {
+          "location": "Emplacement",
+          "elevation": "Altitude"
+        },
+        "data_description": {
+          "elevation": "Altitude du lieu en mètres. Une valeur approximative suffit."
+        }
+      }
+    },
+    "error": {
+      "invalid_location": "Saisissez une latitude comprise entre -90° et 90° et une longitude valide."
+    },
+    "abort": {
+      "already_configured": "Ce lieu est déjà configuré.",
+      "reconfigure_successful": "Le lieu a été mis à jour."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Quels passages faut-il signaler ?",
+        "data": {
+          "min_elevation": "Masque d'horizon",
+          "min_peak_elevation": "Élévation minimale au point culminant",
+          "max_sun_elevation": "Seuil d'obscurité (élévation du Soleil)",
+          "min_visible_duration": "Durée de visibilité minimale",
+          "forecast_days": "Période de prévision",
+          "alert_lead_minutes": "Préavis",
+          "show_in_sidebar": "Afficher ISS Tracker dans la barre latérale",
+          "units": "Unités",
+          "n2yo_api_key": "Clé API N2YO (facultatif)"
+        },
+        "data_description": {
+          "min_elevation": "La station n'est considérée comme visible qu'au-dessus de cette élévation. 10° dépasse la plupart des arbres et des toits.",
+          "min_peak_elevation": "Ignorer les passages bas qui ne montent jamais plus haut que cette valeur.",
+          "max_sun_elevation": "Le Soleil doit se trouver au moins aussi bas sous l'horizon. -6° marque la fin du crépuscule civil ; utilisez -3° pour inclure des passages dans un crépuscule plus clair.",
+          "min_visible_duration": "Ignorer les passages visibles moins longtemps que cette durée.",
+          "forecast_days": "Jusqu'où prédire à l'avance. Au-delà d'une semaine, les horaires peuvent se décaler de quelques minutes à l'arrivée de nouvelles données orbitales ; les prédictions sont affinées automatiquement.",
+          "alert_lead_minutes": "Le capteur « Passage visible imminent » s'active avec cette avance sur l'apparition de la station.",
+          "show_in_sidebar": "Ajoute à la barre latérale une page ISS Tracker avec un globe 3D, la trajectoire de la station et un compte à rebours jusqu'au prochain passage visible. Le globe reste de toute façon disponible comme carte de tableau de bord.",
+          "units": "Pour les distances et vitesses affichées sur le globe (altitude, vitesse, distance par rapport à vous). « Automatique » suit le système d'unités de Home Assistant.",
+          "n2yo_api_key": "Facultatif. Ajoute N2YO comme source de secours pour les données orbitales et compare une fois par jour les prédictions de N2YO avec celles de cette intégration."
+        }
+      }
+    },
+    "error": {
+      "invalid_n2yo_key": "N2YO a refusé cette clé API.",
+      "n2yo_unreachable": "Impossible de joindre N2YO pour vérifier la clé API. Réessayez plus tard.",
+      "peak_below_mask": "L'élévation minimale au point culminant ne peut pas être inférieure au masque d'horizon."
+    }
+  },
+  "selector": {
+    "units": {
+      "options": {
+        "auto": "Automatique (système d'unités de Home Assistant)",
+        "metric": "Métrique (km, km/h)",
+        "imperial": "Impérial (mi, mph)"
+      }
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "visible_now": {
+        "name": "ISS visible maintenant"
+      },
+      "visible_pass_soon": {
+        "name": "Passage visible imminent"
+      },
+      "above_horizon": {
+        "name": "ISS au-dessus de l'horizon"
+      }
+    },
+    "device_tracker": {
+      "position": {
+        "name": "Position de l'ISS"
+      }
+    },
+    "sensor": {
+      "next_visible_pass": {
+        "name": "Prochain passage visible"
+      },
+      "next_visible_pass_peak_elevation": {
+        "name": "Élévation maximale du prochain passage visible"
+      },
+      "next_visible_pass_magnitude": {
+        "name": "Luminosité du prochain passage visible"
+      },
+      "next_visible_pass_duration": {
+        "name": "Durée du prochain passage visible"
+      },
+      "next_pass": {
+        "name": "Prochain passage"
+      },
+      "elevation": {
+        "name": "Élévation de l'ISS"
+      },
+      "elements_epoch": {
+        "name": "Époque des éléments orbitaux"
+      },
+      "n2yo_difference": {
+        "name": "Écart avec la prédiction N2YO"
+      }
+    }
+  },
+  "issues": {
+    "elements_stale": {
+      "title": "Les prédictions de l'ISS sont en pause",
+      "description": "Les éléments orbitaux de la Station spatiale internationale en cache datent de {age} jours, et aucun élément plus récent n'a pu être téléchargé ({error}). Des prédictions fondées sur des données plus anciennes seraient trompeuses : les entités ISS Tracker restent donc indisponibles jusqu'à ce qu'un téléchargement réussisse. Vérifiez que Home Assistant peut joindre celestrak.org ou wheretheiss.at ; ajouter une clé API N2YO dans les options fournit une source supplémentaire. Ce message disparaît de lui-même dès que des éléments récents arrivent."
+    }
+  }
+}

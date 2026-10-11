@@ -3,10 +3,13 @@
 from __future__ import annotations
 
 from datetime import timedelta
+import json
+from pathlib import Path
 from typing import Final
 
 DOMAIN: Final = "iss_tracker"
-VERSION: Final = "0.1.0"
+# The release number lives only in manifest.json (scripts/version.py bumps it).
+VERSION: Final[str] = json.loads((Path(__file__).parent / "manifest.json").read_text())["version"]
 USER_AGENT: Final = (
     f"HomeAssistant-ISSTracker/{VERSION} (+https://github.com/kedube/ha-iss-tracker)"
 )
@@ -19,6 +22,7 @@ CONF_FORECAST_DAYS: Final = "forecast_days"
 CONF_ALERT_LEAD_MINUTES: Final = "alert_lead_minutes"
 CONF_N2YO_API_KEY: Final = "n2yo_api_key"
 CONF_SHOW_PANEL: Final = "show_in_sidebar"
+CONF_UNITS: Final = "units"
 
 # NASA's Spot the Station reports sightings from 10 degrees above the horizon;
 # lower than that, trees and buildings usually hide the station.
@@ -30,6 +34,9 @@ DEFAULT_MIN_VISIBLE_DURATION: Final = 60
 DEFAULT_FORECAST_DAYS: Final = 10
 DEFAULT_ALERT_LEAD_MINUTES: Final = 15
 DEFAULT_SHOW_PANEL: Final = True
+# Distances and speeds on the globe; auto follows Home Assistant's unit system.
+UNITS: Final = ("auto", "metric", "imperial")
+DEFAULT_UNITS: Final = "auto"
 
 # How often to download fresh orbital elements. CelesTrak asks for no more than
 # one download per two hours and publishes new ISS elements a few times a day.
