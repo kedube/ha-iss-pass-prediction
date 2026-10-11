@@ -1,4 +1,4 @@
-"""ISS Pass Prediction: predicts when the International Space Station is visible."""
+"""ISS Tracker: follows the International Space Station and predicts when it is visible."""
 
 from __future__ import annotations
 
@@ -9,12 +9,12 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 from .const import DOMAIN
-from .coordinator import DATA_ELEMENTS, ElementsManager, IssPassCoordinator
+from .coordinator import DATA_ELEMENTS, ElementsManager, IssTrackerCoordinator
 from .frontend import async_clear_stale_issue, async_setup_frontend, async_update_panel
 
 PLATFORMS = [Platform.BINARY_SENSOR, Platform.DEVICE_TRACKER, Platform.SENSOR]
 
-type IssConfigEntry = ConfigEntry[IssPassCoordinator]
+type IssConfigEntry = ConfigEntry[IssTrackerCoordinator]
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
@@ -35,7 +35,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: IssConfigEntry) -> bool:
     if manager is None:
         manager = hass.data[DATA_ELEMENTS] = ElementsManager(hass)
 
-    coordinator = IssPassCoordinator(hass, entry, manager)
+    coordinator = IssTrackerCoordinator(hass, entry, manager)
     await coordinator.async_config_entry_first_refresh()
     entry.runtime_data = coordinator
     entry.async_on_unload(coordinator.async_start_live())

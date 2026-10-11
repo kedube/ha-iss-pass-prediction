@@ -1,4 +1,4 @@
-"""Config flow for ISS Pass Prediction."""
+"""Config flow for ISS Tracker."""
 
 from __future__ import annotations
 
@@ -97,7 +97,7 @@ def _elevation_selector() -> NumberSelector:
     return _number(-500, 9000, 1, UnitOfLength.METERS)
 
 
-class IssPassConfigFlow(ConfigFlow, domain=DOMAIN):
+class IssTrackerConfigFlow(ConfigFlow, domain=DOMAIN):
     """Add an observing location."""
 
     VERSION = 1
@@ -192,10 +192,10 @@ class IssPassConfigFlow(ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry: IssConfigEntry) -> OptionsFlow:
         """Return the options flow."""
-        return IssPassOptionsFlow()
+        return IssTrackerOptionsFlow()
 
 
-class IssPassOptionsFlow(OptionsFlow):
+class IssTrackerOptionsFlow(OptionsFlow):
     """Tune which passes are reported."""
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:

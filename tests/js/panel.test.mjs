@@ -66,7 +66,7 @@ globalThis.document = {
   },
 };
 
-await import("../../custom_components/iss_pass_prediction/frontend/iss-tracker-panel.js");
+await import("../../custom_components/iss_tracker/frontend/iss-tracker-panel.js");
 const IssTrackerPanel = definitions["iss-tracker-panel"];
 
 const HOME = { entry_id: "home", title: "Home", show_in_sidebar: true };
@@ -76,7 +76,7 @@ const settle = async () => {
 };
 
 test("a deleted location makes the panel switch to one that is left", async () => {
-  store.set("iss-pass-prediction:panel", JSON.stringify({ entry_id: "cabin" }));
+  store.set("iss-tracker:panel", JSON.stringify({ entry_id: "cabin" }));
   let locations = [HOME, CABIN];
   const panel = new IssTrackerPanel();
   panel.hass = { callWS: async () => locations };

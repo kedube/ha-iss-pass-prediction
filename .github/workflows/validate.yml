@@ -45,14 +45,14 @@ jobs:
       # Quoted, so Node expands the glob itself (a directory argument fails on Node 22).
       - run: node --test "tests/js/*.test.mjs"
       - name: Check the frontend modules parse
-        run: for f in custom_components/iss_pass_prediction/frontend/*.js; do node --check "$f"; done
+        run: for f in custom_components/iss_tracker/frontend/*.js; do node --check "$f"; done
 
   # Once every check has passed on main, publish the version in manifest.json
   # as a release (tag and title "1.01", no "v"), unless that version is already
   # released. Raise it with: python scripts/version.py bump
   release:
     needs: [hassfest, hacs, tests]
-    if: github.ref == 'refs/heads/main' && github.repository == 'kedube/ha-iss-pass-prediction'
+    if: github.ref == 'refs/heads/main' && github.repository == 'kedube/ha-iss-tracker'
     runs-on: ubuntu-latest
     permissions:
       contents: write

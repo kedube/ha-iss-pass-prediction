@@ -1,4 +1,4 @@
-# ISS Pass Prediction for Home Assistant
+# ISS Tracker for Home Assistant
 
 ![The ISS Tracker: chase view of the station flying along its orbit](docs/images/chase-view.jpg)
 
@@ -92,20 +92,20 @@ whereas the real station fades over a few seconds.
 
 ### HACS (recommended)
 
-[![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kedube&repository=ha-iss-pass-prediction&category=integration)
+[![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kedube&repository=ha-iss-tracker&category=integration)
 
 1. In HACS, open the menu → **Custom repositories**, add
-   `https://github.com/kedube/ha-iss-pass-prediction` with category **Integration**.
-2. Download **ISS Pass Prediction** and restart Home Assistant.
+   `https://github.com/kedube/ha-iss-tracker` with category **Integration**.
+2. Download **ISS Tracker** and restart Home Assistant.
 
 ### Manual
 
-Copy `custom_components/iss_pass_prediction` into your Home Assistant
+Copy `custom_components/iss_tracker` into your Home Assistant
 `config/custom_components/` folder and restart.
 
 ## Setup
 
-**Settings → Devices & services → Add integration → ISS Pass Prediction.** The location
+**Settings → Devices & services → Add integration → ISS Tracker.** The location
 defaults to your Home Assistant home; you can add more locations (a cabin, a dark-sky
 site) as separate entries. To correct a location's coordinates or elevation later, choose
 **Reconfigure** on its entry: its entities, automations and dashboard cards keep working.
@@ -219,7 +219,7 @@ and frees its graphics memory shortly after you leave the page.
 
 Import the blueprint:
 
-[![Import blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fkedube%2Fha-iss-pass-prediction%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fiss_pass_prediction%2Fnotify_visible_pass.yaml)
+[![Import blueprint](https://my.home-assistant.io/badges/blueprint_import.svg)](https://my.home-assistant.io/redirect/blueprint_import/?blueprint_url=https%3A%2F%2Fgithub.com%2Fkedube%2Fha-iss-tracker%2Fblob%2Fmain%2Fblueprints%2Fautomation%2Fiss_tracker%2Fnotify_visible_pass.yaml)
 
 It sends a Companion-app notification when a pass is about to start, and optionally a daily
 heads-up:
@@ -323,10 +323,10 @@ python scripts/version.py status   # whether pushing to main will release it
 Orbit propagation uses [`sgp4`](https://pypi.org/project/sgp4/) by Brandon Rhodes, the
 official Vallado SGP4 implementation. The globe is drawn with
 [MapLibre GL JS](https://maplibre.org) 6.11.2 (BSD-3-Clause, bundled under
-`custom_components/iss_pass_prediction/frontend/vendor/`). The city lights are NASA Black
+`custom_components/iss_tracker/frontend/vendor/`). The city lights are NASA Black
 Marble via GIBS (public domain), bundled under
-`custom_components/iss_pass_prediction/frontend/img/`. The icon and logo
-(`custom_components/iss_pass_prediction/brand/`, drawn by `scripts/make_brand.py`) use
+`custom_components/iss_tracker/frontend/img/`. The icon and logo
+(`custom_components/iss_tracker/brand/`, drawn by `scripts/make_brand.py`) use
 [Natural Earth](https://www.naturalearthdata.com) coastlines (public domain) and the
 [Space Grotesk](https://github.com/floriankarsten/space-grotesk) typeface (SIL Open Font
 License 1.1). Licensed under the GNU GPL v3; see `LICENSE`.

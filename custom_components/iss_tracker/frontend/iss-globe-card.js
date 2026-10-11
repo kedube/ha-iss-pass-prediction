@@ -51,7 +51,7 @@ class IssGlobeCard extends HTMLElement {
   static getConfigForm() {
     return {
       schema: [
-        { name: "entry_id", selector: { config_entry: { integration: "iss_pass_prediction" } } },
+        { name: "entry_id", selector: { config_entry: { integration: "iss_tracker" } } },
         {
           name: "imagery",
           selector: {
@@ -209,7 +209,7 @@ function register() {
       type: "iss-globe-card",
       name: "ISS globe",
       description: "A 3D Earth with the International Space Station at its true altitude, its orbit and a countdown to when it next crosses your sky.",
-      documentationURL: "https://github.com/kedube/ha-iss-pass-prediction",
+      documentationURL: "https://github.com/kedube/ha-iss-tracker",
     });
   }
 }

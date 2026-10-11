@@ -1,4 +1,4 @@
-"""Binary sensors for ISS Pass Prediction."""
+"""Binary sensors for ISS Tracker."""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.util import dt as dt_util
 
 from . import IssConfigEntry
-from .coordinator import IssPassCoordinator
+from .coordinator import IssTrackerCoordinator
 from .entity import IssEntity
 
 PARALLEL_UPDATES = 0
@@ -25,7 +25,7 @@ PARALLEL_UPDATES = 0
 class IssBinarySensorDescription(BinarySensorEntityDescription):
     """Describes an ISS binary sensor."""
 
-    is_on_fn: Callable[[IssPassCoordinator, datetime], bool]
+    is_on_fn: Callable[[IssTrackerCoordinator, datetime], bool]
 
 
 BINARY_SENSORS: tuple[IssBinarySensorDescription, ...] = (
@@ -60,7 +60,7 @@ class IssBinarySensor(IssEntity, BinarySensorEntity):
     entity_description: IssBinarySensorDescription
 
     def __init__(
-        self, coordinator: IssPassCoordinator, description: IssBinarySensorDescription
+        self, coordinator: IssTrackerCoordinator, description: IssBinarySensorDescription
     ) -> None:
         """Initialise the binary sensor."""
         super().__init__(coordinator, description.key)

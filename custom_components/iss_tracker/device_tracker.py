@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import IssConfigEntry
-from .coordinator import IssPassCoordinator
+from .coordinator import IssTrackerCoordinator
 from .entity import IssEntity
 
 PARALLEL_UPDATES = 0
@@ -32,7 +32,7 @@ class IssTracker(IssEntity, TrackerEntity):
     # recorded, for the trail on map cards.
     _unrecorded_attributes = frozenset({"altitude_km", "speed_km_s", "sunlit"})
 
-    def __init__(self, coordinator: IssPassCoordinator) -> None:
+    def __init__(self, coordinator: IssTrackerCoordinator) -> None:
         """Initialise the tracker."""
         super().__init__(coordinator, "position")
 

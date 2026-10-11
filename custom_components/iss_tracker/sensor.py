@@ -1,4 +1,4 @@
-"""Sensors for ISS Pass Prediction."""
+"""Sensors for ISS Tracker."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ from homeassistant.util import dt as dt_util
 
 from . import IssConfigEntry
 from .const import DOMAIN, ELEMENTS_MAX_AGE, MAX_LISTED_PASSES
-from .coordinator import IssPassCoordinator
+from .coordinator import IssTrackerCoordinator
 from .entity import IssEntity, pass_attributes, visible_pass_attributes
 
 PARALLEL_UPDATES = 0
@@ -31,14 +31,14 @@ PARALLEL_UPDATES = 0
 class IssSensorDescription(SensorEntityDescription):
     """Describes an ISS sensor."""
 
-    value_fn: Callable[[IssPassCoordinator, datetime], Any]
-    attrs_fn: Callable[[IssPassCoordinator, datetime], dict[str, Any]] | None = None
+    value_fn: Callable[[IssTrackerCoordinator, datetime], Any]
+    attrs_fn: Callable[[IssTrackerCoordinator, datetime], dict[str, Any]] | None = None
     # Stays available while predictions are paused, to show why.
     available_when_stale: bool = False
 
 
-def _next_visible(attr: str) -> Callable[[IssPassCoordinator, datetime], Any]:
-    def value(c: IssPassCoordinator, now: datetime) -> Any:
+def _next_visible(attr: str) -> Callable[[IssTrackerCoordinator, datetime], Any]:
+    def value(c: IssTrackerCoordinator, now: datetime) -> Any:
         p = c.next_visible_pass(now)
         if p is None or p.visible is None:
             return None
@@ -57,7 +57,7 @@ def _next_visible(attr: str) -> Callable[[IssPassCoordinator, datetime], Any]:
     return value
 
 
-def _next_visible_attrs(c: IssPassCoordinator, now: datetime) -> dict[str, Any]:
+def _next_visible_attrs(c: IssTrackerCoordinator, now: datetime) -> dict[str, Any]:
     p = c.next_visible_pass(now)
     if p is None or c.data is None:
         return {"upcoming": []}
@@ -70,23 +70,23 @@ def _next_visible_attrs(c: IssPassCoordinator, now: datetime) -> dict[str, Any]:
     return {**visible_pass_attributes(p, epoch), "upcoming": upcoming}
 
 
-def _next_pass_value(c: IssPassCoordinator, now: datetime) -> Any:
+def _next_pass_value(c: IssTrackerCoordinator, now: datetime) -> Any:
     p = c.next_pass(now)
     return None if p is None else p.rise.time.replace(microsecond=0)
 
 
-def _next_pass_attrs(c: IssPassCoordinator, now: datetime) -> dict[str, Any]:
+def _next_pass_attrs(c: IssTrackerCoordinator, now: datetime) -> dict[str, Any]:
     p = c.next_pass(now)
     if p is None or c.data is None:
         return {}
     return pass_attributes(p, c.data.elements.epoch)
 
 
-def _elevation_value(c: IssPassCoordinator, now: datetime) -> Any:
+def _elevation_value(c: IssTrackerCoordinator, now: datetime) -> Any:
     return None if c.live is None else round(c.live.look.elevation, 1)
 
 
-def _elevation_attrs(c: IssPassCoordinator, now: datetime) -> dict[str, Any]:
+def _elevation_attrs(c: IssTrackerCoordinator, now: datetime) -> dict[str, Any]:
     if c.live is None:
         return {}
     look = c.live.look
@@ -98,11 +98,11 @@ def _elevation_attrs(c: IssPassCoordinator, now: datetime) -> dict[str, Any]:
     }
 
 
-def _epoch_value(c: IssPassCoordinator, now: datetime) -> Any:
+def _epoch_value(c: IssTrackerCoordinator, now: datetime) -> Any:
     return None if c.elements is None else c.elements.epoch.replace(microsecond=0)
 
 
-def _epoch_attrs(c: IssPassCoordinator, now: datetime) -> dict[str, Any]:
+def _epoch_attrs(c: IssTrackerCoordinator, now: datetime) -> dict[str, Any]:
     if (e := c.elements) is None:
         return {}
     age = now - e.epoch
@@ -116,11 +116,11 @@ def _epoch_attrs(c: IssPassCoordinator, now: datetime) -> dict[str, Any]:
     }
 
 
-def _n2yo_value(c: IssPassCoordinator, now: datetime) -> Any:
+def _n2yo_value(c: IssTrackerCoordinator, now: datetime) -> Any:
     return None if c.n2yo_check is None else c.n2yo_check.get("max_difference")
 
 
-def _n2yo_attrs(c: IssPassCoordinator, now: datetime) -> dict[str, Any]:
+def _n2yo_attrs(c: IssTrackerCoordinator, now: datetime) -> dict[str, Any]:
     return {} if c.n2yo_check is None else dict(c.n2yo_check)
 
 
@@ -212,7 +212,9 @@ class IssSensor(IssEntity, SensorEntity):
     # and the live look angles change on every position update.
     _unrecorded_attributes = frozenset({"upcoming", "azimuth", "direction", "range_km", "sunlit"})
 
-    def __init__(self, coordinator: IssPassCoordinator, description: IssSensorDescription) -> None:
+    def __init__(
+        self, coordinator: IssTrackerCoordinator, description: IssSensorDescription
+    ) -> None:
         """Initialise the sensor."""
         super().__init__(coordinator, description.key)
         self.entity_description = description

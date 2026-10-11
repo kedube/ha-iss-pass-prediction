@@ -4,7 +4,7 @@
  */
 
 const VERSION = new URL(import.meta.url).searchParams.get("v") || "";
-const STORE = "iss-pass-prediction:panel";
+const STORE = "iss-tracker:panel";
 const MENU_ICON = "M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z";
 // Retry a failed module download at most this often.
 const RETRY_MS = 30000;
@@ -165,7 +165,7 @@ class IssTrackerPanel extends HTMLElement {
   async _loadLocations() {
     let locations = [];
     try {
-      locations = await this._hass.callWS({ type: "iss_pass_prediction/locations" });
+      locations = await this._hass.callWS({ type: "iss_tracker/locations" });
     } catch {
       // The globe shows its own message when nothing is set up.
     }

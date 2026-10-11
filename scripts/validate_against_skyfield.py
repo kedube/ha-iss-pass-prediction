@@ -31,11 +31,11 @@ from skyfield.api import EarthSatellite, Loader, wgs84
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from custom_components.iss_pass_prediction.elements import (
+from custom_components.iss_tracker.elements import (
     CELESTRAK_URL,
     parse_omm_xml,
 )
-from custom_components.iss_pass_prediction.predict import (
+from custom_components.iss_tracker.predict import (
     Observer,
     PassPredictor,
 )

@@ -29,7 +29,7 @@ from pytest_homeassistant_custom_component.test_util.aiohttp import (
 )
 from yarl import URL
 
-from custom_components.iss_pass_prediction.const import (
+from custom_components.iss_tracker.const import (
     CONF_ALERT_LEAD_MINUTES,
     CONF_N2YO_API_KEY,
     DEFAULT_ALERT_LEAD_MINUTES,
@@ -37,11 +37,11 @@ from custom_components.iss_pass_prediction.const import (
     ISSUE_ELEMENTS_STALE,
     STORAGE_KEY,
 )
-from custom_components.iss_pass_prediction.coordinator import ElementsManager
-from custom_components.iss_pass_prediction.diagnostics import (
+from custom_components.iss_tracker.coordinator import ElementsManager
+from custom_components.iss_tracker.diagnostics import (
     async_get_config_entry_diagnostics,
 )
-from custom_components.iss_pass_prediction.elements import (
+from custom_components.iss_tracker.elements import (
     CELESTRAK_URL,
     N2YO_BASE_URL,
     WHERETHEISS_URL,
@@ -49,7 +49,7 @@ from custom_components.iss_pass_prediction.elements import (
     parse_omm_xml,
     parse_tle,
 )
-from custom_components.iss_pass_prediction.predict import Observer, PassPredictor
+from custom_components.iss_tracker.predict import Observer, PassPredictor
 
 DENVER = {CONF_LATITUDE: 39.74, CONF_LONGITUDE: -104.99, CONF_ELEVATION: 1609.0}
 LINE1 = "1 25544U 98067A   26281.85354122  .00006592  00000+0  12863-3 0  9993"

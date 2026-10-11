@@ -23,12 +23,10 @@ from pytest_homeassistant_custom_component.common import (
 )
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
-from custom_components.iss_pass_prediction.const import DOMAIN
-from custom_components.iss_pass_prediction.elements import CELESTRAK_URL
+from custom_components.iss_tracker.const import DOMAIN
+from custom_components.iss_tracker.elements import CELESTRAK_URL
 
-BLUEPRINT = (
-    Path(__file__).parents[1] / "blueprints/automation/iss_pass_prediction/notify_visible_pass.yaml"
-)
+BLUEPRINT = Path(__file__).parents[1] / "blueprints/automation/iss_tracker/notify_visible_pass.yaml"
 PASS_SENSOR = "sensor.iss_next_visible_pass"
 SOON_SENSOR = "binary_sensor.iss_visible_pass_soon"
 ATTRIBUTES = {

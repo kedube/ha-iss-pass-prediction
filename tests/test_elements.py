@@ -9,7 +9,7 @@ import pytest
 from sgp4 import omm
 from sgp4.api import Satrec
 
-from custom_components.iss_pass_prediction.elements import (
+from custom_components.iss_tracker.elements import (
     ElementsError,
     OrbitalElements,
     parse_omm_xml,

@@ -45,7 +45,7 @@ from .const import (
     TRACK_STEP_S,
     VISIBLE_PATH_STEP_S,
 )
-from .coordinator import IssPassCoordinator
+from .coordinator import IssTrackerCoordinator
 from .entity import confidence, pass_attributes, visible_pass_attributes
 from .predict import Pass, PassPredictor, PropagationError, TrackPoint
 
@@ -203,12 +203,12 @@ async def async_update_panel(
 
 def _coordinator(
     hass: HomeAssistant, connection: websocket_api.ActiveConnection, msg: dict[str, Any]
-) -> IssPassCoordinator | None:
+) -> IssTrackerCoordinator | None:
     """Return the loaded location a request is for, or send an error saying why there is none."""
     entries = hass.config_entries.async_entries(DOMAIN)
     if not entries:
         connection.send_error(
-            msg["id"], websocket_api.ERR_NOT_FOUND, "No ISS Pass Prediction location is set up"
+            msg["id"], websocket_api.ERR_NOT_FOUND, "No ISS Tracker location is set up"
         )
         return None
     if (entry_id := msg.get("entry_id")) is not None:
@@ -217,7 +217,7 @@ def _coordinator(
             connection.send_error(
                 msg["id"],
                 ERR_UNKNOWN_LOCATION,
-                "This ISS Pass Prediction location no longer exists",
+                "This ISS Tracker location no longer exists",
             )
             return None
     for entry in entries:
@@ -271,7 +271,7 @@ def _track_json(points: list[TrackPoint]) -> list[list[float]]:
     ]
 
 
-def paused_reason(coordinator: IssPassCoordinator, now: datetime) -> str | None:
+def paused_reason(coordinator: IssTrackerCoordinator, now: datetime) -> str | None:
     """Why predictions are paused, or None while they can be trusted.
 
     This mirrors the entities, which go unavailable at the same time.
@@ -287,7 +287,7 @@ def paused_reason(coordinator: IssPassCoordinator, now: datetime) -> str | None:
     return None
 
 
-def pass_status(coordinator: IssPassCoordinator, predictor: PassPredictor, p: Pass) -> str:
+def pass_status(coordinator: IssTrackerCoordinator, predictor: PassPredictor, p: Pass) -> str:
     """Whether a pass qualifies for the visible-pass sensors, or why not.
 
     ``visible``, or ``low`` or ``brief`` for a visible pass that the minimum
@@ -309,7 +309,7 @@ def pass_status(coordinator: IssPassCoordinator, predictor: PassPredictor, p: Pa
     return "daylight" if predictor.sun_elevation(when) > 0 else "twilight"
 
 
-def build_track_payload(coordinator: IssPassCoordinator) -> dict[str, Any]:
+def build_track_payload(coordinator: IssTrackerCoordinator) -> dict[str, Any]:
     """Everything the globe needs: ground track, location and pass countdowns."""
     utcnow = dt_util.utcnow()
     now = utcnow.replace(microsecond=0)

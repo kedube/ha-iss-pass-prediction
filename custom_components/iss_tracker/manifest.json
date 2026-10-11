@@ -1,6 +1,6 @@
 {
-  "domain": "iss_pass_prediction",
-  "name": "ISS Pass Prediction",
+  "domain": "iss_tracker",
+  "name": "ISS Tracker",
   "codeowners": [
     "@kedube"
   ],
@@ -11,12 +11,12 @@
     "panel_custom",
     "websocket_api"
   ],
-  "documentation": "https://github.com/kedube/ha-iss-pass-prediction",
+  "documentation": "https://github.com/kedube/ha-iss-tracker",
   "integration_type": "service",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/kedube/ha-iss-pass-prediction/issues",
+  "issue_tracker": "https://github.com/kedube/ha-iss-tracker/issues",
   "loggers": [
-    "custom_components.iss_pass_prediction"
+    "custom_components.iss_tracker"
   ],
   "requirements": [
     "sgp4>=2.20"

@@ -113,7 +113,7 @@
   "issues": {
     "elements_stale": {
       "title": "ISS predictions are paused",
-      "description": "The cached orbital elements for the International Space Station are {age} days old, and no fresher ones could be downloaded ({error}). Predictions older than this would be misleading, so the ISS Pass Prediction entities are unavailable until a download succeeds. Check that Home Assistant can reach celestrak.org or wheretheiss.at; adding an N2YO API key in the options gives a further source. This message goes away by itself once fresh elements arrive."
+      "description": "The cached orbital elements for the International Space Station are {age} days old, and no fresher ones could be downloaded ({error}). Predictions older than this would be misleading, so the ISS Tracker entities are unavailable until a download succeeds. Check that Home Assistant can reach celestrak.org or wheretheiss.at; adding an N2YO API key in the options gives a further source. This message goes away by itself once fresh elements arrive."
     }
   }
 }

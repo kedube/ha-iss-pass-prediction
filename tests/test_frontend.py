@@ -26,7 +26,7 @@ from pytest_homeassistant_custom_component.common import (
 )
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
-from custom_components.iss_pass_prediction.const import (
+from custom_components.iss_tracker.const import (
     CONF_ALERT_LEAD_MINUTES,
     CONF_FORECAST_DAYS,
     CONF_MIN_VISIBLE_DURATION,
@@ -36,11 +36,11 @@ from custom_components.iss_pass_prediction.const import (
     FRONTEND_URL,
     PANEL_URL_PATH,
 )
-from custom_components.iss_pass_prediction.elements import CELESTRAK_URL, WHERETHEISS_URL
-from custom_components.iss_pass_prediction.frontend import build_track_payload, pass_status
+from custom_components.iss_tracker.elements import CELESTRAK_URL, WHERETHEISS_URL
+from custom_components.iss_tracker.frontend import build_track_payload, pass_status
 
 DENVER = {CONF_LATITUDE: 39.74, CONF_LONGITUDE: -104.99, CONF_ELEVATION: 1609.0}
-FRONTEND = Path(__file__).parents[1] / "custom_components/iss_pass_prediction/frontend"
+FRONTEND = Path(__file__).parents[1] / "custom_components/iss_tracker/frontend"
 VENDOR = FRONTEND / "vendor/maplibre-gl-6.11.2"
 VENDOR_FILES = (
     "maplibre-gl.mjs",

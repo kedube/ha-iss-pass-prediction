@@ -1,14 +1,14 @@
-"""Constants for the ISS Pass Prediction integration."""
+"""Constants for the ISS Tracker integration."""
 
 from __future__ import annotations
 
 from datetime import timedelta
 from typing import Final
 
-DOMAIN: Final = "iss_pass_prediction"
+DOMAIN: Final = "iss_tracker"
 VERSION: Final = "0.1.0"
 USER_AGENT: Final = (
-    f"HomeAssistant-ISSPassPrediction/{VERSION} (+https://github.com/kedube/ha-iss-pass-prediction)"
+    f"HomeAssistant-ISSTracker/{VERSION} (+https://github.com/kedube/ha-iss-tracker)"
 )
 
 CONF_MIN_ELEVATION: Final = "min_elevation"

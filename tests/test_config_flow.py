@@ -19,7 +19,7 @@ import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
-from custom_components.iss_pass_prediction.const import (
+from custom_components.iss_tracker.const import (
     CONF_ALERT_LEAD_MINUTES,
     CONF_FORECAST_DAYS,
     CONF_MAX_SUN_ELEVATION,
@@ -56,9 +56,7 @@ async def test_user_flow(hass: HomeAssistant) -> None:
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
     assert result["type"] is FlowResultType.FORM
 
-    with patch(
-        "custom_components.iss_pass_prediction.async_setup_entry", return_value=True
-    ) as setup:
+    with patch("custom_components.iss_tracker.async_setup_entry", return_value=True) as setup:
         result = await hass.config_entries.flow.async_configure(result["flow_id"], _user_input())
         await hass.async_block_till_done()
 
@@ -99,7 +97,7 @@ async def test_out_of_range_latitude_is_refused(hass: HomeAssistant, latitude: f
     assert suggested[CONF_NAME] == "Backyard"
     assert suggested[CONF_ELEVATION] == 12
 
-    with patch("custom_components.iss_pass_prediction.async_setup_entry", return_value=True):
+    with patch("custom_components.iss_tracker.async_setup_entry", return_value=True):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], _user_input(lat=42.36)
         )
@@ -116,7 +114,7 @@ async def test_longitude_is_normalised(
     hass: HomeAssistant, longitude: float, expected: float
 ) -> None:
     result = await hass.config_entries.flow.async_init(DOMAIN, context={"source": SOURCE_USER})
-    with patch("custom_components.iss_pass_prediction.async_setup_entry", return_value=True):
+    with patch("custom_components.iss_tracker.async_setup_entry", return_value=True):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], _user_input(lon=longitude)
         )
@@ -161,9 +159,7 @@ async def test_reconfigure_moves_the_location(hass: HomeAssistant) -> None:
     )
     assert result["errors"] == {CONF_LOCATION: "invalid_location"}
 
-    with patch(
-        "custom_components.iss_pass_prediction.async_setup_entry", return_value=True
-    ) as setup:
+    with patch("custom_components.iss_tracker.async_setup_entry", return_value=True) as setup:
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], _reconfigure_input(42.35, 288.95)
         )
@@ -191,7 +187,7 @@ async def test_reconfigure_keeps_the_place_or_refuses_a_duplicate(hass: HomeAssi
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_RECONFIGURE, "entry_id": entry.entry_id}
     )
-    with patch("custom_components.iss_pass_prediction.async_setup_entry", return_value=True):
+    with patch("custom_components.iss_tracker.async_setup_entry", return_value=True):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"], _reconfigure_input(42.36, -71.06, 15)
         )

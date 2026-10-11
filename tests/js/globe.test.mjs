@@ -23,9 +23,9 @@ import {
   sunVector,
   visibilityRadius,
   wrapLongitude,
-} from "../../custom_components/iss_pass_prediction/frontend/iss-geo.js";
-import { skyChartSvg, skyXY } from "../../custom_components/iss_pass_prediction/frontend/iss-sky.js";
-import { SpaceLayer, buildRibbon } from "../../custom_components/iss_pass_prediction/frontend/iss-space.js";
+} from "../../custom_components/iss_tracker/frontend/iss-geo.js";
+import { skyChartSvg, skyXY } from "../../custom_components/iss_tracker/frontend/iss-sky.js";
+import { SpaceLayer, buildRibbon } from "../../custom_components/iss_tracker/frontend/iss-space.js";
 
 const close = (actual, expected, tolerance, label = "") =>
   assert.ok(Math.abs(actual - expected) <= tolerance, `${label} ${actual} != ${expected} ± ${tolerance}`);

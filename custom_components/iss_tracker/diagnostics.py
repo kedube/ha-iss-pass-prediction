@@ -1,4 +1,4 @@
-"""Diagnostics for ISS Pass Prediction."""
+"""Diagnostics for ISS Tracker."""
 
 from __future__ import annotations
 

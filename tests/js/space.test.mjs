@@ -2,15 +2,15 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { circleRing, visibilityRadius } from "../../custom_components/iss_pass_prediction/frontend/iss-geo.js";
-import { skyChartSvg } from "../../custom_components/iss_pass_prediction/frontend/iss-sky.js";
+import { circleRing, visibilityRadius } from "../../custom_components/iss_tracker/frontend/iss-geo.js";
+import { skyChartSvg } from "../../custom_components/iss_tracker/frontend/iss-sky.js";
 import {
   NightLayer,
   SpaceLayer,
   buildRibbon,
   loadCityLights,
   toMercator,
-} from "../../custom_components/iss_pass_prediction/frontend/iss-space.js";
+} from "../../custom_components/iss_tracker/frontend/iss-space.js";
 
 const close = (actual, expected, tolerance, label = "") =>
   assert.ok(Math.abs(actual - expected) <= tolerance, `${label} ${actual} != ${expected} ± ${tolerance}`);

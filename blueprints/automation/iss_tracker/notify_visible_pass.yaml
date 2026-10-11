@@ -7,14 +7,14 @@ blueprint:
     Prediction integration. The advance notice is set in the integration's
     options ("Advance notice").
   domain: automation
-  source_url: https://github.com/kedube/ha-iss-pass-prediction/blob/main/blueprints/automation/iss_pass_prediction/notify_visible_pass.yaml
+  source_url: https://github.com/kedube/ha-iss-tracker/blob/main/blueprints/automation/iss_tracker/notify_visible_pass.yaml
   input:
     next_visible_pass:
       name: Next visible pass sensor
       selector:
         entity:
           filter:
-            - integration: iss_pass_prediction
+            - integration: iss_tracker
               domain: sensor
               device_class: timestamp
     visible_pass_soon:
@@ -22,7 +22,7 @@ blueprint:
       selector:
         entity:
           filter:
-            - integration: iss_pass_prediction
+            - integration: iss_tracker
               domain: binary_sensor
     notify_device:
       name: Phone to notify

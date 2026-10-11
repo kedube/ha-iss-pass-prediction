@@ -3,9 +3,9 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { frameDelay, numberLocale, previewTimeline, uses12Hour } from "../../custom_components/iss_pass_prediction/frontend/iss-geo.js";
+import { frameDelay, numberLocale, previewTimeline, uses12Hour } from "../../custom_components/iss_tracker/frontend/iss-geo.js";
 
-const { IssGlobeView } = await import("../../custom_components/iss_pass_prediction/frontend/iss-globe.js");
+const { IssGlobeView } = await import("../../custom_components/iss_tracker/frontend/iss-globe.js");
 
 // ---- a fake clock with HTML-spec animation frames ---------------------------
 
@@ -304,7 +304,7 @@ test("errors read as sentences, whatever shape the websocket gives them", () => 
   const view = new IssGlobeView();
   assert.match(view._errorText(3), /Lost the connection/);
   assert.match(view._errorText({ code: 3, message: "Connection lost" }), /Lost the connection/);
-  assert.match(view._errorText({ error: { code: "not_found", message: "x" } }), /Set up the ISS Pass Prediction/);
+  assert.match(view._errorText({ error: { code: "not_found", message: "x" } }), /Set up the ISS Tracker/);
   assert.match(view._errorText({ code: "location_disabled", message: "x" }), /disabled/);
   assert.equal(view._errorText({ code: "not_ready", message: "Waiting for ISS orbital elements" }), "Waiting for ISS orbit data…");
   assert.equal(view._errorText({ code: "not_ready", message: "No ISS orbital elements: x" }), "Waiting for ISS orbit data… (No ISS orbital elements: x)");
@@ -357,7 +357,7 @@ test("a deleted location says so at once and tells the host, without retrying", 
     view._showMessage = (text) => messages.push(text);
     view.dispatchEvent = (ev) => events.push([ev.type, ev.detail]);
     view._config = { entry_id: "a" };
-    let error = { code: "unknown_location", message: "This ISS Pass Prediction location no longer exists" };
+    let error = { code: "unknown_location", message: "This ISS Tracker location no longer exists" };
     view._hass = {
       callWS: async () => {
         throw error;

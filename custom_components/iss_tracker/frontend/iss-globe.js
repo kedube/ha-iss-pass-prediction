@@ -781,7 +781,7 @@ export class IssGlobeView extends BaseElement {
     if (!this._hass || (this._fetching && !force)) return false;
     this._fetching = true;
     const gen = this._gen;
-    const msg = { type: "iss_pass_prediction/track" };
+    const msg = { type: "iss_tracker/track" };
     if (this._config.entry_id) msg.entry_id = this._config.entry_id;
     try {
       const sent = Date.now();
@@ -866,7 +866,7 @@ export class IssGlobeView extends BaseElement {
       case 3:
         return "Lost the connection to Home Assistant. Reconnecting…";
       case "not_found":
-        return "Set up the ISS Pass Prediction integration to see the station here.";
+        return "Set up the ISS Tracker integration to see the station here.";
       case "unknown_location":
         return this._config.panel
           ? "This location no longer exists. Choose another one."
@@ -933,7 +933,7 @@ export class IssGlobeView extends BaseElement {
   }
 
   async _path(start, end, step) {
-    const msg = { type: "iss_pass_prediction/path", start: new Date(start * 1000).toISOString(), end: new Date(end * 1000).toISOString(), step };
+    const msg = { type: "iss_tracker/path", start: new Date(start * 1000).toISOString(), end: new Date(end * 1000).toISOString(), step };
     const entry = this._payload?.location?.entry_id ?? this._config.entry_id;
     if (entry) msg.entry_id = entry;
     return (await this._hass.callWS(msg)).track;

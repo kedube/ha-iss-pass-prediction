@@ -1,1 +1,1 @@
-"""Tests for ISS Pass Prediction."""
+"""Tests for ISS Tracker."""

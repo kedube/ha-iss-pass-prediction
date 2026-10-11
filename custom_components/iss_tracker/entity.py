@@ -1,4 +1,4 @@
-"""Shared entity code for ISS Pass Prediction."""
+"""Shared entity code for ISS Tracker."""
 
 from __future__ import annotations
 
@@ -10,16 +10,16 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
 from .const import CONFIDENCE_HIGH_DAYS, CONFIDENCE_MEDIUM_DAYS, DOMAIN, VERSION
-from .coordinator import IssPassCoordinator
+from .coordinator import IssTrackerCoordinator
 from .predict import Pass, SkyPoint
 
 
-class IssEntity(CoordinatorEntity[IssPassCoordinator]):
+class IssEntity(CoordinatorEntity[IssTrackerCoordinator]):
     """Base entity bound to one observer location."""
 
     _attr_has_entity_name = True
 
-    def __init__(self, coordinator: IssPassCoordinator, key: str) -> None:
+    def __init__(self, coordinator: IssTrackerCoordinator, key: str) -> None:
         """Initialise the entity."""
         super().__init__(coordinator)
         entry = coordinator.config_entry
@@ -28,7 +28,7 @@ class IssEntity(CoordinatorEntity[IssPassCoordinator]):
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, entry.entry_id)},
             name=entry.title,
-            manufacturer="ISS Pass Prediction",
+            manufacturer="ISS Tracker",
             model="SGP4 pass predictor",
             sw_version=VERSION,
             entry_type=DeviceEntryType.SERVICE,

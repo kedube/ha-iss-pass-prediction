@@ -7,8 +7,8 @@ from typing import Any
 
 import pytest
 
-from custom_components.iss_pass_prediction.elements import parse_omm_xml
-from custom_components.iss_pass_prediction.predict import (
+from custom_components.iss_tracker.elements import parse_omm_xml
+from custom_components.iss_tracker.predict import (
     Observer,
     PassPredictor,
     angular_separation,

@@ -18,7 +18,7 @@ import re
 import subprocess
 import sys
 
-MANIFEST = Path(__file__).parents[1] / "custom_components/iss_pass_prediction/manifest.json"
+MANIFEST = Path(__file__).parents[1] / "custom_components/iss_tracker/manifest.json"
 VERSION_RE = re.compile(r"(\d+)\.(\d{2})")
 
 

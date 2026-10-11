@@ -1,4 +1,4 @@
-"""Draw the brand images in custom_components/iss_pass_prediction/brand/.
+"""Draw the brand images in custom_components/iss_tracker/brand/.
 
 The icon and the logo, each for light and dark backgrounds, at 1x and 2x:
 the Earth with its real coastlines, the station on its steep orbit (the gold
@@ -38,7 +38,7 @@ _parser.add_argument("--font", type=Path, required=True, help="SpaceGrotesk[wght
 _parser.add_argument(
     "--out",
     type=Path,
-    default=Path(__file__).parents[1] / "custom_components/iss_pass_prediction/brand",
+    default=Path(__file__).parents[1] / "custom_components/iss_tracker/brand",
 )
 ARGS = _parser.parse_args()
 OUT = ARGS.out
@@ -377,7 +377,7 @@ def fit_square(page, inner):
 
 
 ISS_TEXT = '<text font-family="Space Grotesk" font-size="300" font-weight="700" letter-spacing="-4" fill="{c}">ISS</text>'
-SUB_TEXT = '<text font-family="Space Grotesk" font-size="100" font-weight="500" letter-spacing="14" fill="{c}">PASS PREDICTION</text>'
+SUB_TEXT = '<text font-family="Space Grotesk" font-size="100" font-weight="500" letter-spacing="40" fill="{c}">TRACKER</text>'
 
 
 def main():
@@ -394,7 +394,7 @@ def main():
             vx, vy, side, _ = view
             for size, suffix in ((256, ""), (512, "@2x")):
                 render(page, inner, view, (size, size), OUT / f"{prefix}icon{suffix}.png")
-            # Logo: "ISS" over "PASS PREDICTION", both lines the same width,
+            # Logo: "ISS" over "TRACKER", both lines the same width,
             # beside the icon and centred on it.
             cap = side * 0.36
             s1 = cap / (m1[3] - m1[1])

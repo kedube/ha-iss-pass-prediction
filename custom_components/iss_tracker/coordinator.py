@@ -1,4 +1,4 @@
-"""Data coordination for ISS Pass Prediction."""
+"""Data coordination for ISS Tracker."""
 
 from __future__ import annotations
 
@@ -268,7 +268,7 @@ class LiveState:
     sunlit: bool
 
 
-class IssPassCoordinator(DataUpdateCoordinator[IssData]):
+class IssTrackerCoordinator(DataUpdateCoordinator[IssData]):
     """Recomputes passes for one observer and tracks the station live."""
 
     config_entry: IssConfigEntry
