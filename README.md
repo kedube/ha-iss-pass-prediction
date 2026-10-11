@@ -1,5 +1,11 @@
 # ISS Tracker for Home Assistant
 
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![GitHub release](https://img.shields.io/github/v/release/kedube/ha-iss-tracker)](https://github.com/kedube/ha-iss-tracker/releases)
+[![CI](https://github.com/kedube/ha-iss-tracker/actions/workflows/validate.yml/badge.svg)](https://github.com/kedube/ha-iss-tracker/actions/workflows/validate.yml)
+![Home Assistant 2025.6+](https://img.shields.io/badge/Home%20Assistant-2025.6%2B-41BDF5.svg)
+[![License](https://img.shields.io/github/license/kedube/ha-iss-tracker)](LICENSE)
+
 ![The ISS Tracker: chase view of the station flying along its orbit](docs/images/chase-view.jpg)
 
 Know when to step outside and look up. This custom integration predicts when the
@@ -92,16 +98,45 @@ whereas the real station fades over a few seconds.
 
 ### HACS (recommended)
 
-[![Open in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kedube&repository=ha-iss-tracker&category=integration)
+This repository is not in the HACS default store, so add it to HACS as a custom
+repository. The quickest way is this button, which opens it in HACS on your Home
+Assistant:
 
-1. In HACS, open the menu → **Custom repositories**, add
-   `https://github.com/kedube/ha-iss-tracker` with category **Integration**.
-2. Download **ISS Tracker** and restart Home Assistant.
+[![Open your Home Assistant instance and open this repository inside HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=kedube&repository=ha-iss-tracker&category=integration)
 
-### Manual
+Or add it by hand:
 
-Copy `custom_components/iss_tracker` into your Home Assistant
-`config/custom_components/` folder and restart.
+1. In Home Assistant, open **HACS**.
+2. Open the menu (**⋮**, top right) and choose **Custom repositories**.
+3. Enter `https://github.com/kedube/ha-iss-tracker`, choose the type **Integration**, and
+   select **Add**.
+4. Search HACS for **ISS Tracker**, open it and select **Download**.
+5. Restart Home Assistant.
+6. [Add the integration](#setup).
+
+Installed it before 1.02, when it was called **ISS Pass Prediction**? The rename gave
+it a new domain (`iss_tracker`), so it can't take over the old entries. Delete the
+**ISS Pass Prediction** entries under **Settings → Devices & services**, delete the
+`custom_components/iss_pass_prediction` folder if it is still there, and restart; then
+install ISS Tracker and add your locations again. Give each location the same name as
+before and its entity IDs stay the same, so automations keep working. Re-import the
+[blueprint](#notifications), and pick the location in any globe card that names one.
+
+### Updating
+
+HACS offers each new release as an update and shows its release notes. Install the
+update, restart Home Assistant, and then reload any dashboards you have open so they
+load the new version of the globe.
+
+### Manual installation
+
+1. Download the source code of the
+   [latest release](https://github.com/kedube/ha-iss-tracker/releases/latest).
+2. Copy its `custom_components/iss_tracker` folder into the `custom_components` folder
+   of your Home Assistant configuration directory, creating that folder if needed.
+3. Restart Home Assistant.
+
+Manual installs don't get update notifications. Repeat these steps to update.
 
 ## Setup
 
