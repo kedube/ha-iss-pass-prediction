@@ -15,6 +15,9 @@ class FakeElement {
   addEventListener(type, fn) {
     (this.listeners[type] ??= []).push(fn);
   }
+  setAttribute(name, value) {
+    (this.attrs ??= {})[name] = value;
+  }
   replaceChildren(...children) {
     this.children = children;
   }
@@ -81,8 +84,11 @@ test("a deleted location makes the panel switch to one that is left", async () =
   const panel = new IssTrackerPanel();
   panel.hass = { callWS: async () => locations };
   await settle();
+  await panel._languageReady;
   assert.equal(panel._view.config.entry_id, "cabin");
   assert.equal(panel._view.config.panel, true, "the globe words its messages for the panel");
+  assert.equal(panel._menu.attrs["aria-label"], "Sidebar");
+  assert.equal(panel._select.attrs["aria-label"], "Location");
   assert.equal(panel._select.hidden, false);
   locations = [HOME];
   panel._view.fire("location-gone");

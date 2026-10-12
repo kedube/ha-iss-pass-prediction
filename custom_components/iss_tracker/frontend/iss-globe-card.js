@@ -6,6 +6,7 @@
  */
 
 const VERSION = new URL(import.meta.url).searchParams.get("v") || "";
+const QUERY = VERSION ? `?v=${VERSION}` : "";
 
 const DEFAULTS = {
   imagery: "satellite",
@@ -25,58 +26,51 @@ const SWITCHES = [
   "show_home_zone", "show_countdown", "show_stats", "cooperative_gestures",
 ];
 
-const LABELS = {
-  entry_id: "Location",
-  imagery: "Imagery",
-  view: "Start view",
-  labels: "Place names and borders",
-  show_track: "Course lines",
-  show_night: "Day and night",
-  show_footprint: "Area that can see the ISS",
-  show_home_zone: "Your visibility cone",
-  show_countdown: "Countdown",
-  show_stats: "Position and speed",
-  height: "Height (masonry dashboards)",
-  cooperative_gestures: "Require two fingers or Ctrl to move the map",
-};
-
-const HELPERS = {
-  entry_id: "Leave empty to show the first location.",
-};
-
 // Retry a failed module download at most this often.
 const RETRY_MS = 30000;
 
+// The text in the user's language comes from iss-i18n.js, loaded only when
+// it is needed; until then (and if it cannot load) these stay English.
+const CARD_NAME = "ISS globe";
+const CARD_DESCRIPTION =
+  "A 3D Earth with the International Space Station at its true altitude, its orbit and a countdown to when it next crosses your sky.";
+const LOAD_FAILED = "Could not load the ISS globe. Check the connection, or reload the page.";
+
+let i18nModule;
+function loadI18n() {
+  // A failed import is not kept, so the next use tries again.
+  i18nModule ??= import(`./iss-i18n.js${QUERY}`).catch((err) => {
+    i18nModule = null;
+    throw err;
+  });
+  return i18nModule;
+}
+
+/** The text for Home Assistant's language, which it puts on the page; null if it cannot load. */
+async function pageStrings() {
+  try {
+    return await (await loadI18n()).loadStrings(document.documentElement.lang);
+  } catch {
+    return null;
+  }
+}
+
 class IssGlobeCard extends HTMLElement {
-  static getConfigForm() {
+  // Home Assistant waits for the form, so the editor opens in the user's language.
+  static async getConfigForm() {
+    const strings = await pageStrings();
+    const text = (key) => strings?.t(`editor.${key}`);
+    const options = (name, values) => values.map((value) => ({ value, label: text(`${name}_${value}`) ?? value }));
     return {
       schema: [
         { name: "entry_id", selector: { config_entry: { integration: "iss_tracker" } } },
         {
           name: "imagery",
-          selector: {
-            select: {
-              mode: "dropdown",
-              options: [
-                { value: "satellite", label: "Satellite (NASA Blue Marble, Sentinel-2 close up)" },
-                { value: "esri", label: "Satellite, high detail close up (Esri)" },
-                { value: "streets", label: "Street map close up (OpenStreetMap)" },
-              ],
-            },
-          },
+          selector: { select: { mode: "dropdown", options: options("imagery", ["satellite", "esri", "streets"]) } },
         },
         {
           name: "view",
-          selector: {
-            select: {
-              mode: "dropdown",
-              options: [
-                { value: "home", label: "My location" },
-                { value: "follow", label: "Follow the ISS" },
-                { value: "chase", label: "Fly along with the ISS" },
-              ],
-            },
-          },
+          selector: { select: { mode: "dropdown", options: options("view", ["home", "follow", "chase"]) } },
         },
         {
           type: "grid",
@@ -90,8 +84,8 @@ class IssGlobeCard extends HTMLElement {
           selector: { number: { min: 340, max: 1200, step: 10, mode: "box", unit_of_measurement: "px" } },
         },
       ],
-      computeLabel: (schema) => LABELS[schema.name],
-      computeHelper: (schema) => HELPERS[schema.name],
+      computeLabel: (schema) => (schema.name ? text(schema.name) : undefined),
+      computeHelper: (schema) => (schema.name === "entry_id" ? text("entry_id_helper") : undefined),
     };
   }
 
@@ -164,8 +158,14 @@ class IssGlobeCard extends HTMLElement {
       // Browsers remember a failed module fetch, so the retry uses a new URL.
       this._attempt = (this._attempt || 0) + 1;
       this._retryAt = Date.now() + RETRY_MS;
-      this._card.innerHTML = `<div class="error">Could not load the ISS globe. Check the connection, or reload the page.</div>`;
+      const message = document.createElement("div");
+      message.className = "error";
+      message.textContent = LOAD_FAILED;
+      this._card.replaceChildren(message);
       console.warn("ISS globe card:", err);
+      pageStrings().then((strings) => {
+        if (strings && message.isConnected) message.textContent = strings.t("card.load_failed");
+      });
       return;
     } finally {
       this._loading = false;
@@ -200,6 +200,21 @@ class IssGlobeCard extends HTMLElement {
   }
 }
 
+// The card picker's entry, in the user's language once its text has loaded.
+let pickerStrings = null;
+
+/** Load the picker's text when Home Assistant's language is not English (it sets <html lang>). */
+function preparePicker() {
+  const language = document.documentElement.lang;
+  if (!language || /^en\b/i.test(language)) {
+    pickerStrings = null;
+    return;
+  }
+  pageStrings().then((strings) => {
+    if (document.documentElement.lang === language) pickerStrings = strings;
+  });
+}
+
 function register() {
   if (customElements.get("iss-globe-card")) return;
   customElements.define("iss-globe-card", IssGlobeCard);
@@ -207,11 +222,18 @@ function register() {
   if (!window.customCards.some((c) => c.type === "iss-globe-card")) {
     window.customCards.push({
       type: "iss-globe-card",
-      name: "ISS globe",
-      description: "A 3D Earth with the International Space Station at its true altitude, its orbit and a countdown to when it next crosses your sky.",
+      // Read when the card picker opens.
+      get name() {
+        return pickerStrings?.t("card.name") ?? CARD_NAME;
+      },
+      get description() {
+        return pickerStrings?.t("card.description") ?? CARD_DESCRIPTION;
+      },
       documentationURL: "https://github.com/kedube/ha-iss-tracker",
     });
   }
+  preparePicker();
+  new MutationObserver(preparePicker).observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
 }
 
 // Home Assistant installs a scoped custom element registry while its app

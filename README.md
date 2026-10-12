@@ -224,6 +224,10 @@ options) and an **ISS globe** card for dashboards. Both show the same live 3D Ea
 * **Camera modes**: your location, follow the ISS, or fly alongside it. Zoom out for the
   globe and in for a flat map; drag to rotate, right-drag or two fingers to tilt.
 
+The page and the card follow your Home Assistant language: English, German, Dutch,
+French, Spanish, Italian, Polish, Brazilian Portuguese or Swedish (other languages
+show English).
+
 | Night side, your visibility cone and the intercept | Previewing a pass from above home |
 |---|---|
 | ![Globe at night](docs/images/globe-night.jpg) | ![Preview of a pass](docs/images/preview-pass.jpg) |
@@ -339,7 +343,7 @@ Credits for whichever layers are on screen are shown in the corner of the map.
 python3.14 -m venv .venv && . .venv/bin/activate
 pip install -r requirements_test.txt
 pytest
-node --test "tests/js/*.test.mjs"   # the globe: geometry, sky chart, WebGL layers, view and panel
+node --test "tests/js/*.test.mjs"   # the globe: geometry, sky chart, WebGL layers, view, panel, translations
 ```
 
 The unit tests compare the engine with stored Skyfield results, so they need neither
@@ -349,6 +353,19 @@ Skyfield nor an ephemeris. To re-run the full cross-check against live orbit dat
 pip install skyfield
 python scripts/validate_against_skyfield.py --days 10   # downloads de421.bsp (~17 MB) on first run
 ```
+
+### Translations
+
+What Home Assistant shows for the integration (setup, options, entity names, the repair
+notice) is in `custom_components/iss_tracker/translations/`, one JSON file per language,
+with `strings.json` as the English source. The sidebar page and the card have their own
+text in `custom_components/iss_tracker/frontend/translations/`: English in `en.js`, every
+other language in a JSON file with the same keys.
+
+To add a language, copy a JSON file in both folders to the new language's code,
+translate the values and keep each `{placeholder}` as it is. Then add the code to
+`LANGUAGES` in `frontend/iss-i18n.js`. The JS tests check that every language has every
+key, the same placeholders and the plural forms it needs.
 
 ### Releasing
 

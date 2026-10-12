@@ -9,8 +9,6 @@ import {
   compass,
   currentVisiblePass,
   esc,
-  formatCountdown,
-  formatDuration,
   groundDistanceKm,
   lookAngles,
   mercator,
@@ -24,6 +22,7 @@ import {
   visibilityRadius,
   wrapLongitude,
 } from "../../custom_components/iss_tracker/frontend/iss-geo.js";
+import { english } from "../../custom_components/iss_tracker/frontend/iss-i18n.js";
 import { skyChartSvg, skyXY } from "../../custom_components/iss_tracker/frontend/iss-sky.js";
 import { SpaceLayer, buildRibbon } from "../../custom_components/iss_tracker/frontend/iss-space.js";
 
@@ -114,15 +113,15 @@ test("circle radius, distance, bearing and speed", () => {
 });
 
 test("formatting", () => {
-  assert.equal(formatCountdown(65_000), "01:05");
-  assert.equal(formatCountdown(3_725_000), "01:02:05");
-  assert.equal(formatCountdown(93_784_000), "1d 02:03:04");
-  assert.equal(formatCountdown(-5), "00:00");
-  assert.equal(formatDuration(20_000), "under a minute");
-  assert.equal(formatDuration(14 * 60_000), "14 min");
-  assert.equal(formatDuration(134 * 60_000), "2 h 14 min");
-  assert.equal(formatDuration(120 * 60_000), "2 h");
-  assert.equal(formatDuration(26 * 3600_000), "1 d 2 h");
+  assert.equal(english.countdown(65_000), "01:05");
+  assert.equal(english.countdown(3_725_000), "01:02:05");
+  assert.equal(english.countdown(93_784_000), "1d 02:03:04");
+  assert.equal(english.countdown(-5), "00:00");
+  assert.equal(english.duration(20_000), "under a minute");
+  assert.equal(english.duration(14 * 60_000), "14 min");
+  assert.equal(english.duration(134 * 60_000), "2 h 14 min");
+  assert.equal(english.duration(120 * 60_000), "2 h");
+  assert.equal(english.duration(26 * 3600_000), "1 d 2 h");
   assert.equal(compass(0), "N");
   assert.equal(compass(202), "SSW");
   assert.equal(compass(-90), "W");
@@ -190,7 +189,12 @@ test("sky chart geometry and SVG", () => {
   assert.match(svg, />67°</);
   assert.match(svg, /class="live"/);
   assert.doesNotMatch(svg, /NaN/);
+  assert.match(svg, /aria-label="Sky chart of the pass"/);
   assert.doesNotMatch(skyChartSvg({ track: [], visibleStart: 0, visibleEnd: 1, formatTime: String }), /class="vis"/);
+  // Translated, and escaped.
+  const de = skyChartSvg({ track, visibleStart: 60, visibleEnd: 180, formatTime: String, cardinals: ["N", "O", "S", "W"], label: `Himmels"karte` });
+  assert.deepEqual([...de.matchAll(/class="card">([^<]*)</g)].map((m) => m[1]), ["N", "O", "S", "W"]);
+  assert.match(de, /aria-label="Himmels&#34;karte"/);
 });
 
 test("ribbons split at the antimeridian", () => {

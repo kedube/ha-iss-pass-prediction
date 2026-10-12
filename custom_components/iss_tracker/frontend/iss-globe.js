@@ -33,19 +33,20 @@ if (globalThis.window && globalThis.document) {
   import(new URL("maplibre-gl-shared.mjs", MAPLIBRE_DIR).href).catch(() => {});
 }
 
-const [geo, spaceModule, skyModule] = await Promise.all([
+const [geo, spaceModule, skyModule, i18n] = await Promise.all([
   import(`./iss-geo.js${VERSION}`),
   import(`./iss-space.js${VERSION}`),
   import(`./iss-sky.js${VERSION}`),
+  import(`./iss-i18n.js${VERSION}`),
 ]);
 const {
-  bearing, circleRing, closestApproach, compass, currentVisiblePass, esc, formatCountdown,
-  formatDuration, frameDelay, groundDistanceKm, lookAngles, numberLocale, orbitalSpeed,
-  positionAt, previewTimeline, skyTrack, subsolarPoint, sunVector, uses12Hour, visibilityRadius,
-  ISS_PERIOD_S,
+  bearing, circleRing, closestApproach, compass, currentVisiblePass, esc, frameDelay,
+  groundDistanceKm, lookAngles, numberLocale, orbitalSpeed, positionAt, previewTimeline, skyTrack,
+  subsolarPoint, sunVector, uses12Hour, visibilityRadius, ISS_PERIOD_S,
 } = geo;
 const { NightLayer, SpaceLayer, loadCityLights, toMercator } = spaceModule;
 const { skyChartSvg, SKY_STYLE } = skyModule;
+const { english, loadStrings, resolveLanguage } = i18n;
 
 const DEG = Math.PI / 180;
 
@@ -68,7 +69,6 @@ const BLUE_MARBLE = {
 /** Close-up imagery; from space the globe is always NASA's Blue Marble. */
 export const IMAGERY = {
   satellite: {
-    label: "Satellite (Sentinel-2)",
     tiles: [
       "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2025_3857/default/g/{z}/{y}/{x}.jpg",
     ],
@@ -77,7 +77,6 @@ export const IMAGERY = {
       '<a href="https://s2maps.eu" target="_blank" rel="noopener">Sentinel-2 cloudless</a> by EOX IT Services GmbH (contains modified Copernicus Sentinel data 2025)',
   },
   esri: {
-    label: "Satellite, high detail (Esri)",
     tiles: [
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     ],
@@ -85,7 +84,6 @@ export const IMAGERY = {
     attribution: "Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community",
   },
   streets: {
-    label: "Street map (OpenStreetMap)",
     homeAssistantTiles: "/api/map_tiles/raster/{z}/{x}/{y}.png",
     maxzoom: 19,
     attribution:
@@ -95,7 +93,23 @@ export const IMAGERY = {
 // Names used by earlier versions of the card.
 const IMAGERY_ALIASES = { sentinel: "satellite", blue_marble: "satellite" };
 
-const ACQUIRING = "Acquiring the International Space Station…";
+// MapLibre's own button titles and hints, by the translation that gives each.
+const MAPLIBRE_TEXT = {
+  "AttributionControl.ToggleAttribution": "maplibre.attribution",
+  "CooperativeGesturesHandler.MacHelpText": "maplibre.cmd_scroll",
+  "CooperativeGesturesHandler.MobileHelpText": "maplibre.two_fingers",
+  "CooperativeGesturesHandler.WindowsHelpText": "maplibre.ctrl_scroll",
+  "FullscreenControl.Enter": "maplibre.fullscreen_enter",
+  "FullscreenControl.Exit": "maplibre.fullscreen_exit",
+  "Map.Title": "maplibre.map",
+  "Marker.Title": "maplibre.marker",
+  "NavigationControl.ResetBearing": "maplibre.reset_bearing",
+  "NavigationControl.ZoomIn": "maplibre.zoom_in",
+  "NavigationControl.ZoomOut": "maplibre.zoom_out",
+};
+
+// Simulated seconds per real second while a preview plays the pass (previewTimeline's pace).
+const PREVIEW_RATE = 30;
 
 const lerp = (a, b, t) => a + (b - a) * Math.max(0, Math.min(1, t));
 
@@ -353,6 +367,10 @@ export class IssGlobeView extends BaseElement {
     this._labels = new Map();
     this._fmtCache = new Map();
     this._numCache = new Map();
+    // English until Home Assistant's language has loaded (see _useLanguage).
+    this._strings = english;
+    this._language = "en";
+    this._languageReady = Promise.resolve();
     this._clockOffset = 0;
     this._gen = 0;
     // Home Assistant tiles to fetch again, by source: Map of "z/x/y" -> {x, y, z}.
@@ -378,6 +396,7 @@ export class IssGlobeView extends BaseElement {
   set hass(hass) {
     const old = this._hass;
     this._hass = hass;
+    this._useLanguage(hass);
     // Home Assistant replaces the locale object only when a setting changes.
     const localeChanged =
       !!old && (hass?.locale !== old.locale || hass?.config?.time_zone !== old.config?.time_zone);
@@ -470,33 +489,33 @@ export class IssGlobeView extends BaseElement {
       <div class="wrap" part="globe">
         <div id="map"></div>
         <div class="labels"></div>
-        <section class="hud mission glass" hidden aria-label="International Space Station">
+        <section class="hud mission glass" hidden data-t-label="globe.name">
           <div class="top"><span class="live"></span><span class="label"></span><span class="chip" hidden></span></div>
           <div class="clock"></div>
           <div class="when"></div>
           <div class="detail"></div>
           <div class="intercept" hidden><span class="ring"></span><span class="txt"></span></div>
           <div class="actions">
-            <button class="btn gold preview-btn" type="button" title="Fast-forward to the pass">${svgIcon("play")}<span class="long">Preview the pass</span><span class="short">Preview</span></button>
-            <button class="btn look-btn" type="button" title="Sky chart of the pass" aria-expanded="false">${svgIcon("eye")}<span class="long">Where to look</span><span class="short">Look up</span></button>
+            <button class="btn gold preview-btn" type="button" data-t-title="mission.preview_hint">${svgIcon("play")}<span class="long" data-t="mission.preview"></span><span class="short" data-t="mission.preview_short"></span></button>
+            <button class="btn look-btn" type="button" data-t-title="mission.look_hint" aria-expanded="false">${svgIcon("eye")}<span class="long" data-t="mission.look"></span><span class="short" data-t="mission.look_short"></span></button>
           </div>
           <div class="sr-only announce" aria-live="polite"></div>
         </section>
         <aside class="hud side" hidden>
-          <div class="glass sky"><h3>Where to look</h3><div class="sub"></div><div class="chart"></div><div class="caption"></div></div>
-          <div class="glass upcoming"><h3>Visible passes</h3><ol></ol></div>
+          <div class="glass sky"><h3 data-t="mission.look"></h3><div class="sub"></div><div class="chart"></div><div class="caption"></div></div>
+          <div class="glass upcoming"><h3 data-t="upcoming.title"></h3><ol></ol></div>
         </aside>
-        <div class="hud glass sky sky-pop" hidden role="dialog" aria-label="Where to look">
-          <button class="close" type="button" aria-label="Close" title="Close">×</button>
-          <h3>Where to look</h3><div class="sub"></div><div class="chart"></div><div class="caption"></div></div>
+        <div class="hud glass sky sky-pop" hidden role="dialog" data-t-label="mission.look">
+          <button class="close" type="button" data-t-label="globe.close" data-t-title="globe.close">×</button>
+          <h3 data-t="mission.look"></h3><div class="sub"></div><div class="chart"></div><div class="caption"></div></div>
         <div class="hud glass telemetry" hidden></div>
         <div class="hud glass preview-bar" hidden>
-          <div class="row"><span class="tag">PREVIEW</span><span class="pv-time"></span><span class="pv-speed"></span>
-            <button class="btn live-btn" type="button">Back to live</button></div>
+          <div class="row"><span class="tag" data-t="preview.tag"></span><span class="pv-time"></span><span class="pv-speed"></span>
+            <button class="btn live-btn" type="button" data-t="preview.back"></button></div>
           <div class="bar"><div class="fill"></div></div>
         </div>
-        <div class="hud loader"><div><div class="orbit"></div><div class="msg">${ACQUIRING}</div>
-          <button class="btn reload-btn" type="button" hidden>Reload the page</button></div></div>
+        <div class="hud loader"><div><div class="orbit"></div><div class="msg"></div>
+          <button class="btn reload-btn" type="button" hidden data-t="globe.reload"></button></div></div>
       </div>`;
     const $ = (sel) => root.querySelector(sel);
     this._wrap = $(".wrap");
@@ -530,6 +549,8 @@ export class IssGlobeView extends BaseElement {
       loaderMsg: $(".loader .msg"),
       reloadBtn: $(".loader .reload-btn"),
     };
+    this._els.loaderMsg.textContent = this._t("globe.acquiring");
+    this._applyStrings();
     this._els.reloadBtn.addEventListener("click", () => location.reload());
     this._els.previewBtn.addEventListener("click", () => this._startPreview());
     this._els.lookBtn.addEventListener("click", () => {
@@ -573,11 +594,51 @@ export class IssGlobeView extends BaseElement {
     });
   }
 
+  /**
+   * Switch to Home Assistant's language, downloading its text the first time;
+   * what is on screen is reworded once it is in. If the download fails, the
+   * text stays English and the language is tried again after a minute.
+   */
+  _useLanguage(hass) {
+    const language = resolveLanguage(hass?.language || hass?.locale?.language);
+    const retry = this._strings.language !== language && !(performance.now() - this._languageAt < 60000);
+    if (language === this._language && !retry) return this._languageReady;
+    this._language = language;
+    this._languageAt = performance.now();
+    this._languageReady = loadStrings(language).then((strings) => {
+      if (this._language !== language || strings === this._strings) return;
+      this._strings = strings;
+      this._applyStrings();
+    });
+    return this._languageReady;
+  }
+
+  /** Put the text into the page in the current language, and redraw what shows it. */
+  _applyStrings() {
+    const root = this.shadowRoot;
+    if (!this._els || !root) return;
+    for (const el of root.querySelectorAll("[data-t]")) setText(el, this._t(el.dataset.t));
+    for (const el of root.querySelectorAll("[data-t-title]")) el.title = this._t(el.dataset.tTitle);
+    for (const el of root.querySelectorAll("[data-t-label]")) el.setAttribute("aria-label", this._t(el.dataset.tLabel));
+    // The imagery menu is worded when it opens.
+    if (this._menu) this._toggleImageryMenu();
+    if (!this._loaded || !this._payload) return;
+    for (const id of ["label-country", "label-places"]) {
+      if (this._map.getLayer(id)) this._map.setLayoutProperty(id, "text-field", this._placeNames());
+    }
+    this._buildCourse();
+    this._renderUpcoming();
+    this._renderSky(true);
+    this._tick();
+  }
+
   async _start() {
     if (this._starting || this._map) return;
     this._starting = true;
     clearTimeout(this._retryTimer);
     const maplibre = loadMapLibre();
+    // Everything on screen in the user's language from the start.
+    await this._useLanguage(this._hass);
     if (!this._els) this._buildDom();
     let gen = this._gen;
     try {
@@ -613,9 +674,9 @@ export class IssGlobeView extends BaseElement {
       const why = this._errorMessage(err);
       if (maplibreAttempt >= 3) {
         // A file that keeps failing (or one the browser now refuses to fetch again).
-        this._showMessage(`The ISS globe could not load (${why}). Reload the page to try again.`, { reload: true });
+        this._showMessage(this._t("globe.load_failed", { error: why }), { reload: true });
       } else {
-        this._showMessage(`The ISS globe could not load (${why}). It will try again; reloading the page also helps.`);
+        this._showMessage(this._t("globe.load_retrying", { error: why }));
         this._retry(30000 * 2 ** Math.max(0, maplibreAttempt - 1));
       }
     }
@@ -801,11 +862,7 @@ export class IssGlobeView extends BaseElement {
           this._scheduleFrames();
           this._updateLight();
         }
-        this._showMessage(
-          positionAt(payload.track, this._now() / 1000)
-            ? ""
-            : "This device's clock does not match Home Assistant's, so the station cannot be placed. Check the date and time settings."
-        );
+        this._showMessage(positionAt(payload.track, this._now() / 1000) ? "" : this._t("globe.clock_off"));
         this._buildCourse();
         this._renderUpcoming();
         this._renderSky(true);
@@ -852,7 +909,7 @@ export class IssGlobeView extends BaseElement {
     if (typeof e === "string") return e;
     if (e?.message) return e.message;
     const code = this._errorCode(err);
-    if (code === 3) return "connection lost";
+    if (code === 3) return this._t("globe.connection_lost");
     if (code !== undefined) return String(code);
     try {
       return JSON.stringify(e)?.slice(0, 200) ?? String(e);
@@ -864,21 +921,20 @@ export class IssGlobeView extends BaseElement {
   _errorText(err) {
     switch (this._errorCode(err)) {
       case 3:
-        return "Lost the connection to Home Assistant. Reconnecting…";
+        return this._t("globe.reconnecting");
       case "not_found":
-        return "Set up the ISS Tracker integration to see the station here.";
+        return this._t("globe.not_set_up");
       case "unknown_location":
-        return this._config.panel
-          ? "This location no longer exists. Choose another one."
-          : "The location this card shows no longer exists. Edit the card and choose a location.";
+        return this._t(this._config.panel ? "globe.location_gone_panel" : "globe.location_gone_card");
       case "location_disabled":
-        return "This location is disabled. Enable it under Settings > Devices & services, or choose another location.";
+        return this._t("globe.location_disabled");
       case "not_ready": {
+        // The integration's own reason, unless it only says that it is waiting.
         const why = this._errorMessage(err);
-        return `Waiting for ISS orbit data…${why && !/^waiting/i.test(why) ? ` (${why})` : ""}`;
+        return why && !/^waiting/i.test(why) ? this._t("globe.waiting_because", { reason: why }) : this._t("globe.waiting");
       }
       default:
-        return `Could not load the ISS position: ${this._errorMessage(err)}`;
+        return this._t("globe.position_failed", { error: this._errorMessage(err) });
     }
   }
 
@@ -1081,7 +1137,7 @@ export class IssGlobeView extends BaseElement {
         }
       );
       const halo = { "text-color": "#f8fafc", "text-halo-color": "rgba(0,0,0,0.85)", "text-halo-width": 1.4 };
-      const name = ["coalesce", ["get", "name_en"], ["get", "name"]];
+      const name = this._placeNames();
       layers.push(
         {
           id: "label-country", type: "symbol", source: "osm", "source-layer": "boundary_labels",
@@ -1115,6 +1171,13 @@ export class IssGlobeView extends BaseElement {
     return style;
   }
 
+  /** Place names in the user's language where the tiles have it (German), else in English. */
+  _placeNames() {
+    const language = this._strings.language.split("-")[0];
+    const own = language === "en" ? [] : [["get", `name_${language}`]];
+    return ["coalesce", ...own, ["get", "name_en"], ["get", "name"]];
+  }
+
   _createMap() {
     const ml = this._ml;
     const home = this._payload.location;
@@ -1132,6 +1195,7 @@ export class IssGlobeView extends BaseElement {
         trackResize: false,
         attributionControl: { compact: true },
         cooperativeGestures: !!this._config.cooperative_gestures,
+        locale: Object.fromEntries(Object.entries(MAPLIBRE_TEXT).map(([id, key]) => [id, this._t(key)])),
         transformRequest: (url) => {
           if (this._mapToken && url.startsWith(this._haUrl("/api/map_tiles/"))) {
             return { url, headers: { "X-Map-Tiles-Token": this._mapToken } };
@@ -1141,11 +1205,11 @@ export class IssGlobeView extends BaseElement {
       });
     } catch (err) {
       this._starting = false;
-      this._showMessage(`This browser cannot show the 3D globe (WebGL 2 is needed): ${err?.message || err}`);
+      this._showMessage(this._t("globe.no_webgl", { error: err?.message || err }));
       return;
     }
     this._map = map;
-    this._showMessage(ACQUIRING, { spinner: true });
+    this._showMessage(this._t("globe.acquiring"), { spinner: true });
     map.addControl(new ml.NavigationControl({ visualizePitch: true }), "top-right");
     map.addControl(this._viewControl(), "top-right");
     const fullscreen = new ml.FullscreenControl({ container: this._wrap });
@@ -1165,7 +1229,7 @@ export class IssGlobeView extends BaseElement {
     map.on("error", (e) => this._onMapError(e));
     const canvas = map.getCanvas();
     canvas.addEventListener("webglcontextlost", () => {
-      if (this._map === map) this._showMessage("Reloading the globe…", { spinner: true });
+      if (this._map === map) this._showMessage(this._t("globe.reloading"), { spinner: true });
     });
     canvas.addEventListener("webglcontextrestored", () => {
       if (this._map !== map) return;
@@ -1277,22 +1341,25 @@ export class IssGlobeView extends BaseElement {
       onAdd() {
         const div = document.createElement("div");
         div.className = "maplibregl-ctrl maplibregl-ctrl-group ctrl";
+        // The keys of their text, so a change of language can reword them (see _applyStrings).
         const button = (key, title, onClick, label = title) => {
           const b = document.createElement("button");
           b.type = "button";
-          b.title = title;
-          b.setAttribute("aria-label", label);
+          b.dataset.tTitle = title;
+          b.dataset.tLabel = label;
+          b.title = host._t(title);
+          b.setAttribute("aria-label", host._t(label));
           b.innerHTML = svgIcon(key);
           b.addEventListener("click", onClick);
           div.appendChild(b);
           return b;
         };
         host._buttons = {
-          home: button("home", "Show my location", () => host._setMode("home")),
-          follow: button("follow", "Follow the ISS", () => host._setMode(host._mode === "follow" ? "free" : "follow")),
-          chase: button("chase", "Fly along with the ISS", () => host._setMode(host._mode === "chase" ? "free" : "chase")),
-          flat: button("globe", "Switch between globe and flat map", () => host._toggleFlat(), "Flat map"),
-          layers: button("layers", "Change the imagery", () => host._toggleImageryMenu()),
+          home: button("home", "controls.home", () => host._setMode("home")),
+          follow: button("follow", "controls.follow", () => host._setMode(host._mode === "follow" ? "free" : "follow")),
+          chase: button("chase", "controls.chase", () => host._setMode(host._mode === "chase" ? "free" : "chase")),
+          flat: button("globe", "controls.flat", () => host._toggleFlat(), "controls.flat_label"),
+          layers: button("layers", "controls.imagery", () => host._toggleImageryMenu()),
         };
         host._buttons.layers.setAttribute("aria-expanded", "false");
         host._controlDiv = div;
@@ -1324,12 +1391,12 @@ export class IssGlobeView extends BaseElement {
     }
     if (!this._controlDiv) return;
     const select = document.createElement("select");
-    select.setAttribute("aria-label", "Imagery");
+    select.setAttribute("aria-label", this._t("controls.imagery_menu"));
     for (const [key, def] of Object.entries(IMAGERY)) {
       if (def.homeAssistantTiles && !this._haTilesAvailable()) continue;
       const opt = document.createElement("option");
       opt.value = key;
-      opt.textContent = def.label;
+      opt.textContent = this._t(`controls.imagery_${key}`);
       opt.selected = key === this._imageryKey();
       select.appendChild(opt);
     }
@@ -1513,8 +1580,11 @@ export class IssGlobeView extends BaseElement {
         key: "pin-visible",
         cls: "pin",
         lat: r[1], lon: r[2], alt: r[3] * 1000,
-        text: `Visible · ${this._fmt(new Date(visible.start), { weekday: "short", hour: "numeric", minute: "2-digit" })} · ${Math.round(visible.peak_elevation)}°`,
-        title: "Preview this pass",
+        text: this._t("pass.pin_visible", {
+          time: this._fmt(new Date(visible.start), { weekday: "short", hour: "numeric", minute: "2-digit" }),
+          elevation: Math.round(visible.peak_elevation),
+        }),
+        title: this._t("pass.preview_this"),
         onClick: () => this._startPreview(),
       });
     }
@@ -1525,7 +1595,7 @@ export class IssGlobeView extends BaseElement {
         key: "pin-overhead",
         cls: "pin dim",
         lat: r[1], lon: r[2], alt: r[3] * 1000,
-        text: `Overhead · ${this._fmt(new Date(next.rise), { hour: "numeric", minute: "2-digit" })} · ${why.short}`,
+        text: this._t("pass.pin_overhead", { time: this._fmt(new Date(next.rise), { hour: "numeric", minute: "2-digit" }), reason: why.short }),
         title: why.long,
         onClick: () => this._setMode("home"),
       });
@@ -1557,41 +1627,37 @@ export class IssGlobeView extends BaseElement {
    */
   _passVisibility(pass) {
     const s = this._payload.settings;
+    // The options are whole degrees and seconds, except the Sun's half degrees.
+    const value = (v) => this._num(v, Number.isInteger(v) ? 0 : 1);
+    const reason = (key, visible, vars = {}) => ({
+      visible,
+      short: this._t(`pass.${key}`, vars),
+      long: this._t(`pass.${key}_long`, vars),
+    });
     switch (pass.reason) {
       case "visible":
-        return { visible: true, short: "visible", long: "The station can be seen on this pass" };
+        return reason("visible", true);
       case "low": {
         // The highest point while it can be seen, which is what is too low; the
         // pass itself may climb much higher while the station is in shadow.
         const peak = pass.visible_peak_elevation;
-        const up = Number.isFinite(peak) ? `${Math.floor(peak)}°` : null;
-        return {
-          visible: true,
-          short: up ? `visible only up to ${up}` : "visible, but low",
-          long: `Visible${up ? ` only up to ${up}` : ""}, below your ${s.min_peak_elevation}° minimum`,
-        };
+        const minimum = value(s.min_peak_elevation);
+        return Number.isFinite(peak)
+          ? reason("low_up_to", true, { elevation: Math.floor(peak), minimum })
+          : reason("low", true, { minimum });
       }
       case "brief":
-        return {
-          visible: true,
-          short: "visible only briefly",
-          long: `Visible for less than your ${s.min_visible_duration} s minimum`,
-        };
+        return reason("brief", true, { seconds: value(s.min_visible_duration) });
       case "twilight":
-        return {
-          visible: false,
-          short: "sky too bright",
-          long: `The station is sunlit, but your sky is not dark enough (the Sun is above ${s.max_sun_elevation}°)`,
-        };
+        return reason("twilight", false, { elevation: value(s.max_sun_elevation) });
       case "daylight":
-        return { visible: false, short: "daylight", long: "The station passes over you in daylight, so it cannot be seen" };
+        return reason("daylight", false);
       case "shadow":
-        return { visible: false, short: "in Earth's shadow", long: "The station passes over you in Earth's shadow, so it cannot be seen" };
+        return reason("shadow", false);
       default: {
         // An older integration without the reason field.
-        if (pass.visible) return { visible: true, short: "visible", long: "The station can be seen on this pass" };
-        const why = this._invisibleReason(pass);
-        return { visible: false, short: why, long: "The station passes over you but cannot be seen (daylight or Earth's shadow)" };
+        if (pass.visible) return reason("visible", true);
+        return { visible: false, short: this._invisibleReason(pass), long: this._t("pass.hidden_long") };
       }
     }
   }
@@ -1601,7 +1667,7 @@ export class IssGlobeView extends BaseElement {
     const home = this._payload.location;
     const peak = new Date(pass.culmination);
     const sunEl = geo.sunElevation(home.latitude, home.longitude, subsolarPoint(peak));
-    return sunEl > (this._payload.settings.max_sun_elevation ?? -6) ? "daylight" : "in Earth's shadow";
+    return this._t(sunEl > (this._payload.settings.max_sun_elevation ?? -6) ? "pass.daylight" : "pass.shadow");
   }
 
   _ticks(now) {
@@ -1779,7 +1845,7 @@ export class IssGlobeView extends BaseElement {
       this._previewPending = null;
       btn.disabled = false;
       if (hadFocus) btn.focus();
-      this._notify(`ISS preview unavailable: ${this._errorMessage(err)}`);
+      this._notify(this._t("globe.preview_failed", { error: this._errorMessage(err) }));
       return;
     }
     if (this._previewPending !== token || !this._map) return;
@@ -1874,6 +1940,41 @@ export class IssGlobeView extends BaseElement {
 
   // -- HUD ------------------------------------------------------------------
 
+  /** Text in the user's language. */
+  _t(key, vars) {
+    return this._strings.t(key, vars);
+  }
+
+  /** The same as HTML; the values go in as they are, so escape them first. */
+  _html(key, vars) {
+    return this._strings.html(key, vars);
+  }
+
+  /** A compass point as the integration sends it ("SSW"), in the user's language. */
+  _direction(point) {
+    return this._strings.direction(point);
+  }
+
+  _confidence(level) {
+    return ["high", "medium", "low"].includes(level) ? this._t(`mission.confidence_${level}`) : String(level);
+  }
+
+  /** "SW → NE · up to 67° · 6 min · brightness -3.4"; the list leaves out the height, shown beside it. */
+  _passSummary(pass, height = false) {
+    const parts = [`${this._direction(pass.start_direction)} → ${this._direction(pass.end_direction)}`];
+    if (height) parts.push(this._t("pass.up_to", { elevation: Math.round(pass.peak_elevation) }));
+    parts.push(this._t("time.minutes", { minutes: Math.round(pass.duration_seconds / 60) }));
+    if (pass.magnitude != null) parts.push(this._t("mission.brightness", { magnitude: this._num(pass.magnitude, 1) }));
+    return parts.join(" · ");
+  }
+
+  /** Why predictions are paused: worded here when the orbit data is too old, else as the integration puts it. */
+  _pausedReason(p) {
+    if (!Number.isFinite(p.paused_days)) return p.paused;
+    const text = this._t("mission.paused_age", { count: p.paused_days });
+    return p.paused_error ? this._t("mission.with_error", { text, error: p.paused_error }) : text;
+  }
+
   _fmt(date, options) {
     const key = JSON.stringify(options);
     let f = this._fmtCache.get(key);
@@ -1947,29 +2048,40 @@ export class IssGlobeView extends BaseElement {
     if (pass) {
       const cls = `chip ${pass.confidence}`;
       if (e.chip.className !== cls) e.chip.className = cls;
-      setText(e.chip, `${pass.confidence} confidence`);
+      setText(e.chip, this._confidence(pass.confidence));
     }
     if (paused) {
-      setText(e.label, "Predictions paused");
-      setText(e.clock, "Orbit data out of date");
-      setText(e.when, p.paused);
-      setText(e.detail, "Passes come back once fresh orbit data downloads. The station's position shown is approximate.");
+      setText(e.label, this._t("mission.paused"));
+      setText(e.clock, this._t("mission.paused_clock"));
+      setText(e.when, this._pausedReason(p));
+      setText(e.detail, this._t("mission.paused_detail"));
     } else if (visibleNow) {
-      setText(e.label, this._preview ? "Preview · visible" : "Visible now");
-      setText(e.clock, look && look.elevation > 0 ? `Look ${compass(look.azimuth)}, ${Math.round(look.elevation)}° up` : `Look ${pass.peak_direction}`);
-      setText(e.when, `Ends in ${formatCountdown(Date.parse(pass.end) - nowMs)}${pass.disappears_into_shadow ? " · fades into Earth's shadow" : ""} in the ${pass.end_direction}`);
-      setText(e.detail, pass.magnitude != null ? `Brightness ${this._num(pass.magnitude, 1)} · brighter than almost every star` : "");
+      setText(e.label, this._t(this._preview ? "mission.preview_visible" : "mission.visible_now"));
+      setText(
+        e.clock,
+        look && look.elevation > 0
+          ? this._t("mission.look_up", { direction: this._direction(compass(look.azimuth)), elevation: Math.round(look.elevation) })
+          : this._t("mission.look_towards", { direction: this._direction(pass.peak_direction) })
+      );
+      setText(
+        e.when,
+        this._t(pass.disappears_into_shadow ? "mission.ends_in_shadow" : "mission.ends_in", {
+          countdown: this._strings.countdown(Date.parse(pass.end) - nowMs),
+          direction: this._direction(pass.end_direction),
+        })
+      );
+      setText(e.detail, pass.magnitude != null ? this._t("mission.bright_star", { magnitude: this._num(pass.magnitude, 1) }) : "");
     } else if (pass) {
       const start = new Date(pass.start);
-      setText(e.label, this._preview ? "Preview · next visible pass" : "Next visible pass");
-      setText(e.clock, formatCountdown(start - nowMs));
+      setText(e.label, this._t(this._preview ? "mission.preview_next" : "mission.next_visible_pass"));
+      setText(e.clock, this._strings.countdown(start - nowMs));
       setText(e.when, this._fmt(start, { weekday: "long", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }));
-      setText(e.detail, `${pass.start_direction} → ${pass.end_direction} · up to ${Math.round(pass.peak_elevation)}° · ${Math.round(pass.duration_seconds / 60)} min${pass.magnitude != null ? ` · brightness ${this._num(pass.magnitude, 1)}` : ""}`);
+      setText(e.detail, this._passSummary(pass, true));
     } else {
-      setText(e.label, "Next visible pass");
-      setText(e.clock, "None soon");
-      setText(e.when, `No visible passes in the next ${p.settings.forecast_days} days`);
-      setText(e.detail, "The ISS is only visible when it is sunlit and your sky is dark.");
+      setText(e.label, this._t("mission.next_visible_pass"));
+      setText(e.clock, this._t("mission.none_soon"));
+      setText(e.when, this._t("mission.none_in_window", { count: p.settings.forecast_days }));
+      setText(e.detail, this._t("mission.sunlit_and_dark"));
     }
     this._announce(visibleNow ? `${e.label.textContent}. ${e.clock.textContent}` : `${e.label.textContent}: ${e.when.textContent}`, `${e.label.textContent}|${pass?.start ?? ""}`);
 
@@ -1985,7 +2097,7 @@ export class IssGlobeView extends BaseElement {
     if (this._preview) {
       const html = `<b>${esc(this._fmt(new Date(simMs), { weekday: "short", hour: "numeric", minute: "2-digit", second: "2-digit" }))}</b>`;
       if (e.pvTime.innerHTML !== html) e.pvTime.innerHTML = html;
-      setText(e.pvSpeed, this._preview.phase === "pass" ? "30× speed" : "fast forward");
+      setText(e.pvSpeed, this._preview.phase === "pass" ? this._t("preview.slow", { rate: PREVIEW_RATE }) : this._t("preview.fast"));
     }
     if (visibleNow) this._renderSky(false);
 
@@ -2013,14 +2125,20 @@ export class IssGlobeView extends BaseElement {
     e.intercept.hidden = false;
     const rise = Date.parse(n.rise);
     const why = this._passVisibility(n);
-    const visibility = why.visible ? why.short : `not visible (${why.short})`;
+    const visibility = why.visible ? why.short : this._t("pass.not_visible", { reason: why.short });
     let html;
     if (rise <= nowMs) {
-      html = `<b>Over your sky right now</b> · ${esc(visibility)}`;
+      html = `<b>${esc(this._t("pass.over_now"))}</b> · ${esc(visibility)}`;
     } else {
       const orbits = Math.floor((rise - nowMs) / 1000 / ISS_PERIOD_S);
       const when = this._fmt(new Date(rise), { weekday: "short", hour: "numeric", minute: "2-digit" });
-      html = `Next over your sky <b>${esc(when)}</b> · in ${esc(formatDuration(rise - nowMs))}${orbits >= 1 ? ` · ${orbits} orbit${orbits > 1 ? "s" : ""} away` : ""} · up to ${Math.round(n.culmination_elevation)}° · ${esc(visibility)}`;
+      const parts = [
+        this._html("pass.next_over", { time: `<b>${esc(when)}</b>` }),
+        esc(this._t("pass.in", { duration: this._strings.duration(rise - nowMs) })),
+      ];
+      if (orbits >= 1) parts.push(esc(this._t("pass.orbits_away", { count: orbits })));
+      parts.push(esc(this._t("pass.up_to", { elevation: Math.round(n.culmination_elevation) })), esc(visibility));
+      html = parts.join(" · ");
     }
     if (html !== this._interceptHtml) {
       e.interceptTxt.innerHTML = html;
@@ -2037,17 +2155,19 @@ export class IssGlobeView extends BaseElement {
     }
     el.hidden = false;
     const speed = orbitalSpeed(pos.alt) * 3600;
-    const lat = `${this._num(Math.abs(pos.lat), 2)}° ${pos.lat >= 0 ? "N" : "S"}`;
-    const lon = `${this._num(Math.abs(pos.lon), 2)}° ${pos.lon >= 0 ? "E" : "W"}`;
+    const lat = `${this._num(Math.abs(pos.lat), 2)}° ${this._direction(pos.lat >= 0 ? "N" : "S")}`;
+    const lon = `${this._num(Math.abs(pos.lon), 2)}° ${this._direction(pos.lon >= 0 ? "E" : "W")}`;
     const home = this._payload.location;
     const ground = groundDistanceKm(home.latitude, home.longitude, pos.lat, pos.lon);
-    const approx = this._payload.paused && !this._preview ? " (approximate)" : "";
+    const approx = this._payload.paused && !this._preview ? ` ${esc(this._t("telemetry.approximate"))}` : "";
+    let away = this._html("telemetry.distance", { distance: `<b>${this._distance(ground)}</b>`, place: esc(home.title) });
+    if (look && look.elevation > 0) away += ` · ${esc(this._t("telemetry.above_horizon", { elevation: Math.round(look.elevation) }))}`;
     const html = `
-      <span>Altitude <b>${this._distance(pos.alt)}</b></span>
-      <span>Speed <b>${this._speed(speed)}</b></span>
-      <span class="opt"><b>${lat}, ${lon}</b>${approx}</span>
-      <span class="${pos.sunlit ? "lit" : "dark"}">${pos.sunlit ? "In sunlight" : "In Earth's shadow"}</span>
-      <span class="opt"><b>${this._distance(ground)}</b> from ${esc(home.title)}${look && look.elevation > 0 ? ` · ${Math.round(look.elevation)}° above your horizon` : ""}</span>`;
+      <span>${this._html("telemetry.altitude", { value: `<b>${this._distance(pos.alt)}</b>` })}</span>
+      <span>${this._html("telemetry.speed", { value: `<b>${this._speed(speed)}</b>` })}</span>
+      <span class="opt"><b>${esc(lat)}, ${esc(lon)}</b>${approx}</span>
+      <span class="${pos.sunlit ? "lit" : "dark"}">${esc(this._t(pos.sunlit ? "telemetry.sunlit" : "telemetry.shadow"))}</span>
+      <span class="opt">${away}</span>`;
     if (html !== this._telemetryHtml) {
       el.innerHTML = html;
       this._telemetryHtml = html;
@@ -2090,9 +2210,17 @@ export class IssGlobeView extends BaseElement {
       size: wide ? 232 : 200,
       // Both charts can be in the page at once; each needs its own gradient.
       id: wide ? "sky-side" : "sky-pop",
+      cardinals: this._strings.list("sky.cardinals"),
+      label: this._t("sky.chart"),
     });
     const when = this._fmt(new Date(pass.start), { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
-    const caption = `Appears in the ${pass.start_direction} ${Math.round(pass.start_elevation)}° up, climbs to ${Math.round(pass.peak_elevation)}° in the ${pass.peak_direction}, ${pass.disappears_into_shadow ? "fades into Earth's shadow" : "sets"} in the ${pass.end_direction}.`;
+    const caption = this._t(pass.disappears_into_shadow ? "sky.fades" : "sky.sets", {
+      start: this._direction(pass.start_direction),
+      start_elevation: Math.round(pass.start_elevation),
+      peak: this._direction(pass.peak_direction),
+      peak_elevation: Math.round(pass.peak_elevation),
+      end: this._direction(pass.end_direction),
+    });
     setText(target.querySelector(".sub"), when);
     target.querySelector(".chart").innerHTML = svg;
     // Keep the live dot's pulse in step across redraws instead of restarting it.
@@ -2111,10 +2239,10 @@ export class IssGlobeView extends BaseElement {
       .slice(0, 12)
       .map((q, i) => {
         const start = new Date(q.start);
-        return `<li data-i="${i}" data-start="${esc(q.start)}" tabindex="0" role="button" title="Preview this pass"><span class="t">${esc(this._fmt(start, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }))}</span>
+        return `<li data-i="${i}" data-start="${esc(q.start)}" tabindex="0" role="button" title="${esc(this._t("pass.preview_this"))}"><span class="t">${esc(this._fmt(start, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }))}</span>
           <span class="el">${Math.round(q.peak_elevation)}°</span>
-          <span class="d">${esc(q.start_direction)} → ${esc(q.end_direction)} · ${Math.round(q.duration_seconds / 60)} min${q.magnitude != null ? ` · brightness ${esc(this._num(q.magnitude, 1))}` : ""}</span>
-          <span class="c">${esc(q.confidence)} confidence</span></li>`;
+          <span class="d">${esc(this._passSummary(q))}</span>
+          <span class="c">${esc(this._confidence(q.confidence))}</span></li>`;
       })
       .join("");
     // Rebuild only when something changed, and keep keyboard focus on the same pass.

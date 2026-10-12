@@ -1,0 +1,175 @@
+{
+  "compass": ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSO", "SO", "OSO", "O", "ONO", "NO", "NNO"],
+  "card": {
+    "name": "Globo de la ISS",
+    "description": "Una Tierra en 3D con la Estación Espacial Internacional a su altitud real, su órbita y una cuenta atrás hasta su próximo paso por tu cielo.",
+    "load_failed": "No se pudo cargar el globo de la ISS. Comprueba la conexión o vuelve a cargar la página."
+  },
+  "editor": {
+    "entry_id": "Ubicación",
+    "entry_id_helper": "Déjalo vacío para mostrar la primera ubicación.",
+    "imagery": "Imágenes",
+    "imagery_satellite": "Satélite (NASA Blue Marble, Sentinel-2 de cerca)",
+    "imagery_esri": "Satélite, gran detalle de cerca (Esri)",
+    "imagery_streets": "Callejero de cerca (OpenStreetMap)",
+    "view": "Vista inicial",
+    "view_home": "Mi ubicación",
+    "view_follow": "Seguir a la ISS",
+    "view_chase": "Volar junto a la ISS",
+    "labels": "Nombres de lugares y fronteras",
+    "show_track": "Líneas de trayectoria",
+    "show_night": "Día y noche",
+    "show_footprint": "Zona desde la que se ve la ISS",
+    "show_home_zone": "Tu cono de visibilidad",
+    "show_countdown": "Cuenta atrás",
+    "show_stats": "Posición y velocidad",
+    "cooperative_gestures": "Exigir dos dedos o Ctrl para mover el mapa",
+    "height": "Altura (paneles de mampostería)"
+  },
+  "panel": {
+    "sidebar": "Panel lateral",
+    "location": "Ubicación"
+  },
+  "globe": {
+    "name": "Estación Espacial Internacional",
+    "acquiring": "Localizando la Estación Espacial Internacional…",
+    "reloading": "Recargando el globo…",
+    "reload": "Volver a cargar la página",
+    "load_failed": "No se pudo cargar el globo de la ISS ({error}). Vuelve a cargar la página para intentarlo de nuevo.",
+    "load_retrying": "No se pudo cargar el globo de la ISS ({error}). Volverá a intentarlo; recargar la página también ayuda.",
+    "no_webgl": "Este navegador no puede mostrar el globo en 3D (necesita WebGL 2): {error}",
+    "clock_off": "El reloj de este dispositivo no coincide con el de Home Assistant, así que no se puede situar la estación. Comprueba los ajustes de fecha y hora.",
+    "connection_lost": "conexión perdida",
+    "reconnecting": "Se perdió la conexión con Home Assistant. Reconectando…",
+    "not_set_up": "Configura la integración ISS Tracker para ver aquí la estación.",
+    "location_gone_panel": "Esta ubicación ya no existe. Elige otra.",
+    "location_gone_card": "La ubicación que muestra esta tarjeta ya no existe. Edita la tarjeta y elige una ubicación.",
+    "location_disabled": "Esta ubicación está desactivada. Actívala en Configuración > Dispositivos y servicios o elige otra ubicación.",
+    "waiting": "Esperando los datos orbitales de la ISS…",
+    "waiting_because": "Esperando los datos orbitales de la ISS… ({reason})",
+    "position_failed": "No se pudo cargar la posición de la ISS: {error}",
+    "preview_failed": "La vista previa de la ISS no está disponible: {error}",
+    "close": "Cerrar"
+  },
+  "controls": {
+    "home": "Mostrar mi ubicación",
+    "follow": "Seguir a la ISS",
+    "chase": "Volar junto a la ISS",
+    "flat": "Cambiar entre globo y mapa plano",
+    "flat_label": "Mapa plano",
+    "imagery": "Cambiar las imágenes",
+    "imagery_menu": "Imágenes",
+    "imagery_satellite": "Satélite (Sentinel-2)",
+    "imagery_esri": "Satélite, gran detalle (Esri)",
+    "imagery_streets": "Callejero (OpenStreetMap)"
+  },
+  "maplibre": {
+    "zoom_in": "Acercar",
+    "zoom_out": "Alejar",
+    "reset_bearing": "Arrastra para girar el mapa; haz clic para orientarlo al norte",
+    "fullscreen_enter": "Pantalla completa",
+    "fullscreen_exit": "Salir de pantalla completa",
+    "attribution": "Mostrar u ocultar las fuentes",
+    "map": "Mapa",
+    "marker": "Marcador del mapa",
+    "ctrl_scroll": "Usa Ctrl + rueda para hacer zoom en el mapa",
+    "cmd_scroll": "Usa ⌘ + rueda para hacer zoom en el mapa",
+    "two_fingers": "Usa dos dedos para mover el mapa"
+  },
+  "mission": {
+    "next_visible_pass": "Próximo paso visible",
+    "preview_next": "Vista previa · próximo paso visible",
+    "visible_now": "Visible ahora",
+    "preview_visible": "Vista previa · visible",
+    "confidence_high": "fiabilidad alta",
+    "confidence_medium": "fiabilidad media",
+    "confidence_low": "fiabilidad baja",
+    "look_up": "Mira al {direction}, a {elevation}° de altura",
+    "look_towards": "Mira al {direction}",
+    "ends_in": "Termina en {countdown} por el {direction}",
+    "ends_in_shadow": "Termina en {countdown} · se desvanece en la sombra de la Tierra por el {direction}",
+    "bright_star": "Brillo {magnitude} · más brillante que casi cualquier estrella",
+    "brightness": "brillo {magnitude}",
+    "none_soon": "Ninguno próximamente",
+    "none_in_window": {
+      "one": "No hay pasos visibles en el próximo día",
+      "other": "No hay pasos visibles en los próximos {count} días"
+    },
+    "sunlit_and_dark": "La ISS solo es visible cuando el Sol la ilumina y tu cielo está oscuro.",
+    "paused": "Predicciones en pausa",
+    "paused_clock": "Datos orbitales desactualizados",
+    "paused_age": {
+      "one": "Los datos orbitales tienen {count} día",
+      "other": "Los datos orbitales tienen {count} días"
+    },
+    "with_error": "{text} ({error})",
+    "paused_detail": "Los pasos volverán en cuanto se descarguen datos orbitales nuevos. La posición de la estación que se muestra es aproximada.",
+    "preview": "Ver el paso",
+    "preview_short": "Vista previa",
+    "preview_hint": "Avanzar rápido hasta el paso",
+    "look": "Dónde mirar",
+    "look_short": "Mirar",
+    "look_hint": "Carta celeste del paso"
+  },
+  "pass": {
+    "pin_visible": "Visible · {time} · {elevation}°",
+    "pin_overhead": "Sobre ti · {time} · {reason}",
+    "preview_this": "Ver este paso",
+    "visible": "visible",
+    "visible_long": "La estación se puede ver en este paso",
+    "low": "visible, pero bajo",
+    "low_up_to": "visible solo hasta {elevation}°",
+    "low_long": "Visible, por debajo de tu mínimo de {minimum}°",
+    "low_up_to_long": "Visible solo hasta {elevation}°, por debajo de tu mínimo de {minimum}°",
+    "brief": "visible solo un momento",
+    "brief_long": "Visible menos tiempo que tu mínimo de {seconds} s",
+    "twilight": "cielo demasiado claro",
+    "twilight_long": "El Sol ilumina la estación, pero tu cielo no está lo bastante oscuro (el Sol está por encima de {elevation}°)",
+    "daylight": "de día",
+    "daylight_long": "La estación pasa sobre ti de día, así que no se puede ver",
+    "shadow": "en la sombra de la Tierra",
+    "shadow_long": "La estación pasa sobre ti en la sombra de la Tierra, así que no se puede ver",
+    "hidden_long": "La estación pasa sobre ti, pero no se puede ver (de día o en la sombra de la Tierra)",
+    "not_visible": "no visible ({reason})",
+    "over_now": "Sobre tu cielo ahora mismo",
+    "next_over": "Próximo paso por tu cielo {time}",
+    "in": "dentro de {duration}",
+    "orbits_away": {
+      "one": "a {count} órbita",
+      "other": "a {count} órbitas"
+    },
+    "up_to": "hasta {elevation}°"
+  },
+  "telemetry": {
+    "altitude": "Altitud {value}",
+    "speed": "Velocidad {value}",
+    "approximate": "(aproximada)",
+    "sunlit": "Al sol",
+    "shadow": "En la sombra de la Tierra",
+    "distance": "A {distance} de {place}",
+    "above_horizon": "{elevation}° sobre tu horizonte"
+  },
+  "sky": {
+    "chart": "Carta celeste del paso",
+    "cardinals": ["N", "E", "S", "O"],
+    "sets": "Aparece por el {start} a {start_elevation}°, sube hasta {peak_elevation}° por el {peak} y se pone por el {end}.",
+    "fades": "Aparece por el {start} a {start_elevation}°, sube hasta {peak_elevation}° por el {peak} y se desvanece en la sombra de la Tierra por el {end}."
+  },
+  "upcoming": {
+    "title": "Pasos visibles"
+  },
+  "preview": {
+    "tag": "VISTA PREVIA",
+    "back": "Volver al directo",
+    "slow": "velocidad ×{rate}",
+    "fast": "avance rápido"
+  },
+  "time": {
+    "countdown_days": "{days} d {time}",
+    "under_minute": "menos de un minuto",
+    "minutes": "{minutes} min",
+    "hours": "{hours} h",
+    "hours_minutes": "{hours} h {minutes} min",
+    "days_hours": "{days} d {hours} h"
+  }
+}

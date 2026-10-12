@@ -1,0 +1,175 @@
+{
+  "compass": ["N", "N-NE", "NE", "E-NE", "E", "E-SE", "SE", "S-SE", "S", "S-SO", "SO", "O-SO", "O", "O-NO", "NO", "N-NO"],
+  "card": {
+    "name": "Globe ISS",
+    "description": "Une Terre en 3D avec la Station spatiale internationale à son altitude réelle, son orbite et un compte à rebours jusqu'à son prochain passage dans votre ciel.",
+    "load_failed": "Impossible de charger le globe ISS. Vérifiez la connexion ou rechargez la page."
+  },
+  "editor": {
+    "entry_id": "Lieu",
+    "entry_id_helper": "Laissez vide pour afficher le premier lieu.",
+    "imagery": "Imagerie",
+    "imagery_satellite": "Satellite (NASA Blue Marble, Sentinel-2 en gros plan)",
+    "imagery_esri": "Satellite, très détaillé en gros plan (Esri)",
+    "imagery_streets": "Plan des rues en gros plan (OpenStreetMap)",
+    "view": "Vue de départ",
+    "view_home": "Ma position",
+    "view_follow": "Suivre l'ISS",
+    "view_chase": "Voler avec l'ISS",
+    "labels": "Noms de lieux et frontières",
+    "show_track": "Lignes de trajectoire",
+    "show_night": "Jour et nuit",
+    "show_footprint": "Zone d'où l'ISS est visible",
+    "show_home_zone": "Votre cône de visibilité",
+    "show_countdown": "Compte à rebours",
+    "show_stats": "Position et vitesse",
+    "cooperative_gestures": "Exiger deux doigts ou Ctrl pour déplacer la carte",
+    "height": "Hauteur (tableaux de bord Maçonnerie)"
+  },
+  "panel": {
+    "sidebar": "Barre latérale",
+    "location": "Lieu"
+  },
+  "globe": {
+    "name": "Station spatiale internationale",
+    "acquiring": "Acquisition de la Station spatiale internationale…",
+    "reloading": "Rechargement du globe…",
+    "reload": "Recharger la page",
+    "load_failed": "Le globe ISS n'a pas pu se charger ({error}). Rechargez la page pour réessayer.",
+    "load_retrying": "Le globe ISS n'a pas pu se charger ({error}). Il va réessayer ; recharger la page aide aussi.",
+    "no_webgl": "Ce navigateur ne peut pas afficher le globe 3D (WebGL 2 est nécessaire) : {error}",
+    "clock_off": "L'horloge de cet appareil ne correspond pas à celle de Home Assistant : la station ne peut pas être placée. Vérifiez les réglages de date et d'heure.",
+    "connection_lost": "connexion perdue",
+    "reconnecting": "Connexion à Home Assistant perdue. Reconnexion…",
+    "not_set_up": "Configurez l'intégration ISS Tracker pour voir la station ici.",
+    "location_gone_panel": "Ce lieu n'existe plus. Choisissez-en un autre.",
+    "location_gone_card": "Le lieu affiché par cette carte n'existe plus. Modifiez la carte et choisissez un lieu.",
+    "location_disabled": "Ce lieu est désactivé. Activez-le dans Paramètres > Appareils et services, ou choisissez un autre lieu.",
+    "waiting": "En attente des données d'orbite de l'ISS…",
+    "waiting_because": "En attente des données d'orbite de l'ISS… ({reason})",
+    "position_failed": "Impossible de charger la position de l'ISS : {error}",
+    "preview_failed": "Aperçu de l'ISS indisponible : {error}",
+    "close": "Fermer"
+  },
+  "controls": {
+    "home": "Afficher ma position",
+    "follow": "Suivre l'ISS",
+    "chase": "Voler avec l'ISS",
+    "flat": "Basculer entre le globe et la carte plane",
+    "flat_label": "Carte plane",
+    "imagery": "Changer l'imagerie",
+    "imagery_menu": "Imagerie",
+    "imagery_satellite": "Satellite (Sentinel-2)",
+    "imagery_esri": "Satellite, très détaillé (Esri)",
+    "imagery_streets": "Plan des rues (OpenStreetMap)"
+  },
+  "maplibre": {
+    "zoom_in": "Zoom avant",
+    "zoom_out": "Zoom arrière",
+    "reset_bearing": "Faites glisser pour tourner la carte, cliquez pour revenir au nord",
+    "fullscreen_enter": "Plein écran",
+    "fullscreen_exit": "Quitter le plein écran",
+    "attribution": "Afficher ou masquer les sources",
+    "map": "Carte",
+    "marker": "Repère sur la carte",
+    "ctrl_scroll": "Utilisez Ctrl + molette pour zoomer sur la carte",
+    "cmd_scroll": "Utilisez ⌘ + molette pour zoomer sur la carte",
+    "two_fingers": "Utilisez deux doigts pour déplacer la carte"
+  },
+  "mission": {
+    "next_visible_pass": "Prochain passage visible",
+    "preview_next": "Aperçu · prochain passage visible",
+    "visible_now": "Visible maintenant",
+    "preview_visible": "Aperçu · visible",
+    "confidence_high": "fiabilité élevée",
+    "confidence_medium": "fiabilité moyenne",
+    "confidence_low": "fiabilité faible",
+    "look_up": "Direction {direction}, à {elevation}° de hauteur",
+    "look_towards": "Direction {direction}",
+    "ends_in": "Fin dans {countdown}, direction {direction}",
+    "ends_in_shadow": "Fin dans {countdown} · disparaît dans l'ombre de la Terre, direction {direction}",
+    "bright_star": "Luminosité {magnitude} · plus brillante que presque toutes les étoiles",
+    "brightness": "luminosité {magnitude}",
+    "none_soon": "Aucun pour l'instant",
+    "none_in_window": {
+      "one": "Aucun passage visible d'ici {count} jour",
+      "other": "Aucun passage visible dans les {count} prochains jours"
+    },
+    "sunlit_and_dark": "L'ISS n'est visible que lorsqu'elle est éclairée par le Soleil et que votre ciel est sombre.",
+    "paused": "Prédictions en pause",
+    "paused_clock": "Données d'orbite périmées",
+    "paused_age": {
+      "one": "Les données d'orbite datent de {count} jour",
+      "other": "Les données d'orbite datent de {count} jours"
+    },
+    "with_error": "{text} ({error})",
+    "paused_detail": "Les passages reviendront dès que des données d'orbite récentes seront téléchargées. La position affichée de la station est approximative.",
+    "preview": "Aperçu du passage",
+    "preview_short": "Aperçu",
+    "preview_hint": "Avance rapide jusqu'au passage",
+    "look": "Où regarder",
+    "look_short": "Le ciel",
+    "look_hint": "Carte du ciel du passage"
+  },
+  "pass": {
+    "pin_visible": "Visible · {time} · {elevation}°",
+    "pin_overhead": "Au-dessus de vous · {time} · {reason}",
+    "preview_this": "Aperçu de ce passage",
+    "visible": "visible",
+    "visible_long": "La station est visible lors de ce passage",
+    "low": "visible, mais basse",
+    "low_up_to": "visible seulement jusqu'à {elevation}°",
+    "low_long": "Visible, sous votre minimum de {minimum}°",
+    "low_up_to_long": "Visible seulement jusqu'à {elevation}°, sous votre minimum de {minimum}°",
+    "brief": "visible brièvement",
+    "brief_long": "Visible moins longtemps que votre minimum de {seconds} s",
+    "twilight": "ciel trop clair",
+    "twilight_long": "La station est éclairée par le Soleil, mais votre ciel n'est pas assez sombre (le Soleil est au-dessus de {elevation}°)",
+    "daylight": "en plein jour",
+    "daylight_long": "La station passe au-dessus de vous en plein jour, elle ne peut donc pas être vue",
+    "shadow": "dans l'ombre de la Terre",
+    "shadow_long": "La station passe au-dessus de vous dans l'ombre de la Terre, elle ne peut donc pas être vue",
+    "hidden_long": "La station passe au-dessus de vous mais ne peut pas être vue (jour ou ombre de la Terre)",
+    "not_visible": "non visible ({reason})",
+    "over_now": "Dans votre ciel en ce moment",
+    "next_over": "Prochain passage dans votre ciel {time}",
+    "in": "dans {duration}",
+    "orbits_away": {
+      "one": "à {count} orbite",
+      "other": "à {count} orbites"
+    },
+    "up_to": "jusqu'à {elevation}°"
+  },
+  "telemetry": {
+    "altitude": "Altitude {value}",
+    "speed": "Vitesse {value}",
+    "approximate": "(approximative)",
+    "sunlit": "Au soleil",
+    "shadow": "Dans l'ombre de la Terre",
+    "distance": "À {distance} de {place}",
+    "above_horizon": "{elevation}° au-dessus de votre horizon"
+  },
+  "sky": {
+    "chart": "Carte du ciel du passage",
+    "cardinals": ["N", "E", "S", "O"],
+    "sets": "Apparaît dans le secteur {start} à {start_elevation}°, monte jusqu'à {peak_elevation}° dans le secteur {peak} et se couche dans le secteur {end}.",
+    "fades": "Apparaît dans le secteur {start} à {start_elevation}°, monte jusqu'à {peak_elevation}° dans le secteur {peak} et disparaît dans l'ombre de la Terre, secteur {end}."
+  },
+  "upcoming": {
+    "title": "Passages visibles"
+  },
+  "preview": {
+    "tag": "APERÇU",
+    "back": "Retour au direct",
+    "slow": "vitesse ×{rate}",
+    "fast": "avance rapide"
+  },
+  "time": {
+    "countdown_days": "{days} j {time}",
+    "under_minute": "moins d'une minute",
+    "minutes": "{minutes} min",
+    "hours": "{hours} h",
+    "hours_minutes": "{hours} h {minutes} min",
+    "days_hours": "{days} j {hours} h"
+  }
+}

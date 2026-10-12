@@ -88,8 +88,8 @@ class FrontendState:
 def _files_version() -> str:
     """Short hash of the frontend files, so browsers fetch new versions after updates."""
     digest = hashlib.sha256()
-    for path in sorted(FRONTEND_DIR.glob("*.js")):
-        digest.update(path.name.encode())
+    for path in sorted([*FRONTEND_DIR.glob("*.js"), *FRONTEND_DIR.glob("translations/*")]):
+        digest.update(path.relative_to(FRONTEND_DIR).as_posix().encode())
         digest.update(path.read_bytes())
     return digest.hexdigest()[:12]
 
@@ -324,11 +324,16 @@ def build_track_payload(coordinator: IssTrackerCoordinator) -> dict[str, Any]:
     settings = coordinator.settings
     epoch = data.elements.epoch
     paused = paused_reason(coordinator, now)
+    # Paused for orbit data that is too old: the globe words that in the
+    # user's language from these, and shows "paused" as it is otherwise.
+    stale = paused is not None and now - epoch > ELEMENTS_MAX_AGE
     payload: dict[str, Any] = {
         "generated_at": now.isoformat(),
         # Precise, so the globe can allow for a browser clock that is off.
         "server_time": utcnow.timestamp(),
         "paused": paused,
+        "paused_days": (now - epoch).days if stale else None,
+        "paused_error": coordinator.elements_error if stale else None,
         "location": {
             "entry_id": entry.entry_id,
             "title": entry.title,

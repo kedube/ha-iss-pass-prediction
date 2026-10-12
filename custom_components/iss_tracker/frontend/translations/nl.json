@@ -1,0 +1,175 @@
+{
+  "compass": ["N", "NNO", "NO", "ONO", "O", "OZO", "ZO", "ZZO", "Z", "ZZW", "ZW", "WZW", "W", "WNW", "NW", "NNW"],
+  "card": {
+    "name": "ISS-globe",
+    "description": "Een 3D-aarde met het Internationaal Ruimtestation op zijn echte hoogte, zijn baan en een aftelling tot het weer over je hemel trekt.",
+    "load_failed": "De ISS-globe kon niet worden geladen. Controleer de verbinding of laad de pagina opnieuw."
+  },
+  "editor": {
+    "entry_id": "Locatie",
+    "entry_id_helper": "Laat leeg om de eerste locatie te tonen.",
+    "imagery": "Beeldmateriaal",
+    "imagery_satellite": "Satelliet (NASA Blue Marble, Sentinel-2 van dichtbij)",
+    "imagery_esri": "Satelliet, veel detail van dichtbij (Esri)",
+    "imagery_streets": "Stratenkaart van dichtbij (OpenStreetMap)",
+    "view": "Startweergave",
+    "view_home": "Mijn locatie",
+    "view_follow": "Het ISS volgen",
+    "view_chase": "Meevliegen met het ISS",
+    "labels": "Plaatsnamen en grenzen",
+    "show_track": "Koerslijnen",
+    "show_night": "Dag en nacht",
+    "show_footprint": "Gebied dat het ISS kan zien",
+    "show_home_zone": "Je zichtbaarheidskegel",
+    "show_countdown": "Aftelling",
+    "show_stats": "Positie en snelheid",
+    "cooperative_gestures": "Twee vingers of Ctrl vereisen om de kaart te bewegen",
+    "height": "Hoogte (masonry-dashboards)"
+  },
+  "panel": {
+    "sidebar": "Zijbalk",
+    "location": "Locatie"
+  },
+  "globe": {
+    "name": "Internationaal Ruimtestation",
+    "acquiring": "Internationaal Ruimtestation zoeken…",
+    "reloading": "Globe opnieuw laden…",
+    "reload": "Pagina opnieuw laden",
+    "load_failed": "De ISS-globe kon niet worden geladen ({error}). Laad de pagina opnieuw om het nog eens te proberen.",
+    "load_retrying": "De ISS-globe kon niet worden geladen ({error}). Hij probeert het opnieuw; de pagina opnieuw laden helpt ook.",
+    "no_webgl": "Deze browser kan de 3D-globe niet tonen (WebGL 2 is nodig): {error}",
+    "clock_off": "De klok van dit apparaat komt niet overeen met die van Home Assistant, dus het station kan niet worden geplaatst. Controleer de datum- en tijdinstellingen.",
+    "connection_lost": "verbinding verbroken",
+    "reconnecting": "Verbinding met Home Assistant verbroken. Opnieuw verbinden…",
+    "not_set_up": "Stel de integratie ISS Tracker in om het station hier te zien.",
+    "location_gone_panel": "Deze locatie bestaat niet meer. Kies een andere.",
+    "location_gone_card": "De locatie die deze kaart toont bestaat niet meer. Bewerk de kaart en kies een locatie.",
+    "location_disabled": "Deze locatie is uitgeschakeld. Schakel haar in onder Instellingen > Apparaten en diensten, of kies een andere locatie.",
+    "waiting": "Wachten op baangegevens van het ISS…",
+    "waiting_because": "Wachten op baangegevens van het ISS… ({reason})",
+    "position_failed": "De positie van het ISS kon niet worden geladen: {error}",
+    "preview_failed": "Voorvertoning van het ISS niet beschikbaar: {error}",
+    "close": "Sluiten"
+  },
+  "controls": {
+    "home": "Mijn locatie tonen",
+    "follow": "Het ISS volgen",
+    "chase": "Meevliegen met het ISS",
+    "flat": "Wisselen tussen globe en platte kaart",
+    "flat_label": "Platte kaart",
+    "imagery": "Beeldmateriaal wijzigen",
+    "imagery_menu": "Beeldmateriaal",
+    "imagery_satellite": "Satelliet (Sentinel-2)",
+    "imagery_esri": "Satelliet, veel detail (Esri)",
+    "imagery_streets": "Stratenkaart (OpenStreetMap)"
+  },
+  "maplibre": {
+    "zoom_in": "Inzoomen",
+    "zoom_out": "Uitzoomen",
+    "reset_bearing": "Sleep om de kaart te draaien, klik om hem weer naar het noorden te richten",
+    "fullscreen_enter": "Volledig scherm",
+    "fullscreen_exit": "Volledig scherm sluiten",
+    "attribution": "Bronvermelding tonen of verbergen",
+    "map": "Kaart",
+    "marker": "Kaartmarkering",
+    "ctrl_scroll": "Gebruik Ctrl + scrollen om op de kaart te zoomen",
+    "cmd_scroll": "Gebruik ⌘ + scrollen om op de kaart te zoomen",
+    "two_fingers": "Gebruik twee vingers om de kaart te bewegen"
+  },
+  "mission": {
+    "next_visible_pass": "Volgende zichtbare overkomst",
+    "preview_next": "Voorvertoning · volgende zichtbare overkomst",
+    "visible_now": "Nu zichtbaar",
+    "preview_visible": "Voorvertoning · zichtbaar",
+    "confidence_high": "hoge betrouwbaarheid",
+    "confidence_medium": "gemiddelde betrouwbaarheid",
+    "confidence_low": "lage betrouwbaarheid",
+    "look_up": "Kijk naar het {direction}, {elevation}° omhoog",
+    "look_towards": "Kijk naar het {direction}",
+    "ends_in": "Eindigt over {countdown} in het {direction}",
+    "ends_in_shadow": "Eindigt over {countdown} · verdwijnt in het {direction} in de aardschaduw",
+    "bright_star": "Helderheid {magnitude} · helderder dan bijna elke ster",
+    "brightness": "helderheid {magnitude}",
+    "none_soon": "Voorlopig geen",
+    "none_in_window": {
+      "one": "Geen zichtbare overkomsten in de komende dag",
+      "other": "Geen zichtbare overkomsten in de komende {count} dagen"
+    },
+    "sunlit_and_dark": "Het ISS is alleen zichtbaar als de zon het beschijnt en je hemel donker is.",
+    "paused": "Voorspellingen gepauzeerd",
+    "paused_clock": "Baangegevens verouderd",
+    "paused_age": {
+      "one": "De baangegevens zijn {count} dag oud",
+      "other": "De baangegevens zijn {count} dagen oud"
+    },
+    "with_error": "{text} ({error})",
+    "paused_detail": "Overkomsten komen terug zodra er nieuwe baangegevens zijn gedownload. De getoonde positie van het station is bij benadering.",
+    "preview": "Overkomst bekijken",
+    "preview_short": "Bekijken",
+    "preview_hint": "Vooruitspoelen naar de overkomst",
+    "look": "Waar kijken",
+    "look_short": "Hemel",
+    "look_hint": "Hemelkaart van de overkomst"
+  },
+  "pass": {
+    "pin_visible": "Zichtbaar · {time} · {elevation}°",
+    "pin_overhead": "Boven je · {time} · {reason}",
+    "preview_this": "Deze overkomst bekijken",
+    "visible": "zichtbaar",
+    "visible_long": "Het station is bij deze overkomst te zien",
+    "low": "zichtbaar, maar laag",
+    "low_up_to": "alleen zichtbaar tot {elevation}°",
+    "low_long": "Zichtbaar, maar onder je minimum van {minimum}°",
+    "low_up_to_long": "Alleen zichtbaar tot {elevation}°, onder je minimum van {minimum}°",
+    "brief": "maar kort zichtbaar",
+    "brief_long": "Korter zichtbaar dan je minimum van {seconds} s",
+    "twilight": "hemel te licht",
+    "twilight_long": "De zon beschijnt het station, maar je hemel is niet donker genoeg (de zon staat hoger dan {elevation}°)",
+    "daylight": "daglicht",
+    "daylight_long": "Het station komt bij daglicht over, dus het is niet te zien",
+    "shadow": "in de aardschaduw",
+    "shadow_long": "Het station komt in de aardschaduw over, dus het is niet te zien",
+    "hidden_long": "Het station komt over, maar is niet te zien (daglicht of aardschaduw)",
+    "not_visible": "niet zichtbaar ({reason})",
+    "over_now": "Nu boven je",
+    "next_over": "Volgende overkomst boven je {time}",
+    "in": "over {duration}",
+    "orbits_away": {
+      "one": "nog {count} omloop",
+      "other": "nog {count} omlopen"
+    },
+    "up_to": "tot {elevation}°"
+  },
+  "telemetry": {
+    "altitude": "Hoogte {value}",
+    "speed": "Snelheid {value}",
+    "approximate": "(bij benadering)",
+    "sunlit": "In het zonlicht",
+    "shadow": "In de aardschaduw",
+    "distance": "{distance} van {place}",
+    "above_horizon": "{elevation}° boven je horizon"
+  },
+  "sky": {
+    "chart": "Hemelkaart van de overkomst",
+    "cardinals": ["N", "O", "Z", "W"],
+    "sets": "Verschijnt in het {start} op {start_elevation}°, klimt tot {peak_elevation}° in het {peak} en gaat onder in het {end}.",
+    "fades": "Verschijnt in het {start} op {start_elevation}°, klimt tot {peak_elevation}° in het {peak} en verdwijnt in het {end} in de aardschaduw."
+  },
+  "upcoming": {
+    "title": "Zichtbare overkomsten"
+  },
+  "preview": {
+    "tag": "VOORVERTONING",
+    "back": "Terug naar live",
+    "slow": "{rate}× sneller",
+    "fast": "snel vooruit"
+  },
+  "time": {
+    "countdown_days": "{days} d {time}",
+    "under_minute": "minder dan een minuut",
+    "minutes": "{minutes} min",
+    "hours": "{hours} u",
+    "hours_minutes": "{hours} u {minutes} min",
+    "days_hours": "{days} d {hours} u"
+  }
+}

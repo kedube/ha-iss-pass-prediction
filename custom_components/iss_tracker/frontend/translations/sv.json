@@ -1,0 +1,175 @@
+{
+  "compass": ["N", "NNÖ", "NÖ", "ÖNÖ", "Ö", "ÖSÖ", "SÖ", "SSÖ", "S", "SSV", "SV", "VSV", "V", "VNV", "NV", "NNV"],
+  "card": {
+    "name": "ISS-glob",
+    "description": "En 3D-jord med Internationella rymdstationen på sin verkliga höjd, dess bana och en nedräkning till nästa gång den passerar över din himmel.",
+    "load_failed": "Det gick inte att läsa in ISS-globen. Kontrollera anslutningen eller ladda om sidan."
+  },
+  "editor": {
+    "entry_id": "Plats",
+    "entry_id_helper": "Lämna tomt för att visa den första platsen.",
+    "imagery": "Bildunderlag",
+    "imagery_satellite": "Satellit (NASA Blue Marble, Sentinel-2 på nära håll)",
+    "imagery_esri": "Satellit, hög detaljnivå på nära håll (Esri)",
+    "imagery_streets": "Gatukarta på nära håll (OpenStreetMap)",
+    "view": "Startvy",
+    "view_home": "Min plats",
+    "view_follow": "Följ ISS",
+    "view_chase": "Flyg med ISS",
+    "labels": "Ortnamn och gränser",
+    "show_track": "Banlinjer",
+    "show_night": "Dag och natt",
+    "show_footprint": "Område som kan se ISS",
+    "show_home_zone": "Din synlighetskon",
+    "show_countdown": "Nedräkning",
+    "show_stats": "Position och hastighet",
+    "cooperative_gestures": "Kräv två fingrar eller Ctrl för att flytta kartan",
+    "height": "Höjd (masonry-instrumentpaneler)"
+  },
+  "panel": {
+    "sidebar": "Sidofält",
+    "location": "Plats"
+  },
+  "globe": {
+    "name": "Internationella rymdstationen",
+    "acquiring": "Söker Internationella rymdstationen…",
+    "reloading": "Läser in globen igen…",
+    "reload": "Ladda om sidan",
+    "load_failed": "ISS-globen kunde inte läsas in ({error}). Ladda om sidan för att försöka igen.",
+    "load_retrying": "ISS-globen kunde inte läsas in ({error}). Den försöker igen; att ladda om sidan hjälper också.",
+    "no_webgl": "Den här webbläsaren kan inte visa 3D-globen (WebGL 2 krävs): {error}",
+    "clock_off": "Klockan på den här enheten stämmer inte med Home Assistants, så stationen kan inte placeras. Kontrollera inställningarna för datum och tid.",
+    "connection_lost": "anslutningen bröts",
+    "reconnecting": "Anslutningen till Home Assistant bröts. Ansluter igen…",
+    "not_set_up": "Konfigurera integrationen ISS Tracker för att se stationen här.",
+    "location_gone_panel": "Den här platsen finns inte längre. Välj en annan.",
+    "location_gone_card": "Platsen som det här kortet visar finns inte längre. Redigera kortet och välj en plats.",
+    "location_disabled": "Den här platsen är inaktiverad. Aktivera den under Inställningar > Enheter och tjänster, eller välj en annan plats.",
+    "waiting": "Väntar på bandata för ISS…",
+    "waiting_because": "Väntar på bandata för ISS… ({reason})",
+    "position_failed": "Det gick inte att läsa in ISS:s position: {error}",
+    "preview_failed": "Förhandsvisningen av ISS är inte tillgänglig: {error}",
+    "close": "Stäng"
+  },
+  "controls": {
+    "home": "Visa min plats",
+    "follow": "Följ ISS",
+    "chase": "Flyg med ISS",
+    "flat": "Växla mellan glob och platt karta",
+    "flat_label": "Platt karta",
+    "imagery": "Byt bildunderlag",
+    "imagery_menu": "Bildunderlag",
+    "imagery_satellite": "Satellit (Sentinel-2)",
+    "imagery_esri": "Satellit, hög detaljnivå (Esri)",
+    "imagery_streets": "Gatukarta (OpenStreetMap)"
+  },
+  "maplibre": {
+    "zoom_in": "Zooma in",
+    "zoom_out": "Zooma ut",
+    "reset_bearing": "Dra för att rotera kartan, klicka för att vrida tillbaka till norr",
+    "fullscreen_enter": "Helskärm",
+    "fullscreen_exit": "Avsluta helskärm",
+    "attribution": "Visa eller dölj källor",
+    "map": "Karta",
+    "marker": "Kartmarkör",
+    "ctrl_scroll": "Använd Ctrl + scroll för att zooma kartan",
+    "cmd_scroll": "Använd ⌘ + scroll för att zooma kartan",
+    "two_fingers": "Använd två fingrar för att flytta kartan"
+  },
+  "mission": {
+    "next_visible_pass": "Nästa synliga passage",
+    "preview_next": "Förhandsvisning · nästa synliga passage",
+    "visible_now": "Synlig nu",
+    "preview_visible": "Förhandsvisning · synlig",
+    "confidence_high": "hög tillförlitlighet",
+    "confidence_medium": "medelhög tillförlitlighet",
+    "confidence_low": "låg tillförlitlighet",
+    "look_up": "Titta mot {direction}, {elevation}° upp",
+    "look_towards": "Titta mot {direction}",
+    "ends_in": "Slutar om {countdown} i {direction}",
+    "ends_in_shadow": "Slutar om {countdown} · försvinner in i jordskuggan i {direction}",
+    "bright_star": "Ljusstyrka {magnitude} · ljusare än nästan alla stjärnor",
+    "brightness": "ljusstyrka {magnitude}",
+    "none_soon": "Inga inom kort",
+    "none_in_window": {
+      "one": "Inga synliga passager det närmaste dygnet",
+      "other": "Inga synliga passager de närmaste {count} dagarna"
+    },
+    "sunlit_and_dark": "ISS syns bara när den är solbelyst och din himmel är mörk.",
+    "paused": "Förutsägelser pausade",
+    "paused_clock": "Bandata inaktuella",
+    "paused_age": {
+      "one": "Bandata är {count} dag gamla",
+      "other": "Bandata är {count} dagar gamla"
+    },
+    "with_error": "{text} ({error})",
+    "paused_detail": "Passagerna kommer tillbaka när nya bandata har laddats ned. Stationens visade position är ungefärlig.",
+    "preview": "Förhandsvisa passagen",
+    "preview_short": "Förhandsvisa",
+    "preview_hint": "Snabbspola fram till passagen",
+    "look": "Var du ska titta",
+    "look_short": "Titta upp",
+    "look_hint": "Himmelskarta över passagen"
+  },
+  "pass": {
+    "pin_visible": "Synlig · {time} · {elevation}°",
+    "pin_overhead": "Ovanför dig · {time} · {reason}",
+    "preview_this": "Förhandsvisa den här passagen",
+    "visible": "synlig",
+    "visible_long": "Stationen syns vid den här passagen",
+    "low": "synlig, men lågt",
+    "low_up_to": "synlig bara upp till {elevation}°",
+    "low_long": "Synlig, men under ditt minimum på {minimum}°",
+    "low_up_to_long": "Synlig bara upp till {elevation}°, under ditt minimum på {minimum}°",
+    "brief": "synlig bara en kort stund",
+    "brief_long": "Synlig kortare tid än ditt minimum på {seconds} s",
+    "twilight": "för ljus himmel",
+    "twilight_long": "Stationen är solbelyst, men din himmel är inte tillräckligt mörk (solen står högre än {elevation}°)",
+    "daylight": "dagsljus",
+    "daylight_long": "Stationen passerar över dig i dagsljus, så den syns inte",
+    "shadow": "i jordskuggan",
+    "shadow_long": "Stationen passerar över dig i jordskuggan, så den syns inte",
+    "hidden_long": "Stationen passerar över dig men syns inte (dagsljus eller jordskugga)",
+    "not_visible": "inte synlig ({reason})",
+    "over_now": "Över din himmel just nu",
+    "next_over": "Nästa passage över dig {time}",
+    "in": "om {duration}",
+    "orbits_away": {
+      "one": "{count} varv bort",
+      "other": "{count} varv bort"
+    },
+    "up_to": "upp till {elevation}°"
+  },
+  "telemetry": {
+    "altitude": "Höjd {value}",
+    "speed": "Hastighet {value}",
+    "approximate": "(ungefärlig)",
+    "sunlit": "I solljus",
+    "shadow": "I jordskuggan",
+    "distance": "{distance} från {place}",
+    "above_horizon": "{elevation}° över din horisont"
+  },
+  "sky": {
+    "chart": "Himmelskarta över passagen",
+    "cardinals": ["N", "Ö", "S", "V"],
+    "sets": "Syns i {start} på {start_elevation}°, stiger till {peak_elevation}° i {peak} och går ned i {end}.",
+    "fades": "Syns i {start} på {start_elevation}°, stiger till {peak_elevation}° i {peak} och försvinner in i jordskuggan i {end}."
+  },
+  "upcoming": {
+    "title": "Synliga passager"
+  },
+  "preview": {
+    "tag": "FÖRHANDSVISNING",
+    "back": "Tillbaka till live",
+    "slow": "{rate}× hastighet",
+    "fast": "snabbspolning"
+  },
+  "time": {
+    "countdown_days": "{days} d {time}",
+    "under_minute": "under en minut",
+    "minutes": "{minutes} min",
+    "hours": "{hours} tim",
+    "hours_minutes": "{hours} tim {minutes} min",
+    "days_hours": "{days} d {hours} tim"
+  }
+}

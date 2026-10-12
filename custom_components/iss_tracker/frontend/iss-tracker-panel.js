@@ -8,6 +8,8 @@ const STORE = "iss-tracker:panel";
 const MENU_ICON = "M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z";
 // Retry a failed module download at most this often.
 const RETRY_MS = 30000;
+// Shown when the globe cannot load, in English if its text cannot load either.
+const LOAD_FAILED = "Could not load the ISS globe. Check the connection, or reload the page.";
 
 function loadSettings() {
   try {
@@ -31,6 +33,7 @@ const inset = (side) => `var(--safe-area-inset-${side}, env(safe-area-inset-${si
 class IssTrackerPanel extends HTMLElement {
   set hass(hass) {
     this._hass = hass;
+    this._languageReady = this._useLanguage();
     this._updateMenu();
     if (this._view) {
       this._view.hass = hass;
@@ -52,6 +55,33 @@ class IssTrackerPanel extends HTMLElement {
 
   connectedCallback() {
     this._render();
+  }
+
+  /** Load the panel's text in Home Assistant's language (the globe loads its own). */
+  async _useLanguage() {
+    const language = this._hass?.language || "en";
+    if (language === this._language) return;
+    this._language = language;
+    try {
+      const i18n = await import(`./iss-i18n.js${VERSION ? `?v=${VERSION}` : ""}`);
+      const strings = await i18n.loadStrings(language);
+      if (this._language !== language) return;
+      this._strings = strings;
+      this._applyStrings();
+    } catch (err) {
+      // Let the next update try again.
+      this._language = undefined;
+      console.warn("ISS Tracker:", err);
+    }
+  }
+
+  _applyStrings() {
+    const strings = this._strings;
+    if (!strings || !this._menu) return;
+    this._menu.title = strings.t("panel.sidebar");
+    this._menu.setAttribute("aria-label", strings.t("panel.sidebar"));
+    this._select.setAttribute("aria-label", strings.t("panel.location"));
+    if (this._error) this._error.textContent = strings.t("card.load_failed");
   }
 
   /** The sidebar button, shown when Home Assistant would show its own. */
@@ -107,9 +137,9 @@ class IssTrackerPanel extends HTMLElement {
         .error { padding: 24px; color: #cbd5e1; font-family: var(--ha-font-family-body, Roboto, sans-serif); }
       </style>
       <header>
-        <button class="menu" title="Sidebar" aria-label="Sidebar"><svg viewBox="0 0 24 24"><path d="${MENU_ICON}"/></svg></button>
+        <button class="menu"><svg viewBox="0 0 24 24"><path d="${MENU_ICON}"/></svg></button>
         <h1>ISS Tracker</h1>
-        <select class="location" aria-label="Location" hidden></select>
+        <select class="location" hidden></select>
       </header>
       <main></main>`;
 
@@ -120,6 +150,7 @@ class IssTrackerPanel extends HTMLElement {
     );
 
     const select = (this._select = root.querySelector("select.location"));
+    this._applyStrings();
     const entryId = await this._loadLocations();
     this._viewConfig = { imagery: this._settings.imagery || "satellite", view: "home", entry_id: entryId, panel: true };
     // Listen before the globe has loaded, so an early choice is not lost.
@@ -136,7 +167,10 @@ class IssTrackerPanel extends HTMLElement {
       this._attempt = (this._attempt || 0) + 1;
       this._retryAt = Date.now() + RETRY_MS;
       this._rendering = false;
-      root.querySelector("main").innerHTML = `<div class="error">Could not load the ISS globe. Check the connection, or reload the page.</div>`;
+      this._error = document.createElement("div");
+      this._error.className = "error";
+      this._error.textContent = this._strings?.t("card.load_failed") ?? LOAD_FAILED;
+      root.querySelector("main").replaceChildren(this._error);
       console.warn("ISS Tracker:", err);
       return;
     }

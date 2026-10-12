@@ -1,0 +1,181 @@
+{
+  "compass": ["płn.", "płn. płn.-wsch.", "płn.-wsch.", "wsch. płn.-wsch.", "wsch.", "wsch. płd.-wsch.", "płd.-wsch.", "płd. płd.-wsch.", "płd.", "płd. płd.-zach.", "płd.-zach.", "zach. płd.-zach.", "zach.", "zach. płn.-zach.", "płn.-zach.", "płn. płn.-zach."],
+  "card": {
+    "name": "Globus ISS",
+    "description": "Ziemia w 3D z Międzynarodową Stacją Kosmiczną na jej rzeczywistej wysokości, jej orbitą i odliczaniem do kolejnego przelotu nad twoim niebem.",
+    "load_failed": "Nie udało się wczytać globusa ISS. Sprawdź połączenie lub odśwież stronę."
+  },
+  "editor": {
+    "entry_id": "Lokalizacja",
+    "entry_id_helper": "Pozostaw puste, aby pokazać pierwszą lokalizację.",
+    "imagery": "Podkład mapy",
+    "imagery_satellite": "Satelitarny (NASA Blue Marble, Sentinel-2 z bliska)",
+    "imagery_esri": "Satelitarny, duża szczegółowość z bliska (Esri)",
+    "imagery_streets": "Mapa ulic z bliska (OpenStreetMap)",
+    "view": "Widok początkowy",
+    "view_home": "Moja lokalizacja",
+    "view_follow": "Śledź ISS",
+    "view_chase": "Leć razem z ISS",
+    "labels": "Nazwy miejsc i granice",
+    "show_track": "Linie trasy",
+    "show_night": "Dzień i noc",
+    "show_footprint": "Obszar, z którego widać ISS",
+    "show_home_zone": "Twój stożek widoczności",
+    "show_countdown": "Odliczanie",
+    "show_stats": "Pozycja i prędkość",
+    "cooperative_gestures": "Wymagaj dwóch palców lub Ctrl do przesuwania mapy",
+    "height": "Wysokość (dashboardy typu masonry)"
+  },
+  "panel": {
+    "sidebar": "Pasek boczny",
+    "location": "Lokalizacja"
+  },
+  "globe": {
+    "name": "Międzynarodowa Stacja Kosmiczna",
+    "acquiring": "Namierzanie Międzynarodowej Stacji Kosmicznej…",
+    "reloading": "Ponowne wczytywanie globusa…",
+    "reload": "Odśwież stronę",
+    "load_failed": "Nie udało się wczytać globusa ISS ({error}). Odśwież stronę, aby spróbować ponownie.",
+    "load_retrying": "Nie udało się wczytać globusa ISS ({error}). Globus spróbuje ponownie; odświeżenie strony też pomaga.",
+    "no_webgl": "Ta przeglądarka nie może wyświetlić globusa 3D (wymagany jest WebGL 2): {error}",
+    "clock_off": "Zegar tego urządzenia nie zgadza się z zegarem Home Assistant, więc nie można umieścić stacji. Sprawdź ustawienia daty i godziny.",
+    "connection_lost": "utracono połączenie",
+    "reconnecting": "Utracono połączenie z Home Assistant. Ponowne łączenie…",
+    "not_set_up": "Skonfiguruj integrację ISS Tracker, aby zobaczyć tu stację.",
+    "location_gone_panel": "Ta lokalizacja już nie istnieje. Wybierz inną.",
+    "location_gone_card": "Lokalizacja pokazywana przez tę kartę już nie istnieje. Edytuj kartę i wybierz lokalizację.",
+    "location_disabled": "Ta lokalizacja jest wyłączona. Włącz ją w Ustawienia > Urządzenia oraz usługi lub wybierz inną lokalizację.",
+    "waiting": "Oczekiwanie na dane orbitalne ISS…",
+    "waiting_because": "Oczekiwanie na dane orbitalne ISS… ({reason})",
+    "position_failed": "Nie udało się wczytać pozycji ISS: {error}",
+    "preview_failed": "Podgląd ISS jest niedostępny: {error}",
+    "close": "Zamknij"
+  },
+  "controls": {
+    "home": "Pokaż moją lokalizację",
+    "follow": "Śledź ISS",
+    "chase": "Leć razem z ISS",
+    "flat": "Przełącz między globusem a płaską mapą",
+    "flat_label": "Płaska mapa",
+    "imagery": "Zmień podkład mapy",
+    "imagery_menu": "Podkład mapy",
+    "imagery_satellite": "Satelitarny (Sentinel-2)",
+    "imagery_esri": "Satelitarny, duża szczegółowość (Esri)",
+    "imagery_streets": "Mapa ulic (OpenStreetMap)"
+  },
+  "maplibre": {
+    "zoom_in": "Powiększ",
+    "zoom_out": "Pomniejsz",
+    "reset_bearing": "Przeciągnij, aby obrócić mapę; kliknij, aby ustawić północ u góry",
+    "fullscreen_enter": "Pełny ekran",
+    "fullscreen_exit": "Zamknij pełny ekran",
+    "attribution": "Pokaż lub ukryj źródła",
+    "map": "Mapa",
+    "marker": "Znacznik na mapie",
+    "ctrl_scroll": "Użyj Ctrl + przewijania, aby powiększyć mapę",
+    "cmd_scroll": "Użyj ⌘ + przewijania, aby powiększyć mapę",
+    "two_fingers": "Użyj dwóch palców, aby przesunąć mapę"
+  },
+  "mission": {
+    "next_visible_pass": "Następny widoczny przelot",
+    "preview_next": "Podgląd · następny widoczny przelot",
+    "visible_now": "Widoczna teraz",
+    "preview_visible": "Podgląd · widoczna",
+    "confidence_high": "wysoka pewność",
+    "confidence_medium": "średnia pewność",
+    "confidence_low": "niska pewność",
+    "look_up": "Spójrz na {direction}, {elevation}° nad horyzontem",
+    "look_towards": "Spójrz na {direction}",
+    "ends_in": "Koniec za {countdown} na {direction}",
+    "ends_in_shadow": "Koniec za {countdown} · znika w cieniu Ziemi na {direction}",
+    "bright_star": "Jasność {magnitude} · jaśniejsza niż prawie każda gwiazda",
+    "brightness": "jasność {magnitude}",
+    "none_soon": "Brak w najbliższym czasie",
+    "none_in_window": {
+      "one": "Brak widocznych przelotów w ciągu najbliższego dnia",
+      "few": "Brak widocznych przelotów w ciągu najbliższych {count} dni",
+      "many": "Brak widocznych przelotów w ciągu najbliższych {count} dni",
+      "other": "Brak widocznych przelotów w ciągu najbliższych {count} dni"
+    },
+    "sunlit_and_dark": "ISS jest widoczna tylko wtedy, gdy oświetla ją Słońce, a twoje niebo jest ciemne.",
+    "paused": "Prognozy wstrzymane",
+    "paused_clock": "Nieaktualne dane orbitalne",
+    "paused_age": {
+      "one": "Dane orbitalne mają {count} dzień",
+      "few": "Dane orbitalne mają {count} dni",
+      "many": "Dane orbitalne mają {count} dni",
+      "other": "Dane orbitalne mają {count} dnia"
+    },
+    "with_error": "{text} ({error})",
+    "paused_detail": "Przeloty wrócą, gdy tylko zostaną pobrane świeże dane orbitalne. Pokazana pozycja stacji jest przybliżona.",
+    "preview": "Podgląd przelotu",
+    "preview_short": "Podgląd",
+    "preview_hint": "Przewiń do przelotu",
+    "look": "Gdzie patrzeć",
+    "look_short": "Niebo",
+    "look_hint": "Mapa nieba dla przelotu"
+  },
+  "pass": {
+    "pin_visible": "Widoczny · {time} · {elevation}°",
+    "pin_overhead": "Nad tobą · {time} · {reason}",
+    "preview_this": "Podgląd tego przelotu",
+    "visible": "widoczny",
+    "visible_long": "Stację można zobaczyć podczas tego przelotu",
+    "low": "widoczny, ale nisko",
+    "low_up_to": "widoczny tylko do {elevation}°",
+    "low_long": "Widoczny, ale poniżej twojego minimum {minimum}°",
+    "low_up_to_long": "Widoczny tylko do {elevation}°, poniżej twojego minimum {minimum}°",
+    "brief": "widoczny tylko krótko",
+    "brief_long": "Widoczny krócej niż twoje minimum {seconds} s",
+    "twilight": "zbyt jasne niebo",
+    "twilight_long": "Słońce oświetla stację, ale twoje niebo nie jest wystarczająco ciemne (Słońce jest wyżej niż {elevation}°)",
+    "daylight": "za dnia",
+    "daylight_long": "Stacja przelatuje nad tobą za dnia, więc nie można jej zobaczyć",
+    "shadow": "w cieniu Ziemi",
+    "shadow_long": "Stacja przelatuje nad tobą w cieniu Ziemi, więc nie można jej zobaczyć",
+    "hidden_long": "Stacja przelatuje nad tobą, ale nie można jej zobaczyć (dzień lub cień Ziemi)",
+    "not_visible": "niewidoczny ({reason})",
+    "over_now": "Teraz nad tobą",
+    "next_over": "Następny przelot nad tobą {time}",
+    "in": "za {duration}",
+    "orbits_away": {
+      "one": "za {count} okrążenie",
+      "few": "za {count} okrążenia",
+      "many": "za {count} okrążeń",
+      "other": "za {count} okrążenia"
+    },
+    "up_to": "do {elevation}°"
+  },
+  "telemetry": {
+    "altitude": "Wysokość {value}",
+    "speed": "Prędkość {value}",
+    "approximate": "(w przybliżeniu)",
+    "sunlit": "W słońcu",
+    "shadow": "W cieniu Ziemi",
+    "distance": "{distance} od lokalizacji {place}",
+    "above_horizon": "{elevation}° nad twoim horyzontem"
+  },
+  "sky": {
+    "chart": "Mapa nieba dla przelotu",
+    "cardinals": ["N", "E", "S", "W"],
+    "sets": "Pojawia się na {start} {start_elevation}° nad horyzontem, wznosi się do {peak_elevation}° na {peak} i zachodzi na {end}",
+    "fades": "Pojawia się na {start} {start_elevation}° nad horyzontem, wznosi się do {peak_elevation}° na {peak} i znika w cieniu Ziemi na {end}"
+  },
+  "upcoming": {
+    "title": "Widoczne przeloty"
+  },
+  "preview": {
+    "tag": "PODGLĄD",
+    "back": "Powrót na żywo",
+    "slow": "prędkość ×{rate}",
+    "fast": "szybkie przewijanie"
+  },
+  "time": {
+    "countdown_days": "{days} d {time}",
+    "under_minute": "mniej niż minuta",
+    "minutes": "{minutes} min",
+    "hours": "{hours} godz.",
+    "hours_minutes": "{hours} godz. {minutes} min",
+    "days_hours": "{days} d {hours} godz."
+  }
+}

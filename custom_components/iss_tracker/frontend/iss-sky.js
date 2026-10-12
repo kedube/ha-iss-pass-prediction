@@ -6,6 +6,8 @@
 
 const DEG = Math.PI / 180;
 
+const esc = (value) => String(value).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+
 /** Polar position of an azimuth/elevation on a dome of radius r centred at (c, c). */
 export function skyXY(azimuth, elevation, r, c) {
   const rr = (Math.max(0, 90 - elevation) / 90) * r;
@@ -30,8 +32,13 @@ function pathData(points, r, c) {
  * @param {(t:number) => string} o.formatTime
  * @param {number} [o.size]
  * @param {string} [o.id] id of the dome's gradient; unique per chart in the same document
+ * @param {string[]} [o.cardinals] names of north, east, south and west
+ * @param {string} [o.label] what the chart is, for screen readers
  */
-export function skyChartSvg({ track, visibleStart, visibleEnd, live = null, formatTime, size = 220, id = "sky" }) {
+export function skyChartSvg({
+  track, visibleStart, visibleEnd, live = null, formatTime, size = 220, id = "sky",
+  cardinals = ["N", "E", "S", "W"], label = "Sky chart of the pass",
+}) {
   const c = size / 2;
   const r = c - 22;
   const above = (track || []).filter((p) => p.elevation >= 0);
@@ -45,12 +52,10 @@ export function skyChartSvg({ track, visibleStart, visibleEnd, live = null, form
   const ringLabels = [30, 60]
     .map((el) => `<text x="${(c + 3).toFixed(1)}" y="${(c - ((90 - el) / 90) * r + 10).toFixed(1)}" class="rl">${el}°</text>`)
     .join("");
-  const cardinals = [
-    ["N", 0], ["E", 90], ["S", 180], ["W", 270],
-  ]
-    .map(([name, az]) => {
-      const [x, y] = skyXY(az, -11, r, c);
-      return `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" class="card">${name}</text>`;
+  const compass = cardinals
+    .map((name, i) => {
+      const [x, y] = skyXY(i * 90, -11, r, c);
+      return `<text x="${x.toFixed(1)}" y="${(y + 4).toFixed(1)}" class="card">${esc(name)}</text>`;
     })
     .join("");
 
@@ -84,12 +89,12 @@ export function skyChartSvg({ track, visibleStart, visibleEnd, live = null, form
     dot = `<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="9" class="live-halo"/>
       <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="4.5" class="live"/>`;
   }
-  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="Sky chart of the pass">
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="${esc(label)}">
     <defs><radialGradient id="${id}" r="0.5"><stop offset="0" stop-color="#16244a"/><stop offset="1" stop-color="#070c1c"/></radialGradient></defs>
     <circle cx="${c}" cy="${c}" r="${r}" fill="url(#${id})"/>
     ${rings}
     <path d="M${c} ${c - r}V${c + r}M${c - r} ${c}H${c + r}" class="cross"/>
-    ${ringLabels}${cardinals}${pass}${dot}
+    ${ringLabels}${compass}${pass}${dot}
   </svg>`;
 }
 

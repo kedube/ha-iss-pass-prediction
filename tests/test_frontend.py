@@ -26,6 +26,7 @@ from pytest_homeassistant_custom_component.common import (
 )
 from pytest_homeassistant_custom_component.test_util.aiohttp import AiohttpClientMocker
 
+from custom_components.iss_tracker import frontend as iss_frontend
 from custom_components.iss_tracker.const import (
     CONF_ALERT_LEAD_MINUTES,
     CONF_FORECAST_DAYS,
@@ -138,6 +139,8 @@ async def test_card_files_are_served(
         card,
         f"{FRONTEND_URL}/iss-globe.js",
         f"{FRONTEND_URL}/iss-tracker-panel.js",
+        f"{FRONTEND_URL}/iss-i18n.js",
+        f"{FRONTEND_URL}/translations/en.js",
         f"{FRONTEND_URL}/vendor/maplibre-gl-6.11.2/maplibre-gl.mjs",
         f"{FRONTEND_URL}/vendor/maplibre-gl-6.11.2/maplibre-gl-shared.mjs",
         f"{FRONTEND_URL}/vendor/maplibre-gl-6.11.2/maplibre-gl-worker.mjs",
@@ -150,6 +153,22 @@ async def test_card_files_are_served(
         resp = await client.get(f"{FRONTEND_URL}/img/black-marble-2016-{width}.jpg")
         assert resp.status == 200
         assert resp.content_type == "image/jpeg"
+    for path in sorted((FRONTEND / "translations").glob("*.json")):
+        resp = await client.get(f"{FRONTEND_URL}/translations/{path.name}")
+        assert resp.status == 200, path.name
+        assert resp.content_type == "application/json", path.name
+        assert "Cache-Control" not in resp.headers, "revalidated, like the modules"
+
+
+def test_files_version_covers_the_translations(tmp_path: Path, monkeypatch) -> None:
+    """A changed translation must reach browsers as surely as a changed module."""
+    (tmp_path / "translations").mkdir()
+    (tmp_path / "iss-globe.js").write_text("// globe")
+    (tmp_path / "translations" / "de.json").write_text('{"card": {"name": "ISS-Globus"}}')
+    monkeypatch.setattr(iss_frontend, "FRONTEND_DIR", tmp_path)
+    before = iss_frontend._files_version()
+    (tmp_path / "translations" / "de.json").write_text('{"card": {"name": "Globus"}}')
+    assert iss_frontend._files_version() != before
 
 
 @pytest.mark.parametrize("name", VENDOR_FILES)
@@ -392,6 +411,8 @@ async def test_track_websocket(
     now = datetime.fromisoformat(reference["start"]).timestamp()
     assert result["server_time"] == pytest.approx(now, abs=1)
     assert result["paused"] is None
+    assert result["paused_days"] is None
+    assert result["paused_error"] is None
     assert result["location"]["latitude"] == DENVER[CONF_LATITUDE]
     assert result["settings"] == {
         "min_elevation": 10.0,
@@ -504,6 +525,9 @@ async def test_paused_predictions(
     # Past the age limit, even before the next refresh notices.
     payload = build_track_payload(loaded.runtime_data)
     assert payload["paused"] == "Orbit data is 15 days old"
+    # The numbers the globe words this from in the user's language.
+    assert payload["paused_days"] == 15
+    assert payload["paused_error"] is None
     assert payload["next_visible_pass"] is None
     assert payload["upcoming_visible_passes"] == []
     assert payload["next_pass"] is None
@@ -519,6 +543,8 @@ async def test_paused_predictions(
     paused = msg["result"]["paused"]
     assert "15 days old and could not be refreshed" in paused
     assert "celestrak: HTTP 503" in paused
+    assert msg["result"]["paused_days"] == 15
+    assert "celestrak: HTTP 503" in msg["result"]["paused_error"]
     assert msg["result"]["next_pass"] is None
     assert len(msg["result"]["track"]) == 301
 

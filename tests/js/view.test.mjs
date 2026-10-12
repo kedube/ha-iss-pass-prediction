@@ -1,11 +1,14 @@
 // Tests for the globe view's scheduling and state handling, with the real
 // IssGlobeView driven by fake timers: node --test "tests/js/*.test.mjs"
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
 import { frameDelay, numberLocale, previewTimeline, uses12Hour } from "../../custom_components/iss_tracker/frontend/iss-geo.js";
 
 const { IssGlobeView } = await import("../../custom_components/iss_tracker/frontend/iss-globe.js");
+const { Strings } = await import("../../custom_components/iss_tracker/frontend/iss-i18n.js");
+const GERMAN = JSON.parse(readFileSync(new URL("../../custom_components/iss_tracker/frontend/translations/de.json", import.meta.url), "utf8"));
 
 // ---- a fake clock with HTML-spec animation frames ---------------------------
 
@@ -314,6 +317,41 @@ test("passes over home say why they can or cannot be seen", () => {
   assert.equal(view._passVisibility(pass("shadow")).visible, false);
   assert.match(view._passVisibility(pass("twilight")).long, /-6°/);
   assert.equal(view._passVisibility(pass("daylight")).short, "daylight");
+});
+
+test("the view speaks Home Assistant's language once its text has loaded", async () => {
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    assert.match(String(url), /translations\/de\.json$/);
+    return { ok: true, json: async () => GERMAN };
+  };
+  try {
+    const view = new IssGlobeView();
+    assert.equal(view._errorText(3), "Lost the connection to Home Assistant. Reconnecting…");
+    view.hass = { language: "de", locale: { language: "de", number_format: "language" } };
+    await view._languageReady;
+    assert.equal(view._strings.language, "de");
+    assert.equal(view._errorText(3), "Verbindung zu Home Assistant verloren. Verbindung wird wiederhergestellt…");
+    assert.equal(view._errorText({ code: "not_ready", message: "Starting up" }), "Warte auf ISS-Bahndaten… (Starting up)");
+    view._payload = {
+      settings: { min_peak_elevation: 20, min_visible_duration: 60, max_sun_elevation: -4.5 },
+      location: { latitude: 42, longitude: -71 },
+    };
+    assert.equal(view._passVisibility({ reason: "low", visible_peak_elevation: 15.2 }).short, "nur bis 15° sichtbar");
+    assert.match(view._passVisibility({ reason: "twilight" }).long, /höher als -4,5°/);
+    const pass = { start_direction: "SE", end_direction: "ENE", peak_elevation: 67.4, duration_seconds: 372, magnitude: -3.42 };
+    assert.equal(view._passSummary(pass, true), "SO → ONO · bis 67° · 6 Min. · Helligkeit -3,4");
+    assert.equal(view._confidence("medium"), "mittlere Zuverlässigkeit");
+    assert.equal(view._pausedReason({ paused: "x", paused_days: 16, paused_error: "celestrak: HTTP 503" }), "Die Bahndaten sind 16 Tage alt (celestrak: HTTP 503)");
+    assert.equal(view._pausedReason({ paused: "Could not propagate ISS orbit: x", paused_days: null }), "Could not propagate ISS orbit: x");
+    assert.deepEqual(view._placeNames(), ["coalesce", ["get", "name_de"], ["get", "name_en"], ["get", "name"]]);
+    // The same language again downloads nothing.
+    globalThis.fetch = () => assert.fail("downloaded again");
+    view.hass = { language: "de", locale: view._hass.locale };
+    await view._languageReady;
+  } finally {
+    globalThis.fetch = realFetch;
+  }
 });
 
 test("errors read as sentences, whatever shape the websocket gives them", () => {

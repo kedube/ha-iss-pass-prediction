@@ -206,31 +206,6 @@ export function esc(value) {
   return String(value ?? "").replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
-/** "1d 07:42:13", "07:42:13" or "42:13". */
-export function formatCountdown(ms) {
-  const total = Math.max(0, Math.floor(ms / 1000));
-  const days = Math.floor(total / 86400);
-  const h = Math.floor((total % 86400) / 3600);
-  const m = Math.floor((total % 3600) / 60);
-  const s = total % 60;
-  const pad = (v) => String(v).padStart(2, "0");
-  if (days) return `${days}d ${pad(h)}:${pad(m)}:${pad(s)}`;
-  if (h) return `${pad(h)}:${pad(m)}:${pad(s)}`;
-  return `${pad(m)}:${pad(s)}`;
-}
-
-/** "2 h 14 min", "14 min", "under a minute". */
-export function formatDuration(ms) {
-  const minutes = Math.round(ms / 60000);
-  if (minutes < 1) return "under a minute";
-  const d = Math.floor(minutes / 1440);
-  const h = Math.floor((minutes % 1440) / 60);
-  const m = minutes % 60;
-  if (d) return `${d} d ${h} h`;
-  if (h) return m ? `${h} h ${m} min` : `${h} h`;
-  return `${m} min`;
-}
-
 /** The visible pass under way, or else the next one. */
 export function currentVisiblePass(payload, nowMs) {
   const list = payload?.upcoming_visible_passes || [];

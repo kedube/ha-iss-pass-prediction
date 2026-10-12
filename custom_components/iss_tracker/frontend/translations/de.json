@@ -1,0 +1,175 @@
+{
+  "compass": ["N", "NNO", "NO", "ONO", "O", "OSO", "SO", "SSO", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"],
+  "card": {
+    "name": "ISS-Globus",
+    "description": "Eine 3D-Erde mit der Internationalen Raumstation in ihrer tatsächlichen Höhe, ihrer Umlaufbahn und einem Countdown, bis sie das nächste Mal über deinen Himmel zieht.",
+    "load_failed": "Der ISS-Globus konnte nicht geladen werden. Prüfe die Verbindung oder lade die Seite neu."
+  },
+  "editor": {
+    "entry_id": "Standort",
+    "entry_id_helper": "Leer lassen, um den ersten Standort anzuzeigen.",
+    "imagery": "Bildmaterial",
+    "imagery_satellite": "Satellit (NASA Blue Marble, Sentinel-2 aus der Nähe)",
+    "imagery_esri": "Satellit, hohe Detailtiefe aus der Nähe (Esri)",
+    "imagery_streets": "Straßenkarte aus der Nähe (OpenStreetMap)",
+    "view": "Startansicht",
+    "view_home": "Mein Standort",
+    "view_follow": "Der ISS folgen",
+    "view_chase": "Mit der ISS mitfliegen",
+    "labels": "Ortsnamen und Grenzen",
+    "show_track": "Kurslinien",
+    "show_night": "Tag und Nacht",
+    "show_footprint": "Gebiet, von dem aus die ISS zu sehen ist",
+    "show_home_zone": "Dein Sichtbarkeitskegel",
+    "show_countdown": "Countdown",
+    "show_stats": "Position und Geschwindigkeit",
+    "cooperative_gestures": "Karte nur mit zwei Fingern oder Strg bewegen",
+    "height": "Höhe (Masonry-Dashboards)"
+  },
+  "panel": {
+    "sidebar": "Seitenleiste",
+    "location": "Standort"
+  },
+  "globe": {
+    "name": "Internationale Raumstation",
+    "acquiring": "Internationale Raumstation wird erfasst…",
+    "reloading": "Globus wird neu geladen…",
+    "reload": "Seite neu laden",
+    "load_failed": "Der ISS-Globus konnte nicht geladen werden ({error}). Lade die Seite neu, um es erneut zu versuchen.",
+    "load_retrying": "Der ISS-Globus konnte nicht geladen werden ({error}). Er versucht es erneut; die Seite neu zu laden hilft auch.",
+    "no_webgl": "Dieser Browser kann den 3D-Globus nicht anzeigen (WebGL 2 wird benötigt): {error}",
+    "clock_off": "Die Uhr dieses Geräts stimmt nicht mit der von Home Assistant überein, daher kann die Station nicht platziert werden. Prüfe die Datums- und Zeiteinstellungen.",
+    "connection_lost": "Verbindung verloren",
+    "reconnecting": "Verbindung zu Home Assistant verloren. Verbindung wird wiederhergestellt…",
+    "not_set_up": "Richte die Integration ISS Tracker ein, um die Station hier zu sehen.",
+    "location_gone_panel": "Dieser Standort existiert nicht mehr. Wähle einen anderen.",
+    "location_gone_card": "Der Standort, den diese Karte zeigt, existiert nicht mehr. Bearbeite die Karte und wähle einen Standort.",
+    "location_disabled": "Dieser Standort ist deaktiviert. Aktiviere ihn unter Einstellungen > Geräte & Dienste oder wähle einen anderen Standort.",
+    "waiting": "Warte auf ISS-Bahndaten…",
+    "waiting_because": "Warte auf ISS-Bahndaten… ({reason})",
+    "position_failed": "Die ISS-Position konnte nicht geladen werden: {error}",
+    "preview_failed": "ISS-Vorschau nicht verfügbar: {error}",
+    "close": "Schließen"
+  },
+  "controls": {
+    "home": "Meinen Standort zeigen",
+    "follow": "Der ISS folgen",
+    "chase": "Mit der ISS mitfliegen",
+    "flat": "Zwischen Globus und flacher Karte wechseln",
+    "flat_label": "Flache Karte",
+    "imagery": "Bildmaterial ändern",
+    "imagery_menu": "Bildmaterial",
+    "imagery_satellite": "Satellit (Sentinel-2)",
+    "imagery_esri": "Satellit, hohe Detailtiefe (Esri)",
+    "imagery_streets": "Straßenkarte (OpenStreetMap)"
+  },
+  "maplibre": {
+    "zoom_in": "Vergrößern",
+    "zoom_out": "Verkleinern",
+    "reset_bearing": "Ziehen, um die Karte zu drehen; klicken, um sie nach Norden auszurichten",
+    "fullscreen_enter": "Vollbild",
+    "fullscreen_exit": "Vollbild beenden",
+    "attribution": "Quellenangaben ein- oder ausblenden",
+    "map": "Karte",
+    "marker": "Kartenmarkierung",
+    "ctrl_scroll": "Zum Zoomen der Karte Strg + Scrollen verwenden",
+    "cmd_scroll": "Zum Zoomen der Karte ⌘ + Scrollen verwenden",
+    "two_fingers": "Zum Bewegen der Karte zwei Finger verwenden"
+  },
+  "mission": {
+    "next_visible_pass": "Nächster sichtbarer Überflug",
+    "preview_next": "Vorschau · nächster sichtbarer Überflug",
+    "visible_now": "Jetzt sichtbar",
+    "preview_visible": "Vorschau · sichtbar",
+    "confidence_high": "hohe Zuverlässigkeit",
+    "confidence_medium": "mittlere Zuverlässigkeit",
+    "confidence_low": "niedrige Zuverlässigkeit",
+    "look_up": "Schau nach {direction}, {elevation}° hoch",
+    "look_towards": "Schau nach {direction}",
+    "ends_in": "Endet in {countdown} im {direction}",
+    "ends_in_shadow": "Endet in {countdown} · taucht im {direction} in den Erdschatten ein",
+    "bright_star": "Helligkeit {magnitude} · heller als fast jeder Stern",
+    "brightness": "Helligkeit {magnitude}",
+    "none_soon": "Vorerst keiner",
+    "none_in_window": {
+      "one": "Keine sichtbaren Überflüge am nächsten Tag",
+      "other": "Keine sichtbaren Überflüge in den nächsten {count} Tagen"
+    },
+    "sunlit_and_dark": "Die ISS ist nur sichtbar, wenn die Sonne sie beleuchtet und dein Himmel dunkel ist.",
+    "paused": "Vorhersagen pausiert",
+    "paused_clock": "Bahndaten veraltet",
+    "paused_age": {
+      "one": "Die Bahndaten sind {count} Tag alt",
+      "other": "Die Bahndaten sind {count} Tage alt"
+    },
+    "with_error": "{text} ({error})",
+    "paused_detail": "Überflüge erscheinen wieder, sobald aktuelle Bahndaten heruntergeladen sind. Die gezeigte Position der Station ist ungefähr.",
+    "preview": "Überflug ansehen",
+    "preview_short": "Vorschau",
+    "preview_hint": "Zum Überflug vorspulen",
+    "look": "Wohin schauen",
+    "look_short": "Himmel",
+    "look_hint": "Himmelskarte des Überflugs"
+  },
+  "pass": {
+    "pin_visible": "Sichtbar · {time} · {elevation}°",
+    "pin_overhead": "Über dir · {time} · {reason}",
+    "preview_this": "Vorschau dieses Überflugs",
+    "visible": "sichtbar",
+    "visible_long": "Die Station ist bei diesem Überflug zu sehen",
+    "low": "sichtbar, aber niedrig",
+    "low_up_to": "nur bis {elevation}° sichtbar",
+    "low_long": "Sichtbar, aber unter deinem Minimum von {minimum}°",
+    "low_up_to_long": "Nur bis {elevation}° sichtbar, unter deinem Minimum von {minimum}°",
+    "brief": "nur kurz sichtbar",
+    "brief_long": "Kürzer sichtbar als dein Minimum von {seconds} s",
+    "twilight": "Himmel zu hell",
+    "twilight_long": "Die Station wird von der Sonne beleuchtet, aber dein Himmel ist nicht dunkel genug (die Sonne steht höher als {elevation}°)",
+    "daylight": "Tageslicht",
+    "daylight_long": "Die Station zieht bei Tageslicht über dich hinweg und ist daher nicht zu sehen",
+    "shadow": "im Erdschatten",
+    "shadow_long": "Die Station zieht im Erdschatten über dich hinweg und ist daher nicht zu sehen",
+    "hidden_long": "Die Station zieht über dich hinweg, ist aber nicht zu sehen (Tageslicht oder Erdschatten)",
+    "not_visible": "nicht sichtbar ({reason})",
+    "over_now": "Jetzt gerade über dir",
+    "next_over": "Nächster Überflug über dir {time}",
+    "in": "in {duration}",
+    "orbits_away": {
+      "one": "{count} Umlauf entfernt",
+      "other": "{count} Umläufe entfernt"
+    },
+    "up_to": "bis {elevation}°"
+  },
+  "telemetry": {
+    "altitude": "Höhe {value}",
+    "speed": "Geschwindigkeit {value}",
+    "approximate": "(ungefähr)",
+    "sunlit": "Im Sonnenlicht",
+    "shadow": "Im Erdschatten",
+    "distance": "{distance} von {place} entfernt",
+    "above_horizon": "{elevation}° über deinem Horizont"
+  },
+  "sky": {
+    "chart": "Himmelskarte des Überflugs",
+    "cardinals": ["N", "O", "S", "W"],
+    "sets": "Erscheint im {start} {start_elevation}° über dem Horizont, steigt auf {peak_elevation}° im {peak} und geht im {end} unter.",
+    "fades": "Erscheint im {start} {start_elevation}° über dem Horizont, steigt auf {peak_elevation}° im {peak} und taucht im {end} in den Erdschatten ein."
+  },
+  "upcoming": {
+    "title": "Sichtbare Überflüge"
+  },
+  "preview": {
+    "tag": "VORSCHAU",
+    "back": "Zurück zu Live",
+    "slow": "{rate}-fache Geschwindigkeit",
+    "fast": "Schnellvorlauf"
+  },
+  "time": {
+    "countdown_days": "{days} T {time}",
+    "under_minute": "weniger als eine Minute",
+    "minutes": "{minutes} Min.",
+    "hours": "{hours} Std.",
+    "hours_minutes": "{hours} Std. {minutes} Min.",
+    "days_hours": "{days} T {hours} Std."
+  }
+}
