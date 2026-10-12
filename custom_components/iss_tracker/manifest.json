@@ -21,5 +21,5 @@
   "requirements": [
     "sgp4>=2.20"
   ],
-  "version": "1.03"
+  "version": "1.04"
 }
