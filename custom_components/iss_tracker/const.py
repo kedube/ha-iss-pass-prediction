@@ -22,6 +22,7 @@ CONF_FORECAST_DAYS: Final = "forecast_days"
 CONF_ALERT_LEAD_MINUTES: Final = "alert_lead_minutes"
 CONF_N2YO_API_KEY: Final = "n2yo_api_key"
 CONF_SHOW_PANEL: Final = "show_in_sidebar"
+CONF_SHOW_CALENDAR: Final = "show_in_calendar"
 CONF_UNITS: Final = "units"
 
 # NASA's Spot the Station reports sightings from 10 degrees above the horizon;
@@ -34,6 +35,7 @@ DEFAULT_MIN_VISIBLE_DURATION: Final = 60
 DEFAULT_FORECAST_DAYS: Final = 10
 DEFAULT_ALERT_LEAD_MINUTES: Final = 15
 DEFAULT_SHOW_PANEL: Final = True
+DEFAULT_SHOW_CALENDAR: Final = True
 # Distances and speeds on the globe; auto follows Home Assistant's unit system.
 UNITS: Final = ("auto", "metric", "imperial")
 DEFAULT_UNITS: Final = "auto"

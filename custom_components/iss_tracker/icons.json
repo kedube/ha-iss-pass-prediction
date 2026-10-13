@@ -5,6 +5,9 @@
       "visible_pass_soon": { "default": "mdi:bell-ring-outline" },
       "above_horizon": { "default": "mdi:arrow-up-bold-circle-outline" }
     },
+    "calendar": {
+      "visible_passes": { "default": "mdi:calendar-star" }
+    },
     "device_tracker": {
       "position": { "default": "mdi:space-station" }
     },

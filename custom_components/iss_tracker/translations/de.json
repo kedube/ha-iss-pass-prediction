@@ -49,6 +49,7 @@
           "forecast_days": "Vorhersagezeitraum",
           "alert_lead_minutes": "Vorwarnzeit",
           "show_in_sidebar": "ISS Tracker in der Seitenleiste anzeigen",
+          "show_in_calendar": "Sichtbare Überflüge im Kalender anzeigen",
           "units": "Einheiten",
           "n2yo_api_key": "N2YO-API-Schlüssel (optional)"
         },
@@ -60,6 +61,7 @@
           "forecast_days": "Wie weit im Voraus vorhergesagt wird. Zeiten, die mehr als eine Woche entfernt sind, können sich um Minuten verschieben, wenn neue Bahndaten eintreffen; die Vorhersagen werden automatisch verfeinert.",
           "alert_lead_minutes": "Der Sensor „Sichtbarer Überflug in Kürze“ schaltet sich so lange vor dem Erscheinen der Station ein.",
           "show_in_sidebar": "Fügt der Seitenleiste eine ISS-Tracker-Seite mit 3D-Globus, dem Kurs der Station und einem Countdown bis zum nächsten sichtbaren Überflug hinzu. Der Globus ist in jedem Fall auch als Dashboard-Karte verfügbar.",
+          "show_in_calendar": "Fügt dem Kalender von Home Assistant einen Kalender mit den sichtbaren Überflügen im Vorhersagezeitraum hinzu, jeweils mit der Blickrichtung. Kalender-Auslöser können damit vor einem Überflug Automationen starten.",
           "units": "Für Entfernungen und Geschwindigkeiten auf dem Globus (Höhe, Geschwindigkeit, Entfernung zu dir). „Automatisch“ folgt dem Einheitensystem von Home Assistant.",
           "n2yo_api_key": "Optional. Fügt N2YO als Ersatzquelle für Bahndaten hinzu und vergleicht einmal täglich die Vorhersagen von N2YO mit denen dieser Integration."
         }
@@ -90,6 +92,11 @@
       },
       "above_horizon": {
         "name": "ISS über dem Horizont"
+      }
+    },
+    "calendar": {
+      "visible_passes": {
+        "name": "Sichtbare ISS-Überflüge"
       }
     },
     "device_tracker": {
@@ -129,5 +136,31 @@
       "title": "ISS-Vorhersagen sind pausiert",
       "description": "Die zwischengespeicherten Bahnelemente der Internationalen Raumstation sind {age} Tage alt, und es konnten keine aktuelleren heruntergeladen werden ({error}). Vorhersagen auf Grundlage älterer Daten wären irreführend, daher sind die ISS-Tracker-Entitäten nicht verfügbar, bis ein Download gelingt. Prüfe, ob Home Assistant celestrak.org oder wheretheiss.at erreichen kann; ein N2YO-API-Schlüssel in den Optionen liefert eine weitere Quelle. Diese Meldung verschwindet von selbst, sobald aktuelle Bahnelemente eintreffen."
     }
+  },
+  "common": {
+    "calendar_summary": "Sichtbarer ISS-Überflug · bis {elevation}°",
+    "calendar_sets": "Erscheint im {start} {start_elevation}° über dem Horizont, steigt auf {peak_elevation}° im {peak} und geht im {end} unter.",
+    "calendar_fades": "Erscheint im {start} {start_elevation}° über dem Horizont, steigt auf {peak_elevation}° im {peak} und taucht im {end} in den Erdschatten ein.",
+    "calendar_brightness": "Helligkeit {magnitude}",
+    "confidence_high": "hohe Zuverlässigkeit",
+    "confidence_medium": "mittlere Zuverlässigkeit",
+    "confidence_low": "niedrige Zuverlässigkeit",
+    "decimal_separator": ",",
+    "compass_n": "N",
+    "compass_nne": "NNO",
+    "compass_ne": "NO",
+    "compass_ene": "ONO",
+    "compass_e": "O",
+    "compass_ese": "OSO",
+    "compass_se": "SO",
+    "compass_sse": "SSO",
+    "compass_s": "S",
+    "compass_ssw": "SSW",
+    "compass_sw": "SW",
+    "compass_wsw": "WSW",
+    "compass_w": "W",
+    "compass_wnw": "WNW",
+    "compass_nw": "NW",
+    "compass_nnw": "NNW"
   }
 }

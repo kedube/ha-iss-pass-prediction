@@ -11,8 +11,9 @@
 Know when to step outside and look up. This custom integration predicts when the
 International Space Station will be **visible** from your home: above your horizon,
 lit by the Sun, while your sky is dark. It gives you advance notice, the direction to
-look, how high it will climb, and how bright it will be, and an **ISS Tracker** page
-with a 3D Earth that shows the station flying round it at its true altitude.
+look, how high it will climb, and how bright it will be, a calendar of the visible
+passes, and an **ISS Tracker** page with a 3D Earth that shows the station flying round
+it at its true altitude.
 
 All prediction runs locally inside Home Assistant using SGP4, the standard model for
 published satellite orbital elements and the one that pass-prediction sites such as
@@ -161,6 +162,7 @@ automations and dashboard cards keep working.
 | Forecast window | 10 days | 1–30 days. See **Accuracy**. |
 | Advance notice | 15 min | When **Visible pass soon** turns on. |
 | Show ISS Tracker in the sidebar | on | Adds the **ISS Tracker** page to the sidebar. Turn off to remove it; the globe card stays available. The page stays open while a location reloads after an options change. If another dashboard already uses the address `/iss-tracker`, the page is not added (a warning is logged). |
+| Show visible passes in the calendar | on | Adds the location's **ISS visible passes** calendar (see [Calendar](#calendar)). Turn off to remove it. |
 | Units | Automatic | Distances and speeds on the globe (altitude, speed, distance from you): **Automatic** follows Home Assistant's unit system, or choose **Metric** (km, km/h) or **Imperial** (mi, mph). Entity attributes stay metric (`range_km`, `altitude_km`, `speed_km_s`). |
 | N2YO API key | none | Optional: adds N2YO as a backup orbit source, for every location (they share the orbit data), and checks this integration's predictions against N2YO's once a day. |
 
@@ -182,6 +184,7 @@ entity IDs, in that language.
 | `binary_sensor.home_visible_pass_soon` | On from the advance-notice time until the visible pass ends. With an advance notice longer than the gap between two passes (about 90 minutes), it stays on from one pass to the next; the [blueprint](#notifications) still announces each one. |
 | `binary_sensor.home_iss_visible_now` | On while a visible pass is under way. |
 | `binary_sensor.home_iss_above_horizon` | On while the station is above your horizon mask, lit or not. |
+| `calendar.home_iss_visible_passes` | Every visible pass in the forecast window as an event, with where to look; on while one is under way. See [Calendar](#calendar). |
 | `device_tracker.home_iss_position` | Ground point beneath the station, for map cards. |
 | `sensor.home_orbital_elements_epoch` | Diagnostic: age and source of the orbit data, with `age_days`, `stale` and `last_download_error`. When predictions pause, it stays available to say why until Home Assistant restarts or the location reloads (an options change reloads it); then the repair issue and the location's entry under **Devices & services** say why. |
 | `sensor.home_n2yo_prediction_difference` | Diagnostic (only with an N2YO key): largest angle between N2YO's prediction and this one. Near the peak, 1° is roughly 1 s of timing. |
@@ -286,6 +289,44 @@ triggers:
       offset: "-00:10:00"
 ```
 
+The [calendar](#calendar) works with a calendar trigger, which fires for every pass,
+even with an offset longer than the gap between two passes.
+
+## Calendar
+
+Each location has an **ISS visible passes** calendar, listed in Home Assistant's
+**Calendar** with your other calendars (switch it off in the options). It holds the same
+passes as `sensor.home_next_visible_pass`: every visible pass in the forecast window that
+your options let through. Each event runs from when the station appears to when it
+disappears, and says where to look:
+
+> **ISS visible pass · up to 67°**
+> Appears in the WNW 10° up, climbs to 67° in the SSW, fades into Earth's shadow in the
+> ESE.
+> Brightness -3.4 · high confidence
+
+The events are refined as new orbit data arrives, and a pass drops off the calendar soon
+after it is over. While predictions are paused, the calendar is unavailable and empty.
+Like the globe, the events follow Home Assistant's language (other languages show
+English); after changing the language, reload the location or restart Home Assistant.
+
+An automation that sends a notification ten minutes before each pass:
+
+```yaml
+triggers:
+  - trigger: calendar
+    event: start
+    offset: "-0:10:0"
+    entity_id: calendar.home_iss_visible_passes
+actions:
+  - action: notify.mobile_app_your_phone  # your phone's notify action
+    data:
+      title: "{{ trigger.calendar_event.summary }}"
+      message: >-
+        Look up at {{ as_timestamp(trigger.calendar_event.start) | timestamp_custom('%-I:%M %p') }}.
+        {{ trigger.calendar_event.description }}
+```
+
 ## Dashboard
 
 Besides the [globe card](#card), the sensors work with Home Assistant's own cards:
@@ -357,15 +398,17 @@ python scripts/validate_against_skyfield.py --days 10   # downloads de421.bsp (~
 ### Translations
 
 What Home Assistant shows for the integration (setup, options, entity names, the repair
-notice) is in `custom_components/iss_tracker/translations/`, one JSON file per language,
-with `strings.json` as the English source. The sidebar page and the card have their own
-text in `custom_components/iss_tracker/frontend/translations/`: English in `en.js`, every
-other language in a JSON file with the same keys.
+notice, the calendar's events) is in `custom_components/iss_tracker/translations/`, one
+JSON file per language, with `strings.json` as the English source. The calendar's
+wording, under `common`, repeats the globe's. The sidebar page and the card have their
+own text in `custom_components/iss_tracker/frontend/translations/`: English in `en.js`,
+every other language in a JSON file with the same keys.
 
 To add a language, copy a JSON file in both folders to the new language's code,
 translate the values and keep each `{placeholder}` as it is. Then add the code to
 `LANGUAGES` in `frontend/iss-i18n.js`. The JS tests check that every language has every
-key, the same placeholders and the plural forms it needs.
+key, the same placeholders and the plural forms it needs; the Python tests check the
+calendar's words the same way.
 
 ### Releasing
 

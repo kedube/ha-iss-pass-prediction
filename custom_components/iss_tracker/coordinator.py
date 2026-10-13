@@ -29,12 +29,14 @@ from .const import (
     CONF_MIN_PEAK_ELEVATION,
     CONF_MIN_VISIBLE_DURATION,
     CONF_N2YO_API_KEY,
+    CONF_SHOW_CALENDAR,
     DEFAULT_ALERT_LEAD_MINUTES,
     DEFAULT_FORECAST_DAYS,
     DEFAULT_MAX_SUN_ELEVATION,
     DEFAULT_MIN_ELEVATION,
     DEFAULT_MIN_PEAK_ELEVATION,
     DEFAULT_MIN_VISIBLE_DURATION,
+    DEFAULT_SHOW_CALENDAR,
     DOMAIN,
     ELEMENTS_MAX_AGE,
     ELEMENTS_MIN_RETRY_INTERVAL,
@@ -228,6 +230,7 @@ class PredictionSettings:
     forecast_days: int
     alert_lead: timedelta
     n2yo_api_key: str | None
+    show_in_calendar: bool
 
     @classmethod
     def from_options(cls, options: dict[str, Any]) -> PredictionSettings:
@@ -246,6 +249,7 @@ class PredictionSettings:
                 minutes=float(options.get(CONF_ALERT_LEAD_MINUTES, DEFAULT_ALERT_LEAD_MINUTES))
             ),
             n2yo_api_key=options.get(CONF_N2YO_API_KEY) or None,
+            show_in_calendar=bool(options.get(CONF_SHOW_CALENDAR, DEFAULT_SHOW_CALENDAR)),
         )
 
 

@@ -49,6 +49,7 @@
           "forecast_days": "Période de prévision",
           "alert_lead_minutes": "Préavis",
           "show_in_sidebar": "Afficher ISS Tracker dans la barre latérale",
+          "show_in_calendar": "Afficher les passages visibles dans le calendrier",
           "units": "Unités",
           "n2yo_api_key": "Clé API N2YO (facultatif)"
         },
@@ -60,6 +61,7 @@
           "forecast_days": "Jusqu'où prédire à l'avance. Au-delà d'une semaine, les horaires peuvent se décaler de quelques minutes à l'arrivée de nouvelles données orbitales ; les prédictions sont affinées automatiquement.",
           "alert_lead_minutes": "Le capteur « Passage visible imminent » s'active avec cette avance sur l'apparition de la station.",
           "show_in_sidebar": "Ajoute à la barre latérale une page ISS Tracker avec un globe 3D, la trajectoire de la station et un compte à rebours jusqu'au prochain passage visible. Le globe reste de toute façon disponible comme carte de tableau de bord.",
+          "show_in_calendar": "Ajoute au calendrier de Home Assistant un calendrier des passages visibles de la période de prévision, chacun avec la direction où regarder. Les déclencheurs de calendrier peuvent alors lancer des automatisations avant un passage.",
           "units": "Pour les distances et vitesses affichées sur le globe (altitude, vitesse, distance par rapport à vous). « Automatique » suit le système d'unités de Home Assistant.",
           "n2yo_api_key": "Facultatif. Ajoute N2YO comme source de secours pour les données orbitales et compare une fois par jour les prédictions de N2YO avec celles de cette intégration."
         }
@@ -90,6 +92,11 @@
       },
       "above_horizon": {
         "name": "ISS au-dessus de l'horizon"
+      }
+    },
+    "calendar": {
+      "visible_passes": {
+        "name": "Passages visibles de l'ISS"
       }
     },
     "device_tracker": {
@@ -129,5 +136,31 @@
       "title": "Les prédictions de l'ISS sont en pause",
       "description": "Les éléments orbitaux de la Station spatiale internationale en cache datent de {age} jours, et aucun élément plus récent n'a pu être téléchargé ({error}). Des prédictions fondées sur des données plus anciennes seraient trompeuses : les entités ISS Tracker restent donc indisponibles jusqu'à ce qu'un téléchargement réussisse. Vérifiez que Home Assistant peut joindre celestrak.org ou wheretheiss.at ; ajouter une clé API N2YO dans les options fournit une source supplémentaire. Ce message disparaît de lui-même dès que des éléments récents arrivent."
     }
+  },
+  "common": {
+    "calendar_summary": "Passage visible de l'ISS · jusqu'à {elevation}°",
+    "calendar_sets": "Apparaît dans le secteur {start} à {start_elevation}°, monte jusqu'à {peak_elevation}° dans le secteur {peak} et se couche dans le secteur {end}.",
+    "calendar_fades": "Apparaît dans le secteur {start} à {start_elevation}°, monte jusqu'à {peak_elevation}° dans le secteur {peak} et disparaît dans l'ombre de la Terre, secteur {end}.",
+    "calendar_brightness": "Luminosité {magnitude}",
+    "confidence_high": "fiabilité élevée",
+    "confidence_medium": "fiabilité moyenne",
+    "confidence_low": "fiabilité faible",
+    "decimal_separator": ",",
+    "compass_n": "N",
+    "compass_nne": "N-NE",
+    "compass_ne": "NE",
+    "compass_ene": "E-NE",
+    "compass_e": "E",
+    "compass_ese": "E-SE",
+    "compass_se": "SE",
+    "compass_sse": "S-SE",
+    "compass_s": "S",
+    "compass_ssw": "S-SO",
+    "compass_sw": "SO",
+    "compass_wsw": "O-SO",
+    "compass_w": "O",
+    "compass_wnw": "O-NO",
+    "compass_nw": "NO",
+    "compass_nnw": "N-NO"
   }
 }

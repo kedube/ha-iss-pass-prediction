@@ -49,6 +49,7 @@
           "forecast_days": "Forecast window",
           "alert_lead_minutes": "Advance notice",
           "show_in_sidebar": "Show ISS Tracker in the sidebar",
+          "show_in_calendar": "Show visible passes in the calendar",
           "units": "Units",
           "n2yo_api_key": "N2YO API key (optional)"
         },
@@ -60,6 +61,7 @@
           "forecast_days": "How far ahead to predict. Timing more than a week ahead can shift by minutes as new orbit data arrives; predictions are refined automatically.",
           "alert_lead_minutes": "The \"Visible pass soon\" sensor turns on this long before the station appears.",
           "show_in_sidebar": "Adds an ISS Tracker page to the sidebar with a 3D globe, the station's course and a countdown to the next visible pass. The globe is also available as a dashboard card either way.",
+          "show_in_calendar": "Adds a calendar of the visible passes in the forecast window, each with where to look, to Home Assistant's calendar. Calendar triggers can then start automations before a pass.",
           "units": "For distances and speeds on the globe (altitude, speed, distance from you). \"Automatic\" follows Home Assistant's unit system.",
           "n2yo_api_key": "Optional. Adds N2YO as a backup source of orbit data and compares N2YO's predictions with this integration's once a day."
         }
@@ -90,6 +92,11 @@
       },
       "above_horizon": {
         "name": "ISS above horizon"
+      }
+    },
+    "calendar": {
+      "visible_passes": {
+        "name": "ISS visible passes"
       }
     },
     "device_tracker": {
@@ -129,5 +136,31 @@
       "title": "ISS predictions are paused",
       "description": "The cached orbital elements for the International Space Station are {age} days old, and no fresher ones could be downloaded ({error}). Predictions older than this would be misleading, so the ISS Tracker entities are unavailable until a download succeeds. Check that Home Assistant can reach celestrak.org or wheretheiss.at; adding an N2YO API key in the options gives a further source. This message goes away by itself once fresh elements arrive."
     }
+  },
+  "common": {
+    "calendar_summary": "ISS visible pass · up to {elevation}°",
+    "calendar_sets": "Appears in the {start} {start_elevation}° up, climbs to {peak_elevation}° in the {peak}, sets in the {end}.",
+    "calendar_fades": "Appears in the {start} {start_elevation}° up, climbs to {peak_elevation}° in the {peak}, fades into Earth's shadow in the {end}.",
+    "calendar_brightness": "Brightness {magnitude}",
+    "confidence_high": "high confidence",
+    "confidence_medium": "medium confidence",
+    "confidence_low": "low confidence",
+    "decimal_separator": ".",
+    "compass_n": "N",
+    "compass_nne": "NNE",
+    "compass_ne": "NE",
+    "compass_ene": "ENE",
+    "compass_e": "E",
+    "compass_ese": "ESE",
+    "compass_se": "SE",
+    "compass_sse": "SSE",
+    "compass_s": "S",
+    "compass_ssw": "SSW",
+    "compass_sw": "SW",
+    "compass_wsw": "WSW",
+    "compass_w": "W",
+    "compass_wnw": "WNW",
+    "compass_nw": "NW",
+    "compass_nnw": "NNW"
   }
 }

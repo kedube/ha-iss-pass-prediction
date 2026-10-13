@@ -27,6 +27,7 @@ from custom_components.iss_tracker.const import (
     CONF_MIN_PEAK_ELEVATION,
     CONF_MIN_VISIBLE_DURATION,
     CONF_N2YO_API_KEY,
+    CONF_SHOW_CALENDAR,
     CONF_SHOW_PANEL,
     CONF_UNITS,
     DOMAIN,
@@ -220,6 +221,7 @@ async def test_options_flow(hass: HomeAssistant) -> None:
         **OPTIONS,
         CONF_N2YO_API_KEY: "",
         CONF_SHOW_PANEL: True,
+        CONF_SHOW_CALENDAR: True,
         CONF_UNITS: "auto",
     }
 

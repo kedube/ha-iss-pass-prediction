@@ -49,6 +49,7 @@
           "forecast_days": "Prognosfönster",
           "alert_lead_minutes": "Förvarning",
           "show_in_sidebar": "Visa ISS Tracker i sidofältet",
+          "show_in_calendar": "Visa synliga passager i kalendern",
           "units": "Enheter",
           "n2yo_api_key": "N2YO API-nyckel (valfritt)"
         },
@@ -60,6 +61,7 @@
           "forecast_days": "Hur långt fram förutsägelser görs. Tider mer än en vecka fram kan förskjutas med några minuter när nya bandata kommer in; förutsägelserna förfinas automatiskt.",
           "alert_lead_minutes": "Sensorn ”Synlig passage snart” slås på så här lång tid innan stationen syns.",
           "show_in_sidebar": "Lägger till en ISS Tracker-sida i sidofältet med en 3D-glob, stationens bana och en nedräkning till nästa synliga passage. Globen finns också som instrumentpanelskort oavsett.",
+          "show_in_calendar": "Lägger till en kalender med de synliga passagerna i prognosfönstret, var och en med vart du ska titta, i Home Assistants kalender. Kalenderutlösare kan då starta automationer före en passage.",
           "units": "För avstånd och hastigheter på globen (höjd, hastighet, avstånd till dig). ”Automatiskt” följer Home Assistants enhetssystem.",
           "n2yo_api_key": "Valfritt. Lägger till N2YO som reservkälla för bandata och jämför N2YO:s förutsägelser med den här integrationens en gång om dagen."
         }
@@ -90,6 +92,11 @@
       },
       "above_horizon": {
         "name": "ISS över horisonten"
+      }
+    },
+    "calendar": {
+      "visible_passes": {
+        "name": "Synliga ISS-passager"
       }
     },
     "device_tracker": {
@@ -129,5 +136,31 @@
       "title": "ISS-förutsägelserna är pausade",
       "description": "De cachade banelementen för den internationella rymdstationen är {age} dagar gamla, och inga nyare kunde laddas ned ({error}). Förutsägelser baserade på äldre data skulle vara missvisande, så ISS Tracker-entiteterna är otillgängliga tills en nedladdning lyckas. Kontrollera att Home Assistant kan nå celestrak.org eller wheretheiss.at; en N2YO API-nyckel i alternativen ger ytterligare en källa. Meddelandet försvinner av sig självt när nya banelement kommer in."
     }
+  },
+  "common": {
+    "calendar_summary": "Synlig ISS-passage · upp till {elevation}°",
+    "calendar_sets": "Syns i {start} på {start_elevation}°, stiger till {peak_elevation}° i {peak} och går ned i {end}.",
+    "calendar_fades": "Syns i {start} på {start_elevation}°, stiger till {peak_elevation}° i {peak} och försvinner in i jordskuggan i {end}.",
+    "calendar_brightness": "Ljusstyrka {magnitude}",
+    "confidence_high": "hög tillförlitlighet",
+    "confidence_medium": "medelhög tillförlitlighet",
+    "confidence_low": "låg tillförlitlighet",
+    "decimal_separator": ",",
+    "compass_n": "N",
+    "compass_nne": "NNÖ",
+    "compass_ne": "NÖ",
+    "compass_ene": "ÖNÖ",
+    "compass_e": "Ö",
+    "compass_ese": "ÖSÖ",
+    "compass_se": "SÖ",
+    "compass_sse": "SSÖ",
+    "compass_s": "S",
+    "compass_ssw": "SSV",
+    "compass_sw": "SV",
+    "compass_wsw": "VSV",
+    "compass_w": "V",
+    "compass_wnw": "VNV",
+    "compass_nw": "NV",
+    "compass_nnw": "NNV"
   }
 }

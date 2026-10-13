@@ -49,6 +49,7 @@
           "forecast_days": "Okno prognozy",
           "alert_lead_minutes": "Wyprzedzenie powiadomienia",
           "show_in_sidebar": "Pokaż ISS Tracker na pasku bocznym",
+          "show_in_calendar": "Pokaż widoczne przeloty w kalendarzu",
           "units": "Jednostki",
           "n2yo_api_key": "Klucz API N2YO (opcjonalnie)"
         },
@@ -60,6 +61,7 @@
           "forecast_days": "Jak daleko naprzód przewidywać. Czasy odległe o ponad tydzień mogą przesunąć się o kilka minut po nadejściu nowych danych orbitalnych; prognozy są automatycznie doprecyzowywane.",
           "alert_lead_minutes": "Sensor „Widoczny przelot wkrótce” włącza się z takim wyprzedzeniem przed pojawieniem się stacji.",
           "show_in_sidebar": "Dodaje do paska bocznego stronę ISS Tracker z globusem 3D, trasą stacji i odliczaniem do następnego widocznego przelotu. Globus jest w każdym przypadku dostępny także jako karta dashboardu.",
+          "show_in_calendar": "Dodaje do kalendarza Home Assistant kalendarz widocznych przelotów w oknie prognozy, każdy z informacją, gdzie patrzeć. Wyzwalacze kalendarza mogą wtedy uruchamiać automatyzacje przed przelotem.",
           "units": "Dla odległości i prędkości na globusie (wysokość, prędkość, odległość od ciebie). „Automatycznie” stosuje system jednostek Home Assistant.",
           "n2yo_api_key": "Opcjonalnie. Dodaje N2YO jako zapasowe źródło danych orbitalnych i raz dziennie porównuje prognozy N2YO z prognozami tej integracji."
         }
@@ -90,6 +92,11 @@
       },
       "above_horizon": {
         "name": "ISS nad horyzontem"
+      }
+    },
+    "calendar": {
+      "visible_passes": {
+        "name": "Widoczne przeloty ISS"
       }
     },
     "device_tracker": {
@@ -129,5 +136,31 @@
       "title": "Prognozy ISS są wstrzymane",
       "description": "Zapisane w pamięci podręcznej elementy orbitalne Międzynarodowej Stacji Kosmicznej mają {age} dni, a nie udało się pobrać nowszych ({error}). Prognozy oparte na starszych danych byłyby mylące, dlatego encje ISS Tracker są niedostępne, dopóki pobieranie się nie powiedzie. Sprawdź, czy Home Assistant ma dostęp do celestrak.org lub wheretheiss.at; dodanie klucza API N2YO w opcjach zapewnia dodatkowe źródło. Ten komunikat zniknie sam, gdy nadejdą aktualne elementy."
     }
+  },
+  "common": {
+    "calendar_summary": "Widoczny przelot ISS · do {elevation}°",
+    "calendar_sets": "Pojawia się na {start} {start_elevation}° nad horyzontem, wznosi się do {peak_elevation}° na {peak} i zachodzi na {end}",
+    "calendar_fades": "Pojawia się na {start} {start_elevation}° nad horyzontem, wznosi się do {peak_elevation}° na {peak} i znika w cieniu Ziemi na {end}",
+    "calendar_brightness": "Jasność {magnitude}",
+    "confidence_high": "wysoka pewność",
+    "confidence_medium": "średnia pewność",
+    "confidence_low": "niska pewność",
+    "decimal_separator": ",",
+    "compass_n": "płn.",
+    "compass_nne": "płn. płn.-wsch.",
+    "compass_ne": "płn.-wsch.",
+    "compass_ene": "wsch. płn.-wsch.",
+    "compass_e": "wsch.",
+    "compass_ese": "wsch. płd.-wsch.",
+    "compass_se": "płd.-wsch.",
+    "compass_sse": "płd. płd.-wsch.",
+    "compass_s": "płd.",
+    "compass_ssw": "płd. płd.-zach.",
+    "compass_sw": "płd.-zach.",
+    "compass_wsw": "zach. płd.-zach.",
+    "compass_w": "zach.",
+    "compass_wnw": "zach. płn.-zach.",
+    "compass_nw": "płn.-zach.",
+    "compass_nnw": "płn. płn.-zach."
   }
 }

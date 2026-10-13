@@ -47,6 +47,7 @@ from .const import (
     CONF_MIN_PEAK_ELEVATION,
     CONF_MIN_VISIBLE_DURATION,
     CONF_N2YO_API_KEY,
+    CONF_SHOW_CALENDAR,
     CONF_SHOW_PANEL,
     CONF_UNITS,
     DEFAULT_ALERT_LEAD_MINUTES,
@@ -55,6 +56,7 @@ from .const import (
     DEFAULT_MIN_ELEVATION,
     DEFAULT_MIN_PEAK_ELEVATION,
     DEFAULT_MIN_VISIBLE_DURATION,
+    DEFAULT_SHOW_CALENDAR,
     DEFAULT_SHOW_PANEL,
     DEFAULT_UNITS,
     DOMAIN,
@@ -254,6 +256,10 @@ class IssTrackerOptionsFlow(OptionsFlow):
                 vol.Required(
                     CONF_SHOW_PANEL,
                     default=current.get(CONF_SHOW_PANEL, DEFAULT_SHOW_PANEL),
+                ): BooleanSelector(),
+                vol.Required(
+                    CONF_SHOW_CALENDAR,
+                    default=current.get(CONF_SHOW_CALENDAR, DEFAULT_SHOW_CALENDAR),
                 ): BooleanSelector(),
                 vol.Required(
                     CONF_UNITS,

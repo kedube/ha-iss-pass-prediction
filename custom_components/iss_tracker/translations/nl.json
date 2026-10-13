@@ -49,6 +49,7 @@
           "forecast_days": "Voorspellingsperiode",
           "alert_lead_minutes": "Vooraankondiging",
           "show_in_sidebar": "ISS Tracker in de zijbalk tonen",
+          "show_in_calendar": "Zichtbare overkomsten in de agenda tonen",
           "units": "Eenheden",
           "n2yo_api_key": "N2YO API-sleutel (optioneel)"
         },
@@ -60,6 +61,7 @@
           "forecast_days": "Hoe ver vooruit er wordt voorspeld. Tijden meer dan een week vooruit kunnen enkele minuten verschuiven wanneer nieuwe baangegevens binnenkomen; voorspellingen worden automatisch verfijnd.",
           "alert_lead_minutes": "De sensor \"Zichtbare overkomst binnenkort\" gaat zo lang voordat het station verschijnt aan.",
           "show_in_sidebar": "Voegt een ISS Tracker-pagina toe aan de zijbalk met een 3D-globe, de koers van het station en een aftelling tot de volgende zichtbare overkomst. De globe is daarnaast altijd beschikbaar als dashboardkaart.",
+          "show_in_calendar": "Voegt aan de agenda van Home Assistant een agenda toe met de zichtbare overkomsten in de voorspellingsperiode, elk met waar je moet kijken. Agenda-triggers kunnen dan vóór een overkomst automatiseringen starten.",
           "units": "Voor afstanden en snelheden op de globe (hoogte, snelheid, afstand tot jou). \"Automatisch\" volgt het eenhedenstelsel van Home Assistant.",
           "n2yo_api_key": "Optioneel. Voegt N2YO toe als reservebron voor baangegevens en vergelijkt eenmaal per dag de voorspellingen van N2YO met die van deze integratie."
         }
@@ -90,6 +92,11 @@
       },
       "above_horizon": {
         "name": "ISS boven de horizon"
+      }
+    },
+    "calendar": {
+      "visible_passes": {
+        "name": "Zichtbare ISS-overkomsten"
       }
     },
     "device_tracker": {
@@ -129,5 +136,31 @@
       "title": "ISS-voorspellingen zijn gepauzeerd",
       "description": "De opgeslagen baanelementen van het Internationaal Ruimtestation zijn {age} dagen oud, en er konden geen recentere worden gedownload ({error}). Voorspellingen op basis van oudere gegevens zouden misleidend zijn, dus de ISS Tracker-entiteiten zijn niet beschikbaar totdat een download slaagt. Controleer of Home Assistant celestrak.org of wheretheiss.at kan bereiken; met een N2YO API-sleutel in de opties heb je een extra bron. Deze melding verdwijnt vanzelf zodra er recente baanelementen binnenkomen."
     }
+  },
+  "common": {
+    "calendar_summary": "Zichtbare ISS-overkomst · tot {elevation}°",
+    "calendar_sets": "Verschijnt in het {start} op {start_elevation}°, klimt tot {peak_elevation}° in het {peak} en gaat onder in het {end}.",
+    "calendar_fades": "Verschijnt in het {start} op {start_elevation}°, klimt tot {peak_elevation}° in het {peak} en verdwijnt in het {end} in de aardschaduw.",
+    "calendar_brightness": "Helderheid {magnitude}",
+    "confidence_high": "hoge betrouwbaarheid",
+    "confidence_medium": "gemiddelde betrouwbaarheid",
+    "confidence_low": "lage betrouwbaarheid",
+    "decimal_separator": ",",
+    "compass_n": "N",
+    "compass_nne": "NNO",
+    "compass_ne": "NO",
+    "compass_ene": "ONO",
+    "compass_e": "O",
+    "compass_ese": "OZO",
+    "compass_se": "ZO",
+    "compass_sse": "ZZO",
+    "compass_s": "Z",
+    "compass_ssw": "ZZW",
+    "compass_sw": "ZW",
+    "compass_wsw": "WZW",
+    "compass_w": "W",
+    "compass_wnw": "WNW",
+    "compass_nw": "NW",
+    "compass_nnw": "NNW"
   }
 }
