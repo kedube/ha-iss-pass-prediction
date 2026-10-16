@@ -3,9 +3,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-// Timers run fast and never keep the process alive.
+// Timers run fast, so none keeps the process waiting. They stay referenced: a
+// test that waits on one must keep the event loop alive until it fires.
 const realSetTimeout = setTimeout;
-globalThis.setTimeout = (fn, ms, ...args) => realSetTimeout(fn, Math.min(ms ?? 0, 20), ...args).unref();
+globalThis.setTimeout = (fn, ms, ...args) => realSetTimeout(fn, Math.min(ms ?? 0, 20), ...args);
 
 const definitions = {};
 globalThis.HTMLElement = class {};
