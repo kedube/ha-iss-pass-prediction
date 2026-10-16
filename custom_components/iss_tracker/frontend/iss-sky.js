@@ -14,6 +14,16 @@ export function skyXY(azimuth, elevation, r, c) {
   return [c + rr * Math.sin(azimuth * DEG), c - rr * Math.cos(azimuth * DEG)];
 }
 
+/** Where the live dot goes on a chart of this size; null while the station is below the horizon. */
+export function skyDotXY(live, size = 220) {
+  if (!live || !(live.elevation > 0)) return null;
+  const c = size / 2;
+  return skyXY(live.azimuth, live.elevation, c - 22, c);
+}
+
+/** The transform that puts the live dot (the chart's .live-dot group) at xy. */
+export const skyDotTransform = ([x, y]) => `translate(${x.toFixed(1)} ${y.toFixed(1)})`;
+
 function pathData(points, r, c) {
   return points
     .map((p, i) => {
@@ -83,12 +93,11 @@ export function skyChartSvg({
       <text x="${px.toFixed(1)}" y="${(py + 15).toFixed(1)}" class="lbl peak">${Math.round(top.elevation)}°</text>
       <text x="${ex.toFixed(1)}" y="${(ey - 8).toFixed(1)}" class="lbl">${formatTime(last.t)}</text>`;
   }
-  let dot = "";
-  if (live && live.elevation > 0) {
-    const [lx, ly] = skyXY(live.azimuth, live.elevation, r, c);
-    dot = `<circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="9" class="live-halo"/>
-      <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="4.5" class="live"/>`;
-  }
+  // Always there, hidden while the station is not up: a chart on screen
+  // follows the station by moving this group, not by being drawn again.
+  const at = skyDotXY(live, size);
+  const dot = `<g class="live-dot" transform="${skyDotTransform(at || [c, c])}"${at ? "" : ' display="none"'}>
+      <circle r="9" class="live-halo"/><circle r="4.5" class="live"/></g>`;
   return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" role="img" aria-label="${esc(label)}">
     <defs><radialGradient id="${id}" r="0.5"><stop offset="0" stop-color="#16244a"/><stop offset="1" stop-color="#070c1c"/></radialGradient></defs>
     <circle cx="${c}" cy="${c}" r="${r}" fill="url(#${id})"/>

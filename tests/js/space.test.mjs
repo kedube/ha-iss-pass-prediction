@@ -169,6 +169,26 @@ test("a cone around a pole gets a flat-map shape that fills its circle and nothi
   }
 });
 
+test("on the globe a cone around a pole reaches over the top, past the flat map's edge", () => {
+  const [lat, lon] = [78.22, 15.6]; // Longyearbyen
+  const radius = visibilityRadius(420, 10);
+  const ring = circleRing(lat, lon, radius, 128);
+  const layer = new SpaceLayer();
+  layer.setCone({ latitude: lat, longitude: lon }, ring, ISS_M, radius);
+  layer.setRing("coneRing", ring, ISS_M);
+  const latitude = (y) => (2 * Math.atan(Math.exp(Math.PI - 2 * Math.PI * y)) * 180) / Math.PI - 90;
+  const highest = (data, stride) => {
+    let top = -90;
+    for (let i = 1; i < data.length; i += stride) top = Math.max(top, latitude(data[i]));
+    return top;
+  };
+  // Across the pole from home, the ring is at 180 - lat - radius degrees.
+  const far = 180 - lat - radius;
+  assert.ok(far > 89, "the ring passes well beyond 85 degrees");
+  assert.ok(Math.abs(highest(layer._fills.get("cone").data, 4) - far) < 0.01);
+  assert.ok(Math.abs(highest(layer._ribbons.get("coneRing").data, 12) - far) < 0.01);
+});
+
 test("a cone away from the poles keeps the fan on the flat map too", () => {
   for (const [lat, lon] of [[39.74, -104.99], [-36.85, 174.76], [60, 10]]) {
     const layer = new SpaceLayer();
@@ -494,6 +514,22 @@ test("the footprint is drawn only when it is switched on", () => {
   };
   assert.equal(count(false), 0);
   assert.equal(count(true), 1);
+});
+
+test("browsers without roundRect still draw the station, with square corners", () => {
+  const saved = globalThis.document;
+  const ctx = () => new Proxy(function () {}, { get: (_, key) => (key === "roundRect" ? undefined : ctx()), apply: () => ctx() });
+  globalThis.document = { createElement: () => ({ getContext: () => ctx() }) };
+  try {
+    const space = new SpaceLayer();
+    space.onAdd(fakeMap());
+    const { gl, calls } = fakeGL();
+    space.setFrame(spaceState({ showTrack: false, showCone: false, showFootprint: false }));
+    space.render(gl, argsFor(false));
+    assert.ok(draws(calls).length > 0);
+  } finally {
+    globalThis.document = saved;
+  }
 });
 
 test("city lights are decoded off the main thread, uploaded once and the old texture freed", async () => {

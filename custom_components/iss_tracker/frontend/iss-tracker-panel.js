@@ -60,17 +60,26 @@ class IssTrackerPanel extends HTMLElement {
   /** Load the panel's text in Home Assistant's language (the globe loads its own). */
   async _useLanguage() {
     const language = this._hass?.language || "en";
-    if (language === this._language) return;
+    if (language === this._language || Date.now() < (this._languageRetryAt || 0)) return;
     this._language = language;
     try {
-      const i18n = await import(`./iss-i18n.js${VERSION ? `?v=${VERSION}` : ""}`);
+      // Browsers remember a failed module fetch, so a retry asks under a new URL.
+      const query = [VERSION && `v=${VERSION}`, this._languageAttempt && `retry=${this._languageAttempt}`].filter(Boolean).join("&");
+      const i18n = await import(`./iss-i18n.js${query ? `?${query}` : ""}`);
       const strings = await i18n.loadStrings(language);
       if (this._language !== language) return;
       this._strings = strings;
       this._applyStrings();
+      if (strings.language !== i18n.resolveLanguage(language)) {
+        // English stands in for a translation that did not download: try it again later.
+        this._language = undefined;
+        this._languageRetryAt = Date.now() + RETRY_MS;
+      }
     } catch (err) {
-      // Let the next update try again.
-      this._language = undefined;
+      // Let an update after RETRY_MS try again, not every update fail at once.
+      if (this._language === language) this._language = undefined;
+      this._languageAttempt = (this._languageAttempt || 0) + 1;
+      this._languageRetryAt = Date.now() + RETRY_MS;
       console.warn("ISS Tracker:", err);
     }
   }

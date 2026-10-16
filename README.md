@@ -187,7 +187,7 @@ entity IDs, in that language.
 | `calendar.home_iss_visible_passes` | Every visible pass in the forecast window as an event, with where to look; on while one is under way. See [Calendar](#calendar). |
 | `device_tracker.home_iss_position` | Ground point beneath the station, for map cards. |
 | `sensor.home_orbital_elements_epoch` | Diagnostic: age and source of the orbit data, with `age_days`, `stale` and `last_download_error`. When predictions pause, it stays available to say why until Home Assistant restarts or the location reloads (an options change reloads it); then the repair issue and the location's entry under **Devices & services** say why. |
-| `sensor.home_n2yo_prediction_difference` | Diagnostic (only with an N2YO key): largest angle between N2YO's prediction and this one. Near the peak, 1° is roughly 1 s of timing. |
+| `sensor.home_n2yo_prediction_difference` | Diagnostic (only with an N2YO key): largest angle between N2YO's prediction and this one over the next three days. Near the peak, 1° is roughly 1 s of timing. Further ahead, predictions from different orbit data drift apart (more so across a reboost), so the attributes also give the largest difference over the whole window (`max_difference`), how many days ahead it was (`max_difference_days_ahead`) and the median. |
 
 The live position updates every 60 seconds, and every 10 seconds while the station is
 above your horizon. Its fast-changing attributes (direction, range, altitude, speed) are

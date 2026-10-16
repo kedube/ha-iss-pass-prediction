@@ -13,24 +13,40 @@ const MAPLIBRE_DIR = new URL("./vendor/maplibre-gl-6.11.2/", import.meta.url);
 
 let maplibrePromise;
 let maplibreAttempt = 0;
-export function loadMapLibre() {
+// MapLibre's entry module imports its shared chunk from a fixed URL. A retry
+// can ask for the entry under a new URL but not the chunk, so once the chunk
+// has failed, only reloading the page brings it back.
+let maplibreChunkFailed = false;
+export function loadMapLibre(load = (url) => import(url)) {
   // A failed import is not kept: the next start tries again under a new URL,
   // since browsers remember a failed module fetch for the rest of the page.
-  maplibrePromise ??= import(
-    new URL(`maplibre-gl.mjs${maplibreAttempt ? `?retry=${maplibreAttempt}` : ""}`, MAPLIBRE_DIR).href
-  ).catch((err) => {
-    maplibrePromise = null;
-    maplibreAttempt++;
-    throw err;
-  });
+  // The chunk is asked for alongside the entry module rather than after it.
+  maplibrePromise ??= Promise.allSettled([
+    load(new URL(`maplibre-gl.mjs${maplibreAttempt ? `?retry=${maplibreAttempt}` : ""}`, MAPLIBRE_DIR).href),
+    load(new URL("maplibre-gl-shared.mjs", MAPLIBRE_DIR).href),
+  ])
+    .then(([entry, chunk]) => {
+      if (chunk.status === "rejected") maplibreChunkFailed = true;
+      if (entry.status === "rejected") throw entry.reason;
+      return entry.value;
+    })
+    .catch((err) => {
+      maplibrePromise = null;
+      maplibreAttempt++;
+      throw err;
+    });
   return maplibrePromise;
+}
+
+/** Whether MapLibre has failed in a way that only reloading the page can fix. */
+export function mapLibreNeedsReload() {
+  return maplibreChunkFailed || maplibreAttempt >= 3;
 }
 
 // Start the 1 MB MapLibre download now, alongside the helper modules below,
 // rather than after them. Errors surface when a globe starts.
 if (globalThis.window && globalThis.document) {
   loadMapLibre().catch(() => {});
-  import(new URL("maplibre-gl-shared.mjs", MAPLIBRE_DIR).href).catch(() => {});
 }
 
 const [geo, spaceModule, skyModule, i18n] = await Promise.all([
@@ -40,12 +56,12 @@ const [geo, spaceModule, skyModule, i18n] = await Promise.all([
   import(`./iss-i18n.js${VERSION}`),
 ]);
 const {
-  bearing, circleRing, closestApproach, compass, currentVisiblePass, esc, frameDelay,
+  bearing, circleRing, closestApproach, compass, currentVisiblePass, endedPass, esc, frameDelay,
   groundDistanceKm, lookAngles, numberLocale, orbitalSpeed, positionAt, previewTimeline, skyTrack,
   subsolarPoint, sunVector, uses12Hour, visibilityRadius, ISS_PERIOD_S,
 } = geo;
 const { NightLayer, SpaceLayer, loadCityLights, toMercator } = spaceModule;
-const { skyChartSvg, SKY_STYLE } = skyModule;
+const { skyChartSvg, skyDotTransform, skyDotXY, SKY_STYLE } = skyModule;
 const { english, loadStrings, resolveLanguage } = i18n;
 
 const DEG = Math.PI / 180;
@@ -110,6 +126,11 @@ const MAPLIBRE_TEXT = {
 
 // Simulated seconds per real second while a preview plays the pass (previewTimeline's pace).
 const PREVIEW_RATE = 30;
+// How long a lost WebGL context may take to come back before the map is rebuilt.
+const CONTEXT_RESTORE_MS = 5000;
+// With the station out of sight the picture changes slowly (the trail fades,
+// the terminator creeps), so it is redrawn this often rather than every frame.
+const IDLE_REPAINT_MS = 5000;
 
 const lerp = (a, b, t) => a + (b - a) * Math.max(0, Math.min(1, t));
 
@@ -366,6 +387,8 @@ export class IssGlobeView extends BaseElement {
     this._timers = [];
     this._labels = new Map();
     this._fmtCache = new Map();
+    // What each sky chart element shows, so an unchanged chart is not drawn again.
+    this._skyCharts = new WeakMap();
     this._numCache = new Map();
     // English until Home Assistant's language has loaded (see _useLanguage).
     this._strings = english;
@@ -381,16 +404,19 @@ export class IssGlobeView extends BaseElement {
     // (decided here, from the globe's own size, so fullscreen gets the full one).
     this.autoCompact = false;
     this._onVisibility = () => (document.hidden ? this._pause() : this._resume());
-    this._onReady = () => {
-      // Home Assistant is back after a restart or a dropped connection.
-      this._staleDelay = this._staleRetryAt = 0;
-      if (!this._map) {
-        if (this.isConnected) this._start();
-        return;
-      }
-      this._refreshMapToken(true);
-      this._refresh();
-    };
+    // Work put off while the globe cannot be seen, by kind (see _whenShown).
+    this._pendingShown = new Map();
+    this._onReady = () =>
+      this._whenShown("ready", () => {
+        // Home Assistant is back after a restart or a dropped connection.
+        this._staleDelay = this._staleRetryAt = 0;
+        if (!this._map) {
+          if (this.isConnected) this._start();
+          return;
+        }
+        this._refreshMapToken(true);
+        this._refresh();
+      });
   }
 
   set hass(hass) {
@@ -468,6 +494,8 @@ export class IssGlobeView extends BaseElement {
     clearTimeout(this._retryTimer);
     clearTimeout(this._refreshTimer);
     clearTimeout(this._teardownTimer);
+    // Coming back starts, or refreshes, whatever is needed then.
+    this._pendingShown.clear();
     // Free the WebGL context if the view stays away (dashboards rebuild cards).
     // The card editor replaces its preview on every change and drops the old
     // card: let that go now. Masonry views in edit mode put their cards back
@@ -605,11 +633,14 @@ export class IssGlobeView extends BaseElement {
     if (language === this._language && !retry) return this._languageReady;
     this._language = language;
     this._languageAt = performance.now();
-    this._languageReady = loadStrings(language).then((strings) => {
-      if (this._language !== language || strings === this._strings) return;
-      this._strings = strings;
-      this._applyStrings();
-    });
+    this._languageReady = loadStrings(language)
+      .then((strings) => {
+        if (this._language !== language || strings === this._strings) return;
+        this._strings = strings;
+        this._applyStrings();
+      })
+      // Never rejects: starting the globe waits on it.
+      .catch((err) => console.error("ISS Tracker: could not apply the language:", err));
     return this._languageReady;
   }
 
@@ -661,10 +692,14 @@ export class IssGlobeView extends BaseElement {
         } while (gen !== this._gen);
       }
       this._ml = ml;
-      if (!this._payload) {
-        // Not set up yet, or still starting: try again shortly. A deleted
-        // location waits for a new one instead (see set config).
+      const wantedNow = this._config.entry_id;
+      if (!this._payload || (wantedNow && this._payload.location.entry_id !== wantedNow)) {
+        // Not set up yet, or still starting: try again shortly. That includes
+        // a location that could not be fetched yet, whose name must not go on
+        // another one's data. A deleted location waits for a new one instead
+        // (see set config). The start asks for the data itself.
         this._starting = false;
+        clearTimeout(this._refreshTimer);
         if (!this._gone) this._retry(30000);
         return;
       }
@@ -672,7 +707,7 @@ export class IssGlobeView extends BaseElement {
     } catch (err) {
       this._starting = false;
       const why = this._errorMessage(err);
-      if (maplibreAttempt >= 3) {
+      if (mapLibreNeedsReload()) {
         // A file that keeps failing (or one the browser now refuses to fetch again).
         this._showMessage(this._t("globe.load_failed", { error: why }), { reload: true });
       } else {
@@ -684,7 +719,28 @@ export class IssGlobeView extends BaseElement {
 
   _retry(ms) {
     clearTimeout(this._retryTimer);
-    this._retryTimer = setTimeout(() => this.isConnected && this._start(), ms);
+    this._retryTimer = setTimeout(() => this._whenShown("start", () => this._start()), ms);
+  }
+
+  /**
+   * Run fn now if the globe can be seen, else once it can be: retries and the
+   * like wait rather than keep asking Home Assistant for a hidden tab or a
+   * card scrolled out of view. Only the latest fn of each kind is kept.
+   */
+  _whenShown(kind, fn) {
+    if (this._shown()) fn();
+    else this._pendingShown.set(kind, fn);
+  }
+
+  _shown() {
+    return this.isConnected && !document.hidden && this._onScreen !== false;
+  }
+
+  _runPendingShown() {
+    if (!this._shown()) return;
+    const pending = [...this._pendingShown.values()];
+    this._pendingShown.clear();
+    for (const fn of pending) fn();
   }
 
   _teardown() {
@@ -694,6 +750,7 @@ export class IssGlobeView extends BaseElement {
     this._resizeObserver?.disconnect();
     clearTimeout(this._lightsTimer);
     clearTimeout(this._tilesTimer);
+    clearTimeout(this._contextTimer);
     this._failedTiles = {};
     this._menu?.remove();
     this._menu = null;
@@ -745,6 +802,7 @@ export class IssGlobeView extends BaseElement {
   }
 
   _resume() {
+    this._runPendingShown();
     if (!this.isConnected || !this._map || !this._loaded || this._running || document.hidden || this._onScreen === false) {
       return;
     }
@@ -755,7 +813,10 @@ export class IssGlobeView extends BaseElement {
     this._timers.push(setInterval(() => this._updateLight(), 30 * 1000));
     // Back after a while: tiles tokens last 30-60 minutes, and passes move on.
     if (!(performance.now() - this._mapTokenAt < 10 * 60 * 1000)) this._refreshMapToken();
-    if (!(performance.now() - this._payloadAt < 5 * 60 * 1000)) this._refresh();
+    // Also when the data is another location's: a switch that failed while
+    // the globe was away (whose retry went with it) is tried again now.
+    const elsewhere = !!this._config.entry_id && this._payload?.location.entry_id !== this._config.entry_id;
+    if (elsewhere || !(performance.now() - this._payloadAt < 5 * 60 * 1000)) this._refresh();
     this._updateLight();
     this._map.resize();
     this._mapSize = [this._els.map.clientWidth, this._els.map.clientHeight];
@@ -768,6 +829,9 @@ export class IssGlobeView extends BaseElement {
     this._running = false;
     this._timers.forEach(clearInterval);
     this._timers = [];
+    // Not while away: the first tick after resuming asks again if need be.
+    clearTimeout(this._passRefreshTimer);
+    this._refreshedAfter = null;
     clearTimeout(this._frameTimer);
     cancelAnimationFrame(this._raf);
     this._frameTimer = this._raf = null;
@@ -791,7 +855,9 @@ export class IssGlobeView extends BaseElement {
   }
 
   _frameDelay() {
-    return frameDelay(this._screenSpeed(), { chase: this._mode === "chase", preview: !!this._preview });
+    // Kept for _frame: 0 while the station is out of sight.
+    this._speed = this._screenSpeed();
+    return frameDelay(this._speed, { chase: this._mode === "chase", preview: !!this._preview });
   }
 
   /** How fast the station moves across the screen, in CSS pixels per second (0 when off screen). */
@@ -834,7 +900,10 @@ export class IssGlobeView extends BaseElement {
     if (typeof serverTime !== "number" || receivedMs - sentMs > 2000) return;
     const offset = serverTime * 1000 - (sentMs + receivedMs) / 2;
     // Most clocks agree to well under a second; only correct one that shows.
-    this._clockOffset = Math.abs(offset) > 2000 ? offset : 0;
+    // Once correcting, carry on until the clock is within a second, so one
+    // about two seconds off does not make the countdown jump back and forth.
+    const limit = this._clockOffset ? 1000 : 2000;
+    this._clockOffset = Math.abs(offset) > limit ? offset : 0;
   }
 
   /** Fetch the track and passes; resolves true once fresh data is in. */
@@ -844,32 +913,19 @@ export class IssGlobeView extends BaseElement {
     const gen = this._gen;
     const msg = { type: "iss_tracker/track" };
     if (this._config.entry_id) msg.entry_id = this._config.entry_id;
+    let payload;
+    let relocated;
     try {
       const sent = Date.now();
-      const payload = await this._hass.callWS(msg);
+      payload = await this._hass.callWS(msg);
       if (gen !== this._gen) return false; // The location changed meanwhile.
       this._syncClock(payload.server_time, sent, Date.now());
-      const relocated = !!this._payload && payload.location.entry_id !== this._payload.location.entry_id;
+      relocated = !!this._payload && payload.location.entry_id !== this._payload.location.entry_id;
       this._gone = false;
       this._payload = payload;
       this._payloadAt = performance.now();
       this._refreshDelay = 0;
       clearTimeout(this._refreshTimer);
-      if (this._loaded) {
-        if (relocated && this._preview) {
-          // A preview of the old location's pass.
-          this._stopPreview(true);
-          this._scheduleFrames();
-          this._updateLight();
-        }
-        this._showMessage(positionAt(payload.track, this._now() / 1000) ? "" : this._t("globe.clock_off"));
-        this._buildCourse();
-        this._renderUpcoming();
-        this._renderSky(true);
-        this._tick();
-        if (relocated) this._setMode("home");
-      }
-      return true;
     } catch (err) {
       if (gen !== this._gen) return false;
       const code = this._errorCode(err);
@@ -888,13 +944,33 @@ export class IssGlobeView extends BaseElement {
     } finally {
       if (gen === this._gen) this._fetching = false;
     }
+    if (!this._loaded) return true;
+    // Drawn apart from the request: a drawing bug is not a failed request, so
+    // it is not shown as one, and the new data stays in.
+    try {
+      if (relocated && this._preview) {
+        // A preview of the old location's pass.
+        this._stopPreview(true);
+        this._scheduleFrames();
+        this._updateLight();
+      }
+      this._showMessage(positionAt(payload.track, this._now() / 1000) ? "" : this._t("globe.clock_off"));
+      this._buildCourse();
+      this._renderUpcoming();
+      this._renderSky(true);
+      this._tick();
+      if (relocated) this._setMode("home");
+    } catch (err) {
+      console.error("ISS Tracker: could not draw the new data:", err);
+    }
+    return true;
   }
 
   /** Try the new location again soon, backing off while it keeps failing. */
   _retryRefresh() {
     clearTimeout(this._refreshTimer);
     this._refreshDelay = Math.min(Math.max(2 * (this._refreshDelay || 0), 3000), 5 * 60 * 1000);
-    this._refreshTimer = setTimeout(() => this.isConnected && this._refresh(), this._refreshDelay);
+    this._refreshTimer = setTimeout(() => this._whenShown("refresh", () => this._refresh()), this._refreshDelay);
   }
 
   // Errors from Home Assistant's websocket come as {code, message}; a dropped
@@ -1015,15 +1091,24 @@ export class IssGlobeView extends BaseElement {
       const rows = await this._path(Math.max(now, rise - 50 * 60), rise, 30);
       if (gen !== this._gen || this._approachFor !== next.rise) return;
       this._approach = rows;
-      if (this._loaded && !this._preview) this._space.setLine("approach", rows, this._baseT);
+      if (this._loaded && !this._preview) {
+        this._space.setLine("approach", rows, this._baseT);
+        this._courseChanged = true;
+      }
     } catch {
-      if (gen === this._gen) this._clearApproach();
+      if (gen !== this._gen) return;
+      // Ask again with the next refresh: the location may have been reloading.
+      if (this._approachFor === next.rise) this._approachFor = null;
+      this._clearApproach();
     }
   }
 
   _clearApproach() {
     this._approach = [];
-    if (this._loaded && !this._preview) this._space?.setLine("approach", [], 0);
+    if (this._loaded && !this._preview && this._space) {
+      this._space.setLine("approach", [], 0);
+      this._courseChanged = true;
+    }
   }
 
   /** A different location: drop everything that belonged to the old one. */
@@ -1031,6 +1116,9 @@ export class IssGlobeView extends BaseElement {
     this._gen++;
     this._fetching = false;
     this._gone = false;
+    // The back-off was for the old location; the new one starts afresh.
+    clearTimeout(this._refreshTimer);
+    this._refreshDelay = 0;
     this._previewPending = null;
     this._approachFor = null;
     this._clearApproach();
@@ -1227,15 +1315,7 @@ export class IssGlobeView extends BaseElement {
     map.on("zoomend", () => this._scheduleFrames());
     map.on("render", () => this._placeLabels());
     map.on("error", (e) => this._onMapError(e));
-    const canvas = map.getCanvas();
-    canvas.addEventListener("webglcontextlost", () => {
-      if (this._map === map) this._showMessage(this._t("globe.reloading"), { spinner: true });
-    });
-    canvas.addEventListener("webglcontextrestored", () => {
-      if (this._map !== map) return;
-      this._teardown();
-      this._start();
-    });
+    this._watchContext(map);
 
     const homeEl = document.createElement("div");
     homeEl.className = "home";
@@ -1290,6 +1370,26 @@ export class IssGlobeView extends BaseElement {
     });
   }
 
+  /** Start a new map when the browser takes the WebGL context away for good. */
+  _watchContext(map) {
+    const rebuild = () => {
+      if (this._map !== map) return;
+      this._teardown();
+      // Off the page meanwhile: connectedCallback starts it again.
+      if (this.isConnected) this._start();
+    };
+    const canvas = map.getCanvas();
+    canvas.addEventListener("webglcontextlost", () => {
+      if (this._map !== map) return;
+      this._showMessage(this._t("globe.reloading"), { spinner: true });
+      // The browser restores a lost context when it can. One that stays lost
+      // (the GPU was reset, or too many pages use WebGL) needs a new map.
+      clearTimeout(this._contextTimer);
+      this._contextTimer = setTimeout(rebuild, CONTEXT_RESTORE_MS);
+    });
+    canvas.addEventListener("webglcontextrestored", rebuild);
+  }
+
   _onMapError(e) {
     const status = e?.error?.status;
     const url = String(e?.error?.url || "");
@@ -1330,7 +1430,10 @@ export class IssGlobeView extends BaseElement {
       if (this._map !== map) return;
       if (img) this._night?.setLights(img);
       else if (attempt < 3) {
-        this._lightsTimer = setTimeout(() => this._loadLights(map, attempt + 1), [1, 5, 15][attempt] * 60000);
+        this._lightsTimer = setTimeout(
+          () => this._whenShown("lights", () => this._map === map && this._loadLights(map, attempt + 1)),
+          [1, 5, 15][attempt] * 60000
+        );
       }
     });
   }
@@ -1546,6 +1649,7 @@ export class IssGlobeView extends BaseElement {
     const rows = this._preview ? this._preview.path : p.track;
     this._baseT = rows[0][0];
     const space = this._space;
+    this._courseChanged = true;
     space.setLine("orbit", rows, this._baseT);
 
     // While previewing, the pass being previewed takes the place of the next one.
@@ -1753,7 +1857,17 @@ export class IssGlobeView extends BaseElement {
         moved = true;
       }
     }
-    if (!moved) map.triggerRepaint();
+    if (!moved) {
+      // Every frame while the station can be seen moving; otherwise now and
+      // then, or as soon as the course changes.
+      const idle = !this._preview && this._speed === 0;
+      const now = performance.now();
+      if (!idle || this._courseChanged || !(now - this._repaintAt < IDLE_REPAINT_MS)) {
+        this._courseChanged = false;
+        this._repaintAt = now;
+        map.triggerRepaint();
+      }
+    }
   }
 
   _updateLight() {
@@ -2100,11 +2214,25 @@ export class IssGlobeView extends BaseElement {
       setText(e.pvSpeed, this._preview.phase === "pass" ? this._t("preview.slow", { rate: PREVIEW_RATE }) : this._t("preview.fast"));
     }
     if (visibleNow) this._renderSky(false);
+    this._refreshAfterPass(realMs);
+  }
 
-    if (!this._preview && pass && Date.parse(pass.end) < realMs + 1000 && this._refreshedAfter !== pass.start) {
-      this._refreshedAfter = pass.start;
-      setTimeout(() => this._refresh(), 2000);
-    }
+  /**
+   * Once a pass in the data is over, ask for the ones after it, rather than
+   * leave the next pass over home hidden until the five-minute refresh. Once
+   * per pass; re-armed when the view resumes.
+   */
+  _refreshAfterPass(nowMs) {
+    if (!this._running || this._preview) return;
+    const over = endedPass(this._payload, nowMs);
+    if (!over || over === this._refreshedAfter) return;
+    this._refreshedAfter = over;
+    clearTimeout(this._passRefreshTimer);
+    // A moment after the end, so Home Assistant has moved on too; not if
+    // another refresh has brought the next passes meanwhile.
+    this._passRefreshTimer = setTimeout(() => {
+      if (endedPass(this._payload, this._now()) === over) this._refresh();
+    }, 2000);
   }
 
   /** Tell screen readers when the state changes, not every second. */
@@ -2185,6 +2313,12 @@ export class IssGlobeView extends BaseElement {
     this._els.skySide.hidden = !pass;
     this._els.lookBtn.setAttribute("aria-expanded", String(!this._els.skyPop.hidden));
     if (!pass) return;
+    if (target.hidden) {
+      // Nothing to draw while no one can see it: opening it draws it, and
+      // rebuilds then what was asked to be rebuilt meanwhile.
+      if (rebuild) this._skyTrack = null;
+      return;
+    }
     const home = p.location;
     const start = Date.parse(pass.start) / 1000;
     const end = Date.parse(pass.end) / 1000;
@@ -2201,13 +2335,14 @@ export class IssGlobeView extends BaseElement {
     const nowS = this._simNow();
     const inPass = nowS >= start && nowS <= end + 60;
     const live = inPass && this._position ? lookAngles(home, this._position) : null;
+    const size = wide ? 232 : 200;
+    // Without the live position: that only moves the dot (below).
     const svg = skyChartSvg({
       track: this._skyTrack,
       visibleStart: start,
       visibleEnd: end,
-      live,
       formatTime: (t) => this._fmt(new Date(t * 1000), { hour: "numeric", minute: "2-digit" }),
-      size: wide ? 232 : 200,
+      size,
       // Both charts can be in the page at once; each needs its own gradient.
       id: wide ? "sky-side" : "sky-pop",
       cardinals: this._strings.list("sky.cardinals"),
@@ -2222,10 +2357,22 @@ export class IssGlobeView extends BaseElement {
       end: this._direction(pass.end_direction),
     });
     setText(target.querySelector(".sub"), when);
-    target.querySelector(".chart").innerHTML = svg;
-    // Keep the live dot's pulse in step across redraws instead of restarting it.
-    const pulse = target.querySelector(".live-halo")?.getAnimations?.()[0];
-    if (pulse) pulse.startTime = 0;
+    const chart = target.querySelector(".chart");
+    if (this._skyCharts.get(chart) !== svg) {
+      chart.innerHTML = svg;
+      this._skyCharts.set(chart, svg);
+      // Keep the live dot's pulse in step across redraws instead of restarting it.
+      const pulse = chart.querySelector(".live-halo")?.getAnimations?.()[0];
+      if (pulse) pulse.startTime = 0;
+    }
+    const dot = chart.querySelector(".live-dot");
+    const at = skyDotXY(live, size);
+    if (at) {
+      dot.setAttribute("transform", skyDotTransform(at));
+      dot.removeAttribute("display");
+    } else {
+      dot.setAttribute("display", "none");
+    }
     setText(target.querySelector(".caption"), caption);
   }
 

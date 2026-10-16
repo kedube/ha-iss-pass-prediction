@@ -18,8 +18,17 @@ const DEG = Math.PI / 180;
 const GLOBE_RADIUS_M = 6371008.8;
 const MERCATOR_MAX_LAT = 85.051129;
 
-function mercator(lat, lon) {
-  const clamped = Math.max(-MERCATOR_MAX_LAT, Math.min(MERCATOR_MAX_LAT, lat));
+// Just short of the pole, where mercator y is infinite.
+const POLE_LAT = 89.9999;
+
+/**
+ * Mercator units of a point. Latitudes are clamped to the flat map's limit
+ * unless `limit` says otherwise: a shape that reaches past it towards a pole
+ * passes POLE_LAT, so the globe draws it where it is (the flat map still sets
+ * it on its edge, see PROJECT_GLSL).
+ */
+function mercator(lat, lon, limit = MERCATOR_MAX_LAT) {
+  const clamped = Math.max(-limit, Math.min(limit, lat));
   return [
     (((((lon + 180) % 360) + 360) % 360)) / 360,
     0.5 - Math.log(Math.tan(Math.PI / 4 + (clamped * DEG) / 2)) / (2 * Math.PI),
@@ -651,11 +660,22 @@ export function buildRibbon(points) {
       const cur = r[i];
       const prev = r[Math.max(0, i - 1)];
       const next = r[Math.min(r.length - 1, i + 1)];
-      for (const side of [-1, 1]) {
-        data.set(
-          [cur[0], cur[1], cur[2], prev[0], prev[1], prev[2], next[0], next[1], next[2], side, cur[3], cur[4]],
-          v * RIBBON_STRIDE
-        );
+      // Written in place: some ribbons are rebuilt every frame, and an array
+      // per vertex adds up.
+      for (let side = -1; side <= 1; side += 2) {
+        const o = v * RIBBON_STRIDE;
+        data[o] = cur[0];
+        data[o + 1] = cur[1];
+        data[o + 2] = cur[2];
+        data[o + 3] = prev[0];
+        data[o + 4] = prev[1];
+        data[o + 5] = prev[2];
+        data[o + 6] = next[0];
+        data[o + 7] = next[1];
+        data[o + 8] = next[2];
+        data[o + 9] = side;
+        data[o + 10] = cur[3];
+        data[o + 11] = cur[4];
         v++;
       }
     }
@@ -799,7 +819,10 @@ function drawStation(size = 256) {
   mod.addColorStop(1, "#7c8aa0");
   g.fillStyle = mod;
   g.beginPath();
-  g.roundRect(117, 44, 22, 168, 9);
+  // Square corners where roundRect is missing (Safari before 16, Firefox
+  // before 112), rather than an error that stops every frame.
+  if (g.roundRect) g.roundRect(117, 44, 22, 168, 9);
+  else g.rect(117, 44, 22, 168);
   g.fill();
   g.fillRect(102, 76, 52, 14); // Columbus / Kibo
   g.fillRect(108, 176, 40, 12); // Zvezda's arrays mount
@@ -868,7 +891,7 @@ export class SpaceLayer {
   /** Replace a ring of [lon, lat] at a fixed altitude; t counts the points, for dashes. */
   setRing(name, ring, elevationM) {
     const pts = ring.map(([lon, lat], i) => {
-      const [x, y] = mercator(lat, lon);
+      const [x, y] = mercator(lat, lon, POLE_LAT);
       return [x, y, elevationM, i, 1];
     });
     const old = this._ribbons.get(name) || {};
@@ -881,10 +904,10 @@ export class SpaceLayer {
    * radius the ring was made with (needed for a ring around a pole).
    */
   setCone(home, ring, elevationM, radiusDeg) {
-    const apex = mercator(home.latitude, home.longitude);
+    const apex = mercator(home.latitude, home.longitude, POLE_LAT);
     // Unwrap around the apex so a cone near the antimeridian stays in one piece.
     const near = (pt) => {
-      const q = mercator(pt[1], pt[0]);
+      const q = mercator(pt[1], pt[0], POLE_LAT);
       if (q[0] - apex[0] > 0.5) q[0] -= 1;
       else if (q[0] - apex[0] < -0.5) q[0] += 1;
       return q;

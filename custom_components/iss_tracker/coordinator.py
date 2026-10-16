@@ -30,6 +30,7 @@ from .const import (
     CONF_MIN_VISIBLE_DURATION,
     CONF_N2YO_API_KEY,
     CONF_SHOW_CALENDAR,
+    CONFIDENCE_HIGH_DAYS,
     DEFAULT_ALERT_LEAD_MINUTES,
     DEFAULT_FORECAST_DAYS,
     DEFAULT_MAX_SUN_ELEVATION,
@@ -512,13 +513,13 @@ class IssTrackerCoordinator(DataUpdateCoordinator[IssData]):
                 return
             self.n2yo_check = {
                 "checked_at": now,
-                **compare_with_n2yo(self._live_predictor, n2yo_passes),
+                **compare_with_n2yo(self._live_predictor, n2yo_passes, now),
             }
         self.async_update_listeners()
 
 
 def compare_with_n2yo(
-    predictor: PassPredictor, n2yo_passes: list[dict[str, Any]]
+    predictor: PassPredictor, n2yo_passes: list[dict[str, Any]], now: datetime
 ) -> dict[str, Any]:
     """Compare N2YO's predicted sky positions with this engine's.
 
@@ -528,13 +529,20 @@ def compare_with_n2yo(
     counts as the start or end of a pass. Near the peak the station moves about
     a degree per second, so the angle is roughly the timing difference in
     seconds.
+
+    Predictions from two sets of orbital elements drift apart with time, by a
+    minute or more a week out when one set predates a reboost. So the headline
+    figure covers the passes of the next CONFIDENCE_HIGH_DAYS days, the ones
+    rated high confidence; the largest difference overall, and how many days
+    ahead it was, are kept beside it.
     """
+    # The largest angle of each pass, with how many days ahead of now it is.
+    worst: list[tuple[float, float]] = []
     separations: list[float] = []
-    compared = 0
     for item in n2yo_passes:
         if not isinstance(item, dict):
             continue
-        used = False
+        pass_worst: tuple[float, float] | None = None
         for prefix in ("start", "max", "end"):
             try:
                 when = dt_util.utc_from_timestamp(float(item[f"{prefix}UTC"]))
@@ -546,14 +554,28 @@ def compare_with_n2yo(
                 mine = predictor.look(when)
             except PropagationError:
                 continue
-            separations.append(angular_separation(mine.azimuth, mine.elevation, az, el))
-            used = True
-        if used:
-            compared += 1
-    if not separations:
-        return {"compared_passes": 0, "max_difference": None, "median_difference": None}
+            angle = angular_separation(mine.azimuth, mine.elevation, az, el)
+            separations.append(angle)
+            if pass_worst is None or angle > pass_worst[1]:
+                pass_worst = ((when - now).total_seconds() / 86400, angle)
+        if pass_worst is not None:
+            worst.append(pass_worst)
+    if not worst:
+        return {
+            "compared_passes": 0,
+            "near_term_passes": 0,
+            "near_term_max_difference": None,
+            "max_difference": None,
+            "max_difference_days_ahead": None,
+            "median_difference": None,
+        }
+    near = [angle for days, angle in worst if days <= CONFIDENCE_HIGH_DAYS]
+    worst_days, worst_angle = max(worst, key=lambda w: w[1])
     return {
-        "compared_passes": compared,
-        "max_difference": round(max(separations), 2),
+        "compared_passes": len(worst),
+        "near_term_passes": len(near),
+        "near_term_max_difference": round(max(near), 2) if near else None,
+        "max_difference": round(worst_angle, 2),
+        "max_difference_days_ahead": round(worst_days, 1),
         "median_difference": round(statistics.median(separations), 2),
     }

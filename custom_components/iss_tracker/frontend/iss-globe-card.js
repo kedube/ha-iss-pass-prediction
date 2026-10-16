@@ -28,6 +28,8 @@ const SWITCHES = [
 
 // Retry a failed module download at most this often.
 const RETRY_MS = 30000;
+// The card editor waits no longer than this for its text, then opens in English.
+const FORM_TEXT_WAIT_MS = 3000;
 
 // The text in the user's language comes from iss-i18n.js, loaded only when
 // it is needed; until then (and if it cannot load) these stay English.
@@ -37,12 +39,17 @@ const CARD_DESCRIPTION =
 const LOAD_FAILED = "Could not load the ISS globe. Check the connection, or reload the page.";
 
 let i18nModule;
+// The module once it is in, for English while a translation is slow to come.
+let i18nLoaded = null;
 function loadI18n() {
   // A failed import is not kept, so the next use tries again.
-  i18nModule ??= import(`./iss-i18n.js${QUERY}`).catch((err) => {
-    i18nModule = null;
-    throw err;
-  });
+  i18nModule ??= import(`./iss-i18n.js${QUERY}`).then(
+    (module) => (i18nLoaded = module),
+    (err) => {
+      i18nModule = null;
+      throw err;
+    }
+  );
   return i18nModule;
 }
 
@@ -55,10 +62,20 @@ async function pageStrings() {
   }
 }
 
+/** pageStrings, but after waitMs whatever there is: English once the module is in, else null. */
+function pageStringsWithin(waitMs) {
+  let timer;
+  const late = new Promise((resolve) => {
+    timer = setTimeout(() => resolve(i18nLoaded?.english ?? null), waitMs);
+  });
+  return Promise.race([pageStrings(), late]).finally(() => clearTimeout(timer));
+}
+
 class IssGlobeCard extends HTMLElement {
-  // Home Assistant waits for the form, so the editor opens in the user's language.
+  // Home Assistant waits for the form, so the editor opens in the user's
+  // language, or in English if that is slow to come.
   static async getConfigForm() {
-    const strings = await pageStrings();
+    const strings = await pageStringsWithin(FORM_TEXT_WAIT_MS);
     const text = (key) => strings?.t(`editor.${key}`);
     const options = (name, values) => values.map((value) => ({ value, label: text(`${name}_${value}`) ?? value }));
     return {

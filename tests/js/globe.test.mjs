@@ -8,6 +8,7 @@ import {
   closestApproach,
   compass,
   currentVisiblePass,
+  endedPass,
   esc,
   groundDistanceKm,
   lookAngles,
@@ -138,6 +139,19 @@ test("picks the pass in progress, else the next one", () => {
   assert.equal(currentVisiblePass(payload, Date.parse("2026-10-10T10:02:00Z")).start, "2026-10-10T10:00:00Z");
   assert.equal(currentVisiblePass(payload, Date.parse("2026-10-10T10:06:00Z")).start, "2026-10-11T10:00:00Z");
   assert.equal(currentVisiblePass(payload, Date.parse("2026-10-12T00:00:00Z")), null);
+});
+
+test("knows when the next pass in the data is over, visible or not", () => {
+  const payload = {
+    upcoming_visible_passes: [{ start: "2026-10-10T10:00:00Z", end: "2026-10-10T10:05:00Z" }],
+    next_pass: { rise: "2026-10-10T09:59:00Z", set: "2026-10-10T10:07:00Z" },
+  };
+  assert.equal(endedPass(payload, Date.parse("2026-10-10T10:04:00Z")), null);
+  assert.equal(endedPass(payload, Date.parse("2026-10-10T10:06:00Z")), "2026-10-10T10:05:00Z");
+  const overhead = { ...payload, upcoming_visible_passes: [] };
+  assert.equal(endedPass(overhead, Date.parse("2026-10-10T10:06:00Z")), null);
+  assert.equal(endedPass(overhead, Date.parse("2026-10-10T10:08:00Z")), "2026-10-10T10:07:00Z");
+  assert.equal(endedPass({ paused: "Orbit data is 15 days old", upcoming_visible_passes: [], next_pass: null }, Date.now()), null);
 });
 
 test("preview timeline sweeps to the pass, plays it, then ends", () => {

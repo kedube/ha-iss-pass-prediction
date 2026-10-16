@@ -117,7 +117,8 @@ def _epoch_attrs(c: IssTrackerCoordinator, now: datetime) -> dict[str, Any]:
 
 
 def _n2yo_value(c: IssTrackerCoordinator, now: datetime) -> Any:
-    return None if c.n2yo_check is None else c.n2yo_check.get("max_difference")
+    # The next few days only: further ahead, two predictions drift apart anyway.
+    return None if c.n2yo_check is None else c.n2yo_check.get("near_term_max_difference")
 
 
 def _n2yo_attrs(c: IssTrackerCoordinator, now: datetime) -> dict[str, Any]:

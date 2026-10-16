@@ -1,6 +1,7 @@
 // Tests for the sidebar panel's location picker and sidebar handling, with
 // just enough DOM to run it in node: node --test "tests/js/*.test.mjs"
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
 class FakeElement {
@@ -96,6 +97,38 @@ test("a deleted location makes the panel switch to one that is left", async () =
   assert.equal(panel._view.config.entry_id, "home");
   assert.deepEqual(panel._select.children.map((o) => o.value), ["home"]);
   assert.equal(panel._select.hidden, true, "no picker for a single location");
+});
+
+test("the panel asks for its language again a while after the download failed, not on every update", async () => {
+  const saved = { fetch: globalThis.fetch, now: Date.now, warn: console.warn };
+  let now = saved.now();
+  Date.now = () => now;
+  console.warn = () => {};
+  let downloads = 0;
+  globalThis.fetch = async (url) => {
+    if (++downloads === 1) throw new TypeError("Failed to fetch");
+    return { ok: true, json: async () => JSON.parse(readFileSync(url, "utf8")) };
+  };
+  try {
+    const panel = new IssTrackerPanel();
+    const hass = { language: "de", callWS: async () => [HOME] };
+    panel.hass = hass;
+    await settle();
+    await panel._languageReady;
+    assert.equal(panel._menu.attrs["aria-label"], "Sidebar", "English while German cannot load");
+    panel.hass = hass;
+    await panel._languageReady;
+    assert.equal(downloads, 1);
+    now += 61000;
+    panel.hass = hass;
+    await panel._languageReady;
+    assert.equal(downloads, 2);
+    assert.equal(panel._menu.attrs["aria-label"], "Seitenleiste");
+  } finally {
+    globalThis.fetch = saved.fetch;
+    Date.now = saved.now;
+    console.warn = saved.warn;
+  }
 });
 
 test("the panel knows when Home Assistant's sidebar sits beside it", () => {

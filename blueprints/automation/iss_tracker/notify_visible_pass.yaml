@@ -3,9 +3,9 @@ blueprint:
   description: >-
     Sends a phone notification shortly before the International Space Station
     is visible from your location, and optionally a daily heads-up when a
-    visible pass is coming up in the next 24 hours. Requires the ISS Pass
-    Prediction integration. The advance notice is set in the integration's
-    options ("Advance notice").
+    visible pass is coming up in the next 24 hours. Requires the ISS Tracker
+    integration. The advance notice is set in the integration's options
+    ("Advance notice").
   domain: automation
   source_url: https://github.com/kedube/ha-iss-tracker/blob/main/blueprints/automation/iss_tracker/notify_visible_pass.yaml
   input:

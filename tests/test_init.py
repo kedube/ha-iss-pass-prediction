@@ -874,17 +874,24 @@ async def test_n2yo_cross_check(
     entry = _n2yo_entry(hass)
     freezer.move_to(start)
 
-    # N2YO's answer, built from this engine's own prediction offset by one
-    # second, so the reported difference should be about one second of motion.
+    # N2YO's answer, built from this engine's own prediction: one second off
+    # for the next three days, so about one second of motion, and a minute off
+    # after that, as when one source's elements predate a reboost.
+    elements = parse_omm_xml("x", omm_xml, start)
+    predictor = PassPredictor(
+        elements.satrec(),
+        Observer(DENVER[CONF_LATITUDE], DENVER[CONF_LONGITUDE], DENVER[CONF_ELEVATION]),
+    )
     fake = []
-    for p in _expected_visible(omm_xml, start):
+    near = 0
+    for p in predictor.find_passes(start, start + timedelta(days=10)):
+        days = (p.culmination.time - start) / timedelta(days=1)
+        if 2.9 < days < 3.1:
+            continue  # Not one that straddles the three days.
+        near += days < 3
         item: dict[str, Any] = {}
-        for prefix, point in (
-            ("start", p.visible.start),
-            ("max", p.visible.peak),
-            ("end", p.visible.end),
-        ):
-            item[f"{prefix}UTC"] = int(point.time.timestamp()) + 1
+        for prefix, point in (("start", p.rise), ("max", p.culmination), ("end", p.set)):
+            item[f"{prefix}UTC"] = int(point.time.timestamp()) + (1 if days < 3 else 60)
             item[f"{prefix}Az"] = round(point.azimuth, 2)
             item[f"{prefix}El"] = round(point.elevation, 2)
         fake.append(item)
@@ -898,7 +905,10 @@ async def test_n2yo_cross_check(
     state = hass.states.get("sensor.home_n2yo_prediction_difference")
     assert state is not None
     assert state.attributes["compared_passes"] == len(fake)
-    assert 0 < float(state.state) < 2.5
+    assert state.attributes["near_term_passes"] == near > 0
+    assert 0 < float(state.state) < 2.5, "the drift further ahead is left out"
+    assert state.attributes["max_difference"] > 5
+    assert state.attributes["max_difference_days_ahead"] > 3
 
     diag = await async_get_config_entry_diagnostics(hass, entry)
     assert diag["options"][CONF_N2YO_API_KEY] == "**REDACTED**"
@@ -907,8 +917,9 @@ async def test_n2yo_cross_check(
     # Pass times and angles would give the home location away; counts do not.
     assert "passes" not in diag
     assert "visible_passes" not in diag
-    assert diag["visible_pass_count"] == len(fake)
+    assert diag["visible_pass_count"] == len(_expected_visible(omm_xml, start))
     assert diag["pass_count"] >= diag["visible_pass_count"]
+    assert diag["n2yo_check"]["max_difference_days_ahead"] > 3
     assert "secret-key" not in repr(diag)
 
 

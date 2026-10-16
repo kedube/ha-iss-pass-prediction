@@ -120,7 +120,9 @@ export function circleRing(lat, lon, radiusDeg, points = 96) {
     let lng = l2 / DEG;
     while (lng - lon > 180) lng -= 360;
     while (lng - lon < -180) lng += 360;
-    ring.push([lng, Math.max(-MERCATOR_MAX_LAT, Math.min(MERCATOR_MAX_LAT, p2 / DEG))]);
+    // True latitudes, even past the flat map's limit: on the globe a ring
+    // around a pole goes over the top.
+    ring.push([lng, p2 / DEG]);
   }
   return ring;
 }
@@ -210,6 +212,16 @@ export function esc(value) {
 export function currentVisiblePass(payload, nowMs) {
   const list = payload?.upcoming_visible_passes || [];
   return list.find((p) => Date.parse(p.end) > nowMs) || null;
+}
+
+/**
+ * When a pass the payload counts as the next one is over (the visible pass,
+ * or the pass over home whether visible or not): its end time, the cue to ask
+ * for the passes after it. Null while both are still to come.
+ */
+export function endedPass(payload, nowMs) {
+  const ends = [payload?.upcoming_visible_passes?.[0]?.end, payload?.next_pass?.set];
+  return ends.find((t) => t && Date.parse(t) <= nowMs) ?? null;
 }
 
 /**

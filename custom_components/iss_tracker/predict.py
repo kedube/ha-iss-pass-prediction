@@ -274,11 +274,18 @@ class PassPredictor:
 
     # -- single instants -------------------------------------------------
 
-    def _state(self, t: float) -> _State:
+    def _propagate(
+        self, t: float
+    ) -> tuple[float, float, tuple[float, float, float], tuple[float, float, float]]:
+        """Julian date, its fraction, and the TEME position and velocity at ``t``."""
         jd, fr = _unix_to_jd(t)
         error, r, v = self._satrec.sgp4(jd, fr)
         if error:
             raise PropagationError(SGP4_ERRORS.get(error, f"SGP4 error {error}"))
+        return jd, fr, r, v
+
+    def _state(self, t: float) -> _State:
+        jd, fr, r, v = self._propagate(t)
         theta = _gmst(jd, fr)
         sat = _rotate_to_ecef(r, theta)
         sun = _rotate_to_ecef(_sun_eci_km(jd, fr), theta)
@@ -298,7 +305,9 @@ class PassPredictor:
         return az, el, rng
 
     def _elevation(self, t: float) -> float:
-        return self._state(t).elevation
+        # Most of the pass search asks only this: skip the Sun and the speed.
+        jd, fr, r, _ = self._propagate(t)
+        return self._look(_rotate_to_ecef(r, _gmst(jd, fr)))[1]
 
     def _sun_elevation(self, st: _State) -> float:
         return self._look(st.sun_ecef)[1]
