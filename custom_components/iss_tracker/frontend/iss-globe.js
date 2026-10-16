@@ -856,8 +856,8 @@ export class IssGlobeView extends BaseElement {
 
   _frameDelay() {
     // Kept for _frame: 0 while the station is out of sight.
-    this._speed = this._screenSpeed();
-    return frameDelay(this._speed, { chase: this._mode === "chase", preview: !!this._preview });
+    this._onScreenSpeed = this._screenSpeed();
+    return frameDelay(this._onScreenSpeed, { chase: this._mode === "chase", preview: !!this._preview });
   }
 
   /** How fast the station moves across the screen, in CSS pixels per second (0 when off screen). */
@@ -1860,7 +1860,7 @@ export class IssGlobeView extends BaseElement {
     if (!moved) {
       // Every frame while the station can be seen moving; otherwise now and
       // then, or as soon as the course changes.
-      const idle = !this._preview && this._speed === 0;
+      const idle = !this._preview && this._onScreenSpeed === 0;
       const now = performance.now();
       if (!idle || this._courseChanged || !(now - this._repaintAt < IDLE_REPAINT_MS)) {
         this._courseChanged = false;

@@ -515,6 +515,21 @@ test("with the station out of sight the globe is redrawn now and then, and at on
   }
 });
 
+test("nothing the view keeps hides one of its own methods", () => {
+  const clock = installClock(T0 * 1000);
+  try {
+    const { view } = stubView(clock);
+    view._frameDelay();
+    view._frame();
+    const proto = IssGlobeView.prototype;
+    const methods = Object.getOwnPropertyNames(proto).filter((name) => typeof Object.getOwnPropertyDescriptor(proto, name).value === "function");
+    // The test's stubs are functions; state that took a method's name is not.
+    assert.deepEqual(Object.keys(view).filter((key) => methods.includes(key) && typeof view[key] !== "function"), []);
+  } finally {
+    clock.restore();
+  }
+});
+
 test("retries wait while the globe cannot be seen, and go as soon as it can", () => {
   const clock = installClock(T0 * 1000);
   try {
